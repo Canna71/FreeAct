@@ -8,6 +8,8 @@
         
         <Compile Include="InputTypes.fs" />
         <Compile Include="FreeAct.fs" />
+        <Compile Include="HtmlAttributes.fs" />
+        <Compile Include="HtmlEvents.fs" />
         <Compile Include="Styles.fs" />
     </ItemGroup>
     <ItemGroup>
