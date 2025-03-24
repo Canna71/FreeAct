@@ -9,6 +9,7 @@
     </PackageVersion>
     <PackageVersion Include="Fable.Core" Version="4.3.0" />
     <PackageVersion Include="Fable.Package.SDK" Version="1.0.0" />
+    <PackageVersion Include="Fable.React" Version="9.4.0" />
     <PackageVersion Include="FSharp.Core" Version="5.0.2" />
   </ItemGroup>
 </Project>
