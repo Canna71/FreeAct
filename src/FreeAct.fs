@@ -27,7 +27,8 @@ let inline createElement
     (children: ReactElement list)
     : ReactElement
     =
-    let props = createObj !!properties
+    let props: obj = createObj !!properties
+    console.log ("Creating element", props)
     // let nested = emitJsExpr (props) "$0.nested || []"
     emitJsStatement (props) "delete $0.nested"
     reactElementApply name props children
@@ -38,81 +39,86 @@ let inline createElement
 let d = 2
 
 // Core types
-type Prop = string * obj
-// TODO: use record type for Element
+type HtmlProp = string * obj
+// TODO: refactor builder to use list of ElementProperty
 
 type ChildElement =
     | Element of ReactElement
     | ElementList of ReactElement list
 
-type Element =
-    {
-        tag: string
-        props: Prop list
-        children: ChildElement list
-    }
+type ElementProperty =
+    | Prop of HtmlProp
+    | Child of ChildElement
 
-let toElement (tag: string, props: Prop list, children: ChildElement list) =
-    {
-        tag = tag
-        props = props
-        children = children
-    }
+// type Element =
+//     {
+//         tag: string
+//         props: Prop list
+//         children: ChildElement list
+//     }
+
+// let toElement (tag: string, props: Prop list, children: ChildElement list) =
+//     {
+//         tag = tag
+//         props = props
+//         children = children
+//     }
 
 type EventHandler = Event -> unit
 
 // Add this helper function to convert ReactElement lists to fragments automatically
-let inline asReactElement (elements: ReactElement list) : ReactElement = unbox elements
+// let inline asReactElement (elements: ReactElement list) : ReactElement = unbox elements
 
 // Convert custom Element type to React elements
-let rec toReactElement (element: Element) : ReactElement =
-    // Convert props list to IReactProperty list
-    let reactProps =
-        element.props
-        // |> List.map (fun (name, value) -> name ==> value)
-        |> List.map (fun prop -> unbox<IReactProperty> prop)
+// let rec toReactElement (element: Element) : ReactElement =
+//     // Convert props list to IReactProperty list
+//     let reactProps =
+//         element.props
+//         // |> List.map (fun (name, value) -> name ==> value)
+//         |> List.map (fun prop -> unbox<IReactProperty> prop)
 
-    let children =
-        element.children
-        |> List.map (fun child ->
-            match child with
-            | Element el -> el
-            | ElementList els -> unbox els
-        )
+//     let children =
+//         element.children
+//         |> List.map (fun child ->
+//             match child with
+//             | Element el -> el
+//             | ElementList els -> unbox els
+//         )
 
-    createElement element.tag reactProps children
+// createElement element.tag reactProps children
 
 // Element builder using method chaining for props
 type ElementBuilder(tag: string) =
 
-    member inline _.Yield(prop: Prop) = prop
+    // member inline _.Yield(prop) = HtmlProp prop
 
-    member inline _.Yield(reactElement: ReactElement) =
-        toElement (tag, [], [ Element reactElement ])
+    member inline _.Yield(prop: HtmlProp) = Prop prop
+    // member inline _.Yield(prop: ElementProperty) =
+    //     [prop]
+
+    member inline _.Yield(reactElement: ReactElement) = [ Child(Element reactElement) ]
 
     member inline _.Yield(reactElementList: ReactElement list) =
-        toElement (tag, [], [ ElementList reactElementList ])
+        [ Child(ElementList reactElementList) ]
 
-    member inline _.Yield(()) = toElement (tag, [], [])
+    member inline _.Yield(()) : ElementProperty list = []
 
-    member inline _.Combine(element, prop: Prop) =
-        { element with props = prop :: element.props }
+    member inline _.Combine(prop: ElementProperty, props: ElementProperty list) = prop :: props
+    member inline _.Combine(props: ElementProperty list, prop: ElementProperty) = props @ [ prop ]
+    member inline _.Combine(a: ElementProperty list, b: ElementProperty list) = a @ b
 
-    member inline _.Combine(prop: Prop, element) =
-        { element with props = prop :: element.props }
+    member inline x.For(prop: ElementProperty, f: unit -> ElementProperty list) =
+        x.Combine(prop, f ())
 
-    member inline _.Combine(a: Element, b: Element) =
-        { a with children = a.children @ b.children; props = a.props @ b.props }
+    member inline x.For(prop: ElementProperty list, f: unit -> ElementProperty) =
+        x.Combine(f (), prop)
 
-    member inline x.For(prop: Prop, f: unit -> Element) = x.Combine(prop, f ())
+    member inline x.For(props: ElementProperty list, f: unit -> ElementProperty list) =
+        x.Combine(f (), props)
 
-    member inline x.For(element: Element, f: unit -> Prop) = x.Combine(f (), element)
+    member inline _.Delay(f: unit -> ElementProperty) = [ f () ]
 
-    member inline x.For(element: Element, f: unit -> Element) = x.Combine(f (), element)
-
-    member inline _.Delay(f: unit -> Prop) = toElement (tag, [ f () ], [])
-
-    member inline _.Delay(f: unit -> Element) = f ()
+    member inline _.Delay(f: unit -> ElementProperty list) = f ()
 
     //  member inline _.Delay(f) = f()
 
@@ -120,118 +126,117 @@ type ElementBuilder(tag: string) =
     /// Use it to assign a class name to an element
     /// </summary>
     [<CustomOperation("className")>]
-    member inline _.ClassName(element: Element, value: string) =
-        { element with props = ("className", value :> obj) :: element.props }
+    member inline x.ClassName(props, value: string) =
+        Prop("className", value :> obj) :: props
 
     /// className as seq of strings
     [<CustomOperation("className")>]
-    member inline _.ClassName(element, values: string seq) =
-        { element with props = ("className", String.concat " " values :> obj) :: element.props }
+    member inline x.ClassName(props, values: string seq) =
+        Prop("className", String.concat " " values :> obj) :: props
 
     // key property
     [<CustomOperation("key")>]
-    member inline _.Key(element, value: string) =
-        { element with props = ("key", value :> obj) :: element.props }
+    member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props
 
     /// Used to define a custom property on an element
     [<CustomOperation("prop")>]
-    member inline _.Prop(element, prop: Prop) =
-        { element with props = prop :: element.props }
-    // toElement(tag, prop :: props, children)
+    member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
 
     /// Used to define a custom property on an element
     [<CustomOperation("prop")>]
-    member inline _.Prop(element, propName: string, propValue: obj) =
-        { element with props = (propName, propValue) :: element.props }
+    member inline _.Prop(props, propName: string, propValue: obj) =
+        Prop(propName, propValue) :: props
 
     /// onClick event
     [<CustomOperation("onClick")>]
-    member inline _.OnClick(element, handler) =
-        { element with props = ("onClick", handler :> obj) :: element.props }
+    member inline _.OnClick(props, handler) =
+        Prop("onClick", handler :> obj) :: props
 
     // onchange
     [<CustomOperation("onChange")>]
-    member inline _.OnChange(element, handler: EventHandler) =
-        { element with props = ("onChange", handler :> obj) :: element.props }
+    member inline _.OnChange(props, handler: EventHandler) =
+        Prop("onChange", handler :> obj) :: props
 
     [<CustomOperation("text")>]
-    member inline _.Text(element, value: string) =
-        { element with children = ElementList [ unbox value ] :: element.children }
-    // toElement(tag, props,  [unbox value])
+    member inline x.Text(props, value: string) = Child(Element(unbox value)) :: props
 
     // src
     [<CustomOperation("src")>]
-    member inline _.Src(element, value: string) =
-        { element with props = ("src", value :> obj) :: element.props }
+    member inline _.Src(props, value: string) = Prop("src", value :> obj) :: props
 
     // type as InputType
     [<CustomOperation("type'")>]
-    member inline _.Type(element, value: InputType) =
-        { element with props = ("type", value.ToString() :> obj) :: element.props }
+    member inline _.Type(props, value: InputType) =
+        Prop("type", value.ToString() :> obj) :: props
 
     // height as int
     [<CustomOperation("height")>]
-    member inline _.Height(element, value: int) =
-        { element with props = ("height", value :> obj) :: element.props }
+    member inline _.Height(props, value: int) = Prop("height", value :> obj) :: props
 
     /// height as float
     [<CustomOperation("height")>]
-    member inline _.Height(element, value: float) =
-        { element with props = ("height", value :> obj) :: element.props }
-
+    member inline _.Height(props, value: float) = Prop("height", value :> obj) :: props
     // height as ICSSUnit
     [<CustomOperation("height")>]
-    member inline _.Height(element, value: ICSSUnit) =
-        { element with props = ("height", value :> obj) :: element.props }
-
+    member inline _.Height(props, value: ICSSUnit) = Prop("height", value :> obj) :: props
     // width as int
     [<CustomOperation("width")>]
-    member inline _.Width(element, value: int) =
-        { element with props = ("width", value :> obj) :: element.props }
-
+    member inline _.Width(props, value: int) = Prop("width", value :> obj) :: props
     // width as float
     [<CustomOperation("width")>]
-    member inline _.Width(element, value: float) =
-        { element with props = ("width", value :> obj) :: element.props }
-
+    member inline _.Width(props, value: float) = Prop("width", value :> obj) :: props
     // width as ICSSUnit
     [<CustomOperation("width")>]
-    member inline _.Width(element, value: ICSSUnit) =
-        { element with props = ("width", value :> obj) :: element.props }
-
+    member inline _.Width(props, value: ICSSUnit) = Prop("width", value :> obj) :: props
     // placeholder
     [<CustomOperation("placeholder")>]
-    member inline _.Placeholder(element, value: string) =
-        { element with props = ("placeholder", value :> obj) :: element.props }
-
+    member inline _.Placeholder(props, value: string) =
+        Prop("placeholder", value :> obj) :: props
     // value
     [<CustomOperation("value")>]
-    member inline _.Value(element, value: obj) =
-        { element with props = ("value", value) :: element.props }
-
+    member inline _.Value(props, value: obj) = Prop("value", value) :: props
     // defaultValue
     [<CustomOperation("defaultValue")>]
-    member inline _.DefaultValue(element, value: obj) =
-        { element with props = ("defaultValue", value) :: element.props }
+    member inline _.DefaultValue(props, value: obj) = Prop("defaultValue", value) :: props
 
     // zero operation
     [<CustomOperation("zero")>]
-    member inline _.Zero() = toElement (tag, [], [])
+    member inline _.Zero() = []
 
-    // Add this Return member inline to automatically convert to ReactElement
-    member inline _.Run(element: Element) = toReactElement element
+    // inline operation
+
+    member inline x.Run(prop: ElementProperty) = x.Run [ prop ]
+
+    member x.Run(props: ElementProperty list) =
+        let properties =
+            List.choose
+                (fun prop ->
+                    match prop with
+                    | Prop p -> Some p
+                    | _ -> None
+                )
+                props
+
+        let children =
+            List.choose
+                (fun prop ->
+                    match prop with
+                    | Child c ->
+                        match c with
+                        | Element e -> Some e
+                        | ElementList els -> Some(unbox els)
+                    | _ -> None
+                )
+                props
+
+        createElement tag (unbox properties) (unbox children)
 
 // Derived builder with children operation
 type ElementWithChildrenBuilder(tag: string) =
     inherit ElementBuilder(tag)
 
     [<CustomOperation("children")>]
-    member _.Children(element: Element, elements: ReactElement list) =
-        { element with children = ElementList elements :: element.children }
-
-// [<CustomOperation("children")>]
-// member _.Children((tag, props, children), elements: ReactElement list list) =
-//     toElement(tag, props, children @ unbox elements)
+    member this.Children(props, elements: ReactElement list) = Child(ElementList elements) :: props
 
 // HTML element builders
 

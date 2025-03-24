@@ -55,9 +55,9 @@ type StyleBuilder() =
     // member inline _.Delay(f) = f()
 
     // Convert to IReactProperty with "style" prop name
-    member inline _.Run(props) : Prop =
+    member inline _.Run(props) : HtmlProp =
         let styleObj = createObj props
-        let ret = unbox<Prop> ("style", styleObj)
+        let ret = unbox<HtmlProp> ("style", styleObj)
         ret
 
 let style = StyleBuilder()
