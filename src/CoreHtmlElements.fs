@@ -4,9 +4,10 @@ open FreeAct
 open FreeAct.Interop
 
 [<AutoOpen>]
-module CoreHtmlElement =
+module CoreElement =
+    open Fable.Core.JsInterop
 
-    type CoreHtmlElementBuilder(tag: string) =
+    type CoreElementBuilder(tag: string) =
         inherit ElementWithChildrenBuilder(tag)
 
         /// id
@@ -24,32 +25,61 @@ module CoreHtmlElement =
         [<CustomOperation("className")>]
         member inline x.ClassName(props, values: string seq) =
             Prop("className", String.concat " " values :> obj) :: props
+        /// spellCheck
 
-        /// title
-        [<CustomOperation("title")>]
-        member inline _.Title(props, value: string) = Prop("title", value :> obj) :: props
+        // slot
+        /// <summary>
+        /// Used to define the slot of an element
+        /// </summary>
+        [<CustomOperation("slot")>]
+        member inline _.Slot(props, value: string) = Prop("slot", value :> obj) :: props
 
-        /// lang
-        [<CustomOperation("lang")>]
-        member inline _.Lang(props, value: string) = Prop("lang", value :> obj) :: props
+        // aria-* attributes
+        /// <summary>
+        /// Used to define a custom aria attribute on an element
+        /// </summary>
+        [<CustomOperation("aria")>]
+        member inline _.Aria(props, ariaName: string, ariaValue: string) =
+            Prop(sprintf "aria-%s" ariaName, ariaValue :> obj) :: props
 
-        /// dir
-        [<CustomOperation("dir")>]
-        member inline _.Dir(props, value: Direction) =
-            Prop("dir", directionToString value :> obj) :: props
+        // dangerouslySetInnerHTML
+        /// <summary>
+        /// Used to define the inner HTML of an element
+        /// </summary>
+        [<CustomOperation("dangerouslySetInnerHTML")>]
+        member inline _.DangerouslySetInnerHTML(props, value: string) =
+            Prop("dangerouslySetInnerHTML", createObj [ "__html" ==> value ]) :: props
 
-        /// tabIndex
-        [<CustomOperation("tabIndex")>]
-        member inline _.TabIndex(props, value: int) = Prop("tabIndex", value :> obj) :: props
+        // scrollLeft
+        /// <summary>
+        /// Used to define the scroll left of an element
+        /// </summary>
+        [<CustomOperation("scrollLeft")>]
+        member inline _.ScrollLeft(props, value: int) =
+            Prop("scrollLeft", value :> obj) :: props
 
-        /// hidden
-        [<CustomOperation("hidden")>]
-        member inline _.Hidden(props, value: bool) = Prop("hidden", value :> obj) :: props
+        // scrollTop
+        /// <summary>
+        /// Used to define the scroll top of an element
+        /// </summary>
+        [<CustomOperation("scrollTop")>]
+        member inline _.ScrollTop(props, value: int) =
+            Prop("scrollTop", value :> obj) :: props
 
-        /// accessKey
-        [<CustomOperation("accessKey")>]
-        member inline _.AccessKey(props, value: string) =
-            Prop("accessKey", value :> obj) :: props
+        // key property
+        [<CustomOperation("key")>]
+        member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props
+
+    type HtmlElementBuilder(tag: string) =
+        inherit CoreElementBuilder(tag)
+
+        // data-* attributes
+        /// <summary>
+        /// Used to define a custom data attribute on an element
+        /// </summary>
+        [<CustomOperation("data")>]
+        member inline _.Data(props, dataName: string, dataValue: string) =
+            Prop(sprintf "data-%s" dataName, dataValue :> obj) :: props
 
         /// contentEditable
         [<CustomOperation("contentEditable")>]
@@ -61,6 +91,11 @@ module CoreHtmlElement =
         member inline _.ContentEditable(props, value: PlaintextOnly) =
             Prop("contentEditable", "plaintext-only" :> obj) :: props
 
+        /// dir
+        [<CustomOperation("dir")>]
+        member inline _.Dir(props, value: Direction) =
+            Prop("dir", directionToString value :> obj) :: props
+
         /// draggable
         /// <summary>
         /// Used to define whether an element is draggable or not
@@ -69,28 +104,9 @@ module CoreHtmlElement =
         member inline _.Draggable(props, value: bool) =
             Prop("draggable", value :> obj) :: props
 
-        /// spellCheck
-        /// <summary>
-        /// Used to define whether an element is spell checked or not
-        /// </summary>
-        [<CustomOperation("spellCheck")>]
-        member inline _.SpellCheck(props, value: bool) =
-            Prop("spellCheck", value :> obj) :: props
-
-        /// translate
-        /// <summary>
-        /// Used to define whether the content of an element should be translated or not
-        /// </summary>
-        [<CustomOperation("translate")>]
-        member inline _.Translate(props, value: bool) =
-            Prop(
-                "translate",
-                if value then
-                    "yes"
-                else
-                    "no" :> obj
-            )
-            :: props
+        /// hidden
+        [<CustomOperation("hidden")>]
+        member inline _.Hidden(props, value: bool) = Prop("hidden", value :> obj) :: props
 
         /// inert
         /// <summary>
@@ -98,13 +114,6 @@ module CoreHtmlElement =
         /// </summary>
         [<CustomOperation("inert")>]
         member inline _.Inert(props, value: bool) = Prop("inert", value :> obj) :: props
-
-        // slot
-        /// <summary>
-        /// Used to define the slot of an element
-        /// </summary>
-        [<CustomOperation("slot")>]
-        member inline _.Slot(props, value: string) = Prop("slot", value :> obj) :: props
 
         // itemscope
         /// <summary>
@@ -142,27 +151,46 @@ module CoreHtmlElement =
         [<CustomOperation("itemRef")>]
         member inline _.ItemRef(props, value: string) = Prop("itemRef", value :> obj) :: props
 
-        // data-* attributes
-        /// <summary>
-        /// Used to define a custom data attribute on an element
-        /// </summary>
-        [<CustomOperation("data")>]
-        member inline _.Data(props, dataName: string, dataValue: string) =
-            Prop(sprintf "data-%s" dataName, dataValue :> obj) :: props
+        /// lang
+        [<CustomOperation("lang")>]
+        member inline _.Lang(props, value: string) = Prop("lang", value :> obj) :: props
 
-        // aria-* attributes
         /// <summary>
-        /// Used to define a custom aria attribute on an element
+        /// Used to define whether an element is spell checked or not
         /// </summary>
-        [<CustomOperation("aria")>]
-        member inline _.Aria(props, ariaName: string, ariaValue: string) =
-            Prop(sprintf "aria-%s" ariaName, ariaValue :> obj) :: props
+        [<CustomOperation("spellCheck")>]
+        member inline _.SpellCheck(props, value: bool) =
+            Prop("spellCheck", value :> obj) :: props
+
+        /// tabIndex
+        [<CustomOperation("tabIndex")>]
+        member inline _.TabIndex(props, value: int) = Prop("tabIndex", value :> obj) :: props
+
+        /// translate
+        /// <summary>
+        /// Used to define whether the content of an element should be translated or not
+        /// </summary>
+        [<CustomOperation("translate")>]
+        member inline _.Translate(props, value: bool) =
+            Prop(
+                "translate",
+                if value then
+                    "yes"
+                else
+                    "no" :> obj
+            )
+            :: props
+
+        /// title
+        [<CustomOperation("title")>]
+        member inline _.Title(props, value: string) = Prop("title", value :> obj) :: props
+
+        /// accessKey
+        [<CustomOperation("accessKey")>]
+        member inline _.AccessKey(props, value: string) =
+            Prop("accessKey", value :> obj) :: props
 
         // TODO: The following should go in a derived type
-
-        // key property
-        [<CustomOperation("key")>]
-        member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props
 
         // src
         [<CustomOperation("src")>]

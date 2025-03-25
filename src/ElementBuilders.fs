@@ -6,17 +6,17 @@ module Builders =
     open Fable.React
 
     /// Defines a HTML div element
-    let div = CoreHtmlElementBuilder "div"
-    let h1 = CoreHtmlElementBuilder "h1"
-    let button = CoreHtmlElementBuilder("button")
-    let p = CoreHtmlElementBuilder("p")
-    let section = CoreHtmlElementBuilder("section")
-    let span = CoreHtmlElementBuilder("span")
-    let i = CoreHtmlElementBuilder("i")
+    let div = HtmlElementBuilder "div"
+    let h1 = HtmlElementBuilder "h1"
+    let button = HtmlElementBuilder("button")
+    let p = HtmlElementBuilder("p")
+    let section = HtmlElementBuilder("section")
+    let span = HtmlElementBuilder("span")
+    let i = HtmlElementBuilder("i")
 
-    let label = CoreHtmlElementBuilder("label")
-    let img = CoreHtmlElementBuilder("img")
+    let label = HtmlElementBuilder("label")
+    let img = HtmlElementBuilder("img")
 
-    let input = CoreHtmlElementBuilder("input")
+    let input = HtmlElementBuilder("input")
 
     let none: ReactElement = null
