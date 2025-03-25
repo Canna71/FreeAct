@@ -150,21 +150,19 @@ module CoreHtmlElement =
         member inline _.Data(props, dataName: string, dataValue: string) =
             Prop(sprintf "data-%s" dataName, dataValue :> obj) :: props
 
-        /// Used to define a custom property on an element
-        [<CustomOperation("prop")>]
-        member inline _.Prop(props, propName: string, propValue: obj) =
-            Prop(propName, propValue) :: props
+        // aria-* attributes
+        /// <summary>
+        /// Used to define a custom aria attribute on an element
+        /// </summary>
+        [<CustomOperation("aria")>]
+        member inline _.Aria(props, ariaName: string, ariaValue: string) =
+            Prop(sprintf "aria-%s" ariaName, ariaValue :> obj) :: props
 
-        /// Used to define a custom property on an element
-        [<CustomOperation("prop")>]
-        member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
+        // TODO: The following should go in a derived type
 
         // key property
         [<CustomOperation("key")>]
         member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props
-
-        [<CustomOperation("text")>]
-        member inline x.Text(props, value: string) = Child(Element(unbox value)) :: props
 
         // src
         [<CustomOperation("src")>]

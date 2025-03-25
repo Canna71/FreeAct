@@ -18,6 +18,7 @@ type ElementProperty =
     | Child of ChildElement
 
 type EventHandler = Event -> unit
+type PointerEventHandler = PointerEvent -> unit
 
 // Element builder using method chaining for props
 type ElementBuilder(tag: string) =
@@ -82,6 +83,18 @@ type ElementBuilder(tag: string) =
                 props
 
         createElement tag (unbox properties) (unbox children)
+
+    [<CustomOperation("text")>]
+    member inline x.Text(props, value: string) = Child(Element(unbox value)) :: props
+
+    /// Used to define a custom property on an element
+    [<CustomOperation("prop")>]
+    member inline _.Prop(props, propName: string, propValue: obj) =
+        Prop(propName, propValue) :: props
+
+    /// Used to define a custom property on an element
+    [<CustomOperation("prop")>]
+    member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
 
 // Derived builder with children operation
 type ElementWithChildrenBuilder(tag: string) =

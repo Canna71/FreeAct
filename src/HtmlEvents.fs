@@ -5,11 +5,11 @@ open FreeAct
 [<AutoOpen>]
 module HtmlEvents =
 
-    type ElementBuilder with
+    type CoreHtmlElementBuilder with
 
         /// onClick event
         [<CustomOperation("onClick")>]
-        member inline _.OnClick(props, handler) =
+        member inline _.OnClick(props, handler: PointerEventHandler) =
             Prop("onClick", handler :> obj) :: props
 
         // onchange
