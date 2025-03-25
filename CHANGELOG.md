@@ -7,8 +7,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 <!-- Don't add your changes manually, it will be done based on your Git history when making a release -->
 
 <!-- EasyBuild: START -->
-<!-- last_commit_released: 14109d651fe6d615a55de77e9eb9fee829dd1c10 -->
+<!-- last_commit_released: cbe6c33a6e7459b127c0cb6e059174468d42a24b -->
 <!-- EasyBuild: END -->
+
+## 0.2.0 - 2025-03-25
+
+### 🚀 Features
+
+* Add release logging for new version and package path ([cbe6c33](https://github.com/Canna71/FreeAct/commit/cbe6c33a6e7459b127c0cb6e059174468d42a24b))
+
+<strong><small>[View changes on Github](https://github.com/Canna71/FreeAct/compare/14109d651fe6d615a55de77e9eb9fee829dd1c10..cbe6c33a6e7459b127c0cb6e059174468d42a24b)</small></strong>
 
 ## 0.1.2 - 2025-03-25
 
