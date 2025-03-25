@@ -25,7 +25,6 @@ module CoreElement =
         [<CustomOperation("className")>]
         member inline x.ClassName(props, values: string seq) =
             Prop("className", String.concat " " values :> obj) :: props
-        /// spellCheck
 
         // slot
         /// <summary>
