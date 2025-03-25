@@ -17,9 +17,6 @@ type ElementProperty =
     | Prop of HtmlProp
     | Child of ChildElement
 
-type EventHandler = Event -> unit
-type PointerEventHandler = PointerEvent -> unit
-
 // Element builder using method chaining for props
 type ElementBuilder(tag: string) =
 
