@@ -9,7 +9,6 @@ module CoreHtmlElement =
     type CoreHtmlElementBuilder(tag: string) =
         inherit ElementWithChildrenBuilder(tag)
 
-
         /// id
         [<CustomOperation("id")>]
         member inline _.Id(props, value: string) = Prop("id", value :> obj) :: props
@@ -34,9 +33,122 @@ module CoreHtmlElement =
         [<CustomOperation("lang")>]
         member inline _.Lang(props, value: string) = Prop("lang", value :> obj) :: props
 
-        // dir
+        /// dir
         [<CustomOperation("dir")>]
-        member inline _.Dir(props, value: Direction) = Prop("dir", directionToString value :> obj) :: props
+        member inline _.Dir(props, value: Direction) =
+            Prop("dir", directionToString value :> obj) :: props
+
+        /// tabIndex
+        [<CustomOperation("tabIndex")>]
+        member inline _.TabIndex(props, value: int) = Prop("tabIndex", value :> obj) :: props
+
+        /// hidden
+        [<CustomOperation("hidden")>]
+        member inline _.Hidden(props, value: bool) = Prop("hidden", value :> obj) :: props
+
+        /// accessKey
+        [<CustomOperation("accessKey")>]
+        member inline _.AccessKey(props, value: string) =
+            Prop("accessKey", value :> obj) :: props
+
+        /// contentEditable
+        [<CustomOperation("contentEditable")>]
+        member inline _.ContentEditable(props, value: bool) =
+            Prop("contentEditable", value :> obj) :: props
+
+        /// contentEditable
+        [<CustomOperation("contentEditable")>]
+        member inline _.ContentEditable(props, value: PlaintextOnly) =
+            Prop("contentEditable", "plaintext-only" :> obj) :: props
+
+        /// draggable
+        /// <summary>
+        /// Used to define whether an element is draggable or not
+        /// </summary>
+        [<CustomOperation("draggable")>]
+        member inline _.Draggable(props, value: bool) =
+            Prop("draggable", value :> obj) :: props
+
+        /// spellCheck
+        /// <summary>
+        /// Used to define whether an element is spell checked or not
+        /// </summary>
+        [<CustomOperation("spellCheck")>]
+        member inline _.SpellCheck(props, value: bool) =
+            Prop("spellCheck", value :> obj) :: props
+
+        /// translate
+        /// <summary>
+        /// Used to define whether the content of an element should be translated or not
+        /// </summary>
+        [<CustomOperation("translate")>]
+        member inline _.Translate(props, value: bool) =
+            Prop(
+                "translate",
+                if value then
+                    "yes"
+                else
+                    "no" :> obj
+            )
+            :: props
+
+        /// inert
+        /// <summary>
+        /// Used to define whether an element is inert or not
+        /// </summary>
+        [<CustomOperation("inert")>]
+        member inline _.Inert(props, value: bool) = Prop("inert", value :> obj) :: props
+
+        // slot
+        /// <summary>
+        /// Used to define the slot of an element
+        /// </summary>
+        [<CustomOperation("slot")>]
+        member inline _.Slot(props, value: string) = Prop("slot", value :> obj) :: props
+
+        // itemscope
+        /// <summary>
+        /// Used to define whether an element is a part of a microdata item or not
+        /// </summary>
+        [<CustomOperation("itemscope")>]
+        member inline _.ItemScope(props, value: bool) =
+            Prop("itemscope", value :> obj) :: props
+
+        // itemType
+        /// <summary>
+        /// Used to define the type of an item in a microdata item
+        /// </summary>
+        [<CustomOperation("itemType")>]
+        member inline _.ItemType(props, value: string) = Prop("itemType", value :> obj) :: props
+
+        // itemID
+        /// <summary>
+        /// Used to define the ID of an item in a microdata item
+        /// </summary>
+        [<CustomOperation("itemID")>]
+        member inline _.ItemID(props, value: string) = Prop("itemID", value :> obj) :: props
+
+        // itemProp
+        /// <summary>
+        /// Used to define the properties of an item in a microdata item
+        /// </summary>
+        [<CustomOperation("itemProp")>]
+        member inline _.ItemProp(props, value: string) = Prop("itemProp", value :> obj) :: props
+
+        // itemRef
+        /// <summary>
+        /// Used to define the reference of an item in a microdata item
+        /// </summary>
+        [<CustomOperation("itemRef")>]
+        member inline _.ItemRef(props, value: string) = Prop("itemRef", value :> obj) :: props
+
+        // data-* attributes
+        /// <summary>
+        /// Used to define a custom data attribute on an element
+        /// </summary>
+        [<CustomOperation("data")>]
+        member inline _.Data(props, dataName: string, dataValue: string) =
+            Prop(sprintf "data-%s" dataName, dataValue :> obj) :: props
 
         /// Used to define a custom property on an element
         [<CustomOperation("prop")>]
@@ -47,7 +159,6 @@ module CoreHtmlElement =
         [<CustomOperation("prop")>]
         member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
 
-       
         // key property
         [<CustomOperation("key")>]
         member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props

@@ -12,3 +12,5 @@ module HtmlTypes =
         | LTR -> "ltr"
         | RTL -> "rtl"
         | Auto -> "auto"
+
+    type PlaintextOnly = PlaintextOnly
