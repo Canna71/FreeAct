@@ -7,12 +7,14 @@ import { execSync } from 'node:child_process';
 // in the `defineConfig` function below
 function findBaseUrlFromRemoteUrl() {
     const remoteUrl = execSync("git remote get-url origin").toString();
-    const findRemoteBaseUrl = /(?:git@|https:\/\/)github\.com(?:\:|\/).*\/(.*).git/gm;
+    const findRemoteBaseUrl = /(?:git@|https:\/\/)github\.com(?::?).*\/(.*).git/gm;
 
     const match = findRemoteBaseUrl.exec(remoteUrl);
 
     if (match) {
-        return match[1];
+        const baseUrl = match[1]
+        console.log(`Determined base URL from remote URL: ${baseUrl}`);
+        return baseUrl;
     }
 
     throw new Error(`Could not determine base URL from remote URL, please make sure you are in a git repository and have remote origin set`);
@@ -24,7 +26,8 @@ export default defineConfig(async ({ command, mode }) => {
     let baseUrl = '/';
 
     if (command === 'build') {
-        baseUrl = findBaseUrlFromRemoteUrl();
+        // baseUrl = findBaseUrlFromRemoteUrl();
+        baseUrl = '/freeact';
     }
 
     return {
