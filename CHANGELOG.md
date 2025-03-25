@@ -7,8 +7,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 <!-- Don't add your changes manually, it will be done based on your Git history when making a release -->
 
 <!-- EasyBuild: START -->
-<!-- last_commit_released: 067fac5f663bff8fb4fff6954d23cd83346f1e45 -->
+<!-- last_commit_released: 14109d651fe6d615a55de77e9eb9fee829dd1c10 -->
 <!-- EasyBuild: END -->
+
+## 0.1.2 - 2025-03-25
+
+### 🐞 Bug Fixes
+
+* Update regex for remote URL parsing and log base URL determination ([14109d6](https://github.com/Canna71/FreeAct/commit/14109d651fe6d615a55de77e9eb9fee829dd1c10))
+
+<strong><small>[View changes on Github](https://github.com/Canna71/FreeAct/compare/067fac5f663bff8fb4fff6954d23cd83346f1e45..14109d651fe6d615a55de77e9eb9fee829dd1c10)</small></strong>
 
 ## 0.1.1 - 2025-03-25
 

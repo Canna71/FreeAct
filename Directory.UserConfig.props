@@ -6,7 +6,7 @@
             at https://github.com/fable-compiler/Fable.Package.SDK
         -->
         <FablePackageType>library</FablePackageType>
-        <PackageTags></PackageTags>
+        <PackageTags>fable-javascript</PackageTags>
         <!-- Example of PackageProjectUrl: https://github.com/fable-compiler/Fable.Package.SDK -->
         <PackageProjectUrl>https://github.com/Canna71/FreeAct</PackageProjectUrl>
         <!-- Example of Authors: Mangel Maxime -->
