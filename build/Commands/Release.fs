@@ -17,13 +17,13 @@ type ReleaseCommand() =
 
     override __.Execute(context, _settings) =
         DemoCommand().Execute(context, DemoSettings()) |> ignore
-
+        printfn "Releasing..."
         let newVersion =
             ChangelogGen.run(
                 Workspace.``CHANGELOG.md``,
                 forwardArguments = (context.Remaining.Raw |> Seq.toList)
             )
-
+        printfn "New version: %s" newVersion
         let nupkgPath = DotNet.pack Workspace.src.``.``
 
         DotNet.nugetPush nupkgPath
