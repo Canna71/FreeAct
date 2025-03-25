@@ -37,3 +37,25 @@ module HtmlTypes =
         | AutoCapitalize.Sentences -> "sentences"
         | AutoCapitalize.Words -> "words"
         | AutoCapitalize.Characters -> "characters"
+
+    [<RequireQualifiedAccess>]
+    type InputMode =
+        | Decimal
+        | Email
+        | Numeric
+        | Search
+        | Tel
+        | Text
+        | Url
+        | None
+
+    let inputModeToString =
+        function
+        | InputMode.Decimal -> "decimal"
+        | InputMode.Email -> "email"
+        | InputMode.Numeric -> "numeric"
+        | InputMode.Search -> "search"
+        | InputMode.Tel -> "tel"
+        | InputMode.Text -> "text"
+        | InputMode.Url -> "url"
+        | InputMode.None -> "none"

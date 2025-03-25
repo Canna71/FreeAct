@@ -81,6 +81,22 @@ module CoreElement =
         member inline _.AutoCapitalize(props, value: AutoCapitalize) =
             Prop("autoCapitalize", autoCapitalizeToString value :> obj) :: props
 
+        // autoCorrect
+        /// <summary>
+        /// Used to define whether an element should be auto corrected or not
+        /// </summary>
+        [<CustomOperation("autoCorrect")>]
+        member inline _.AutoCorrect(props, value: bool) =
+            Prop("autoCorrect", value :> obj) :: props
+
+        // autoFocus
+        /// <summary>
+        /// Used to define whether an element should be auto focused or not
+        /// </summary>
+        [<CustomOperation("autoFocus")>]
+        member inline _.AutoFocus(props, value: bool) =
+            Prop("autoFocus", value :> obj) :: props
+
         // data-* attributes
         /// <summary>
         /// Used to define a custom data attribute on an element
@@ -122,6 +138,14 @@ module CoreElement =
         /// </summary>
         [<CustomOperation("inert")>]
         member inline _.Inert(props, value: bool) = Prop("inert", value :> obj) :: props
+
+        // inputMode
+        /// <summary>
+        /// Used to define the input mode of an element
+        /// </summary>
+        [<CustomOperation("inputMode")>]
+        member inline _.InputMode(props, value: InputMode) =
+            Prop("inputMode", inputModeToString value :> obj) :: props
 
         // itemscope
         /// <summary>
