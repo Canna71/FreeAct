@@ -8,8 +8,8 @@
         <FablePackageType></FablePackageType>
         <PackageTags></PackageTags>
         <!-- Example of PackageProjectUrl: https://github.com/fable-compiler/Fable.Package.SDK -->
-        <PackageProjectUrl></PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/Canna71/FreeAct</PackageProjectUrl>
         <!-- Example of Authors: Mangel Maxime -->
-        <Authors></Authors>
+        <Authors>Gabriele Cannata</Authors>
     </PropertyGroup>
 </Project>
