@@ -6,7 +6,8 @@ open Fable.Core.JS
 
 module Styles =
 
-    type color =
+    [<RequireQualifiedAccess>]
+    type Color =
         static member inline rgba(r: int, g: int, b: int, a: float) = $"rgba({r}, {g}, {b}, {a})"
         static member inline rgb(r: int, g: int, b: int) = $"rgb({r}, {g}, {b})"
         static member inline hex(hex: string) = hex
