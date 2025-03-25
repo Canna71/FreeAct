@@ -7,7 +7,6 @@ import { execSync } from 'node:child_process';
 // in the `defineConfig` function below
 function findBaseUrlFromRemoteUrl() {
     const remoteUrl = execSync("git remote get-url origin").toString();
-    console.log(remoteUrl);
     const findRemoteBaseUrl = /(?:git@|https:\/\/)github\.com(?:\:|\/).*\/(.*).git/gm;
 
     const match = findRemoteBaseUrl.exec(remoteUrl);
