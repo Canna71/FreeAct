@@ -7,8 +7,16 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 <!-- Don't add your changes manually, it will be done based on your Git history when making a release -->
 
 <!-- EasyBuild: START -->
-<!-- last_commit_released: 197537a1fd55c72b85277414abeccf8d64cced9a -->
+<!-- last_commit_released: 067fac5f663bff8fb4fff6954d23cd83346f1e45 -->
 <!-- EasyBuild: END -->
+
+## 0.1.1 - 2025-03-25
+
+### 🐞 Bug Fixes
+
+* Remove console log for remote URL in Vite configuration ([067fac5](https://github.com/Canna71/FreeAct/commit/067fac5f663bff8fb4fff6954d23cd83346f1e45))
+
+<strong><small>[View changes on Github](https://github.com/Canna71/FreeAct/compare/197537a1fd55c72b85277414abeccf8d64cced9a..067fac5f663bff8fb4fff6954d23cd83346f1e45)</small></strong>
 
 ## 0.1.0 - 2025-03-25
 
