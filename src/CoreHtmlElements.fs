@@ -11,6 +11,9 @@ module CoreElement =
         inherit ElementWithChildrenBuilder(tag)
 
         /// id
+        /// <summary>
+        /// Used to define the id of an element
+        /// </summary>
         [<CustomOperation("id")>]
         member inline _.Id(props, value: string) = Prop("id", value :> obj) :: props
 
