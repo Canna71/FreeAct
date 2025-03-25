@@ -1,6 +1,6 @@
 namespace FreeAct
 
-// open Fable.React
+open Fable.React
 open Browser.Types
 open Fable.Core.JS // for console.log
 open FreeAct.Interop

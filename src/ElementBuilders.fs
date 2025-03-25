@@ -3,8 +3,7 @@ namespace FreeAct
 // HTML element builders
 [<AutoOpen>]
 module Builders =
-    open FreeAct.Interop
-    open Browser.Types
+    open Fable.React
 
     /// Defines a HTML div element
     let div = CoreHtmlElementBuilder "div"

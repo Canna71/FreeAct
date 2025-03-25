@@ -1,14 +1,14 @@
 module FreeAct.Interop
 
 open Fable.Core
-// open Fable.React
+open Fable.React
 open Fable.Core.JsInterop
 
 type IReactProperty = interface end
 
-[<Import("ReactElement", "react")>]
-[<AllowNullLiteral>]
-type ReactElement = interface end
+// [<Import("ReactElement", "react")>]
+// [<AllowNullLiteral>]
+// type ReactElement = interface end
 // Represents a generic CSSUnit
 type ICSSUnit = interface end
 
