@@ -73,6 +73,14 @@ module CoreElement =
     type HtmlElementBuilder(tag: string) =
         inherit CoreElementBuilder(tag)
 
+        // autoCapitalize
+        /// <summary>
+        /// Used to define the auto capitalization of an element
+        /// </summary>
+        [<CustomOperation("autoCapitalize")>]
+        member inline _.AutoCapitalize(props, value: AutoCapitalize) =
+            Prop("autoCapitalize", autoCapitalizeToString value :> obj) :: props
+
         // data-* attributes
         /// <summary>
         /// Used to define a custom data attribute on an element
