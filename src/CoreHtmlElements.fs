@@ -1,20 +1,18 @@
 namespace FreeAct
 
 open FreeAct
+open FreeAct.Interop
 
 [<AutoOpen>]
-module HtmlAttributes =
+module CoreHtmlElement =
 
-    type ElementBuilder with
+    type CoreHtmlElementBuilder(tag: string) =
+        inherit ElementWithChildrenBuilder(tag)
 
-        /// Used to define a custom property on an element
-        [<CustomOperation("prop")>]
-        member inline _.Prop(props, propName: string, propValue: obj) =
-            Prop(propName, propValue) :: props
 
-        /// Used to define a custom property on an element
-        [<CustomOperation("prop")>]
-        member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
+        /// id
+        [<CustomOperation("id")>]
+        member inline _.Id(props, value: string) = Prop("id", value :> obj) :: props
 
         /// <summary>
         /// Use it to assign a class name to an element
@@ -27,6 +25,29 @@ module HtmlAttributes =
         [<CustomOperation("className")>]
         member inline x.ClassName(props, values: string seq) =
             Prop("className", String.concat " " values :> obj) :: props
+
+        /// title
+        [<CustomOperation("title")>]
+        member inline _.Title(props, value: string) = Prop("title", value :> obj) :: props
+
+        /// lang
+        [<CustomOperation("lang")>]
+        member inline _.Lang(props, value: string) = Prop("lang", value :> obj) :: props
+
+        // dir
+        [<CustomOperation("dir")>]
+        member inline _.Dir(props, value: Direction) = Prop("dir", directionToString value :> obj) :: props
+
+        /// Used to define a custom property on an element
+        [<CustomOperation("prop")>]
+        member inline _.Prop(props, propName: string, propValue: obj) =
+            Prop(propName, propValue) :: props
+
+        /// Used to define a custom property on an element
+        [<CustomOperation("prop")>]
+        member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
+
+       
         // key property
         [<CustomOperation("key")>]
         member inline x.Key(props, value: string) = Prop("key", value :> obj) :: props
