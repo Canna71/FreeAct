@@ -28,11 +28,16 @@ type ElementBuilder(tag: string) =
 
     member inline _.Yield(()) : ElementProperty list = []
 
+    member inline _.Yield(text: string) = Child(Element(unbox text))
+
     member inline _.Combine(prop: ElementProperty, props: ElementProperty list) = prop :: props
 
     member inline _.Combine(props: ElementProperty list, prop: ElementProperty) = props @ [ prop ]
 
     member inline _.Combine(a: ElementProperty list, b: ElementProperty list) = a @ b
+
+    // member inline x.Combine(props: ElementProperty list, text: string) =
+    //   x.Text(props, text)
 
     member inline x.For(prop: ElementProperty, f: unit -> ElementProperty list) =
         x.Combine(prop, f ())

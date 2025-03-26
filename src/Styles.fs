@@ -5,6 +5,75 @@ open FreeAct
 open Fable.Core.JS
 
 module Styles =
+    [<RequireQualifiedAccess>]
+    type Unit =
+        | Px
+        | Em
+        | Rem
+        | Vw
+        | Vh
+        | Vmin
+
+    let unitToString =
+        function
+        | Unit.Px -> "px"
+        | Unit.Em -> "em"
+        | Unit.Rem -> "rem"
+        | Unit.Vw -> "vw"
+        | Unit.Vh -> "vh"
+        | Unit.Vmin -> "vmin"
+
+    [<RequireQualifiedAccess>]
+    type Length =
+        | Units of int * Unit
+        | Percent of int
+        | Auto
+        | MaxContent
+        | MinContent
+        | FitContent
+        | FitContentPercent of int
+        | Stretch
+
+    let lengthToString =
+        function
+        | Length.Units(n, u) -> sprintf "%d%s" n (unitToString u)
+        | Length.Percent(p) -> sprintf "%d%%" p
+        | Length.Auto -> "auto"
+        | Length.MaxContent -> "max-content"
+        | Length.MinContent -> "min-content"
+        | Length.FitContent -> "fit-content"
+        | Length.FitContentPercent(p) -> sprintf "fit-content(%d%%)" p
+        | Length.Stretch -> "stretch"
+
+    [<RequireQualifiedAccess>]
+    type TextAlign =
+        | Left
+        | Right
+        | Center
+        | Justify
+        | MatchParent
+        | Start
+        | End
+        | Inherit
+        | Initial
+        | Unset
+        | Revert
+        | RevertLayer
+
+    let textAlignToString =
+        function
+        | TextAlign.Left -> "left"
+        | TextAlign.Right -> "right"
+        | TextAlign.Center -> "center"
+        | TextAlign.Justify -> "justify"
+        | TextAlign.MatchParent -> "match-parent"
+        | TextAlign.Start -> "start"
+        | TextAlign.End -> "end"
+        | TextAlign.Inherit -> "inherit"
+        | TextAlign.Initial -> "initial"
+        | TextAlign.Unset -> "unset"
+        | TextAlign.Revert -> "revert"
+        | TextAlign.RevertLayer -> "revert-layer"
 
     [<RequireQualifiedAccess>]
     type Color =
@@ -29,6 +98,7 @@ module Styles =
     type StyleBuilder() =
         member inline _.Yield(_) = []
 
+        member inline _.Zero() = []
         // Color
         [<CustomOperation("color")>]
         member inline _.Color(props, c: string) = ("color", c :> obj) :: props
@@ -41,11 +111,22 @@ module Styles =
         [<CustomOperation("padding")>]
         member inline _.Padding(props, p: string) = ("padding", p :> obj) :: props
 
+        // Padding
+        [<CustomOperation("padding")>]
+        member inline _.Padding(props, n: int) =
+            ("padding", sprintf "%dpx" n :> obj) :: props
+
         [<CustomOperation("margin")>]
         member inline _.Margin(props, m: string) = ("margin", m :> obj) :: props
 
         [<CustomOperation("textAlign")>]
-        member inline _.TextAlign(props, m: string) = ("textAlign", m :> obj) :: props
+        member inline _.TextAlign(props, align: TextAlign) =
+            ("textAlign", textAlignToString align :> obj) :: props
+
+        // width
+        [<CustomOperation("width")>]
+        member inline _.Width(props, w: Length) =
+            ("width", lengthToString w :> obj) :: props
 
         // width
         [<CustomOperation("width")>]

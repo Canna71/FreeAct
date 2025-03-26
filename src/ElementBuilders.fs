@@ -18,5 +18,6 @@ module Builders =
     let img = HtmlElementBuilder("img")
 
     let input = HtmlElementBuilder("input")
+    let strong = HtmlElementBuilder "strong"
 
     let none: ReactElement = null
