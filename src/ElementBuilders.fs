@@ -10,6 +10,8 @@ module Builders =
     let h1 = HtmlElementBuilder "h1"
     let button = HtmlElementBuilder("button")
     let p = HtmlElementBuilder("p")
+
+    let a = HtmlElementBuilder("a")
     let section = HtmlElementBuilder("section")
     let span = HtmlElementBuilder("span")
     let i = HtmlElementBuilder("i")

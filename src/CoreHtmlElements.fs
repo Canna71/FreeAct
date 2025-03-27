@@ -264,3 +264,29 @@ module CoreElement =
         // defaultValue
         [<CustomOperation("defaultValue")>]
         member inline _.DefaultValue(props, value: obj) = Prop("defaultValue", value) :: props
+
+    type AnchorElement() =
+        inherit HtmlElementBuilder("a")
+
+        [<CustomOperation("href")>]
+        member inline _.Href(props, value: string) = Prop("href", value :> obj) :: props
+
+        [<CustomOperation("target")>]
+        member inline _.Target(props, value: Target) =
+            Prop("target", targetToString value :> obj) :: props
+
+        [<CustomOperation("download")>]
+        member inline _.Download(props, value: string) = Prop("download", value :> obj) :: props
+
+        [<CustomOperation("rel")>]
+        member inline _.Rel(props, value: string) = Prop("rel", value :> obj) :: props
+
+        [<CustomOperation("hreflang")>]
+        member inline _.HrefLang(props, value: string) = Prop("hreflang", value :> obj) :: props
+
+        [<CustomOperation("type")>]
+        member inline _.Type(props, value: string) = Prop("type", value :> obj) :: props
+
+        [<CustomOperation("referrerpolicy")>]
+        member inline _.ReferrerPolicy(props, value: ReferrerPolicy) =
+            Prop("referrerpolicy", referrerPolicyToString value :> obj) :: props

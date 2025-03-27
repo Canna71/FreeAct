@@ -59,3 +59,41 @@ module HtmlTypes =
         | InputMode.Text -> "text"
         | InputMode.Url -> "url"
         | InputMode.None -> "none"
+
+    [<RequireQualifiedAccess>]
+    type ReferrerPolicy =
+        | NoReferrer
+        | NoReferrerWhenDowngrade
+        | Origin
+        | OriginWhenCrossOrigin
+        | SameOrigin
+        | StrictOrigin
+        | StrictOriginWhenCrossOrigin
+        | UnsafeUrl
+
+    let referrerPolicyToString =
+        function
+        | ReferrerPolicy.NoReferrer -> "no-referrer"
+        | ReferrerPolicy.NoReferrerWhenDowngrade -> "no-referrer-when-downgrade"
+        | ReferrerPolicy.Origin -> "origin"
+        | ReferrerPolicy.OriginWhenCrossOrigin -> "origin-when-cross-origin"
+        | ReferrerPolicy.SameOrigin -> "same-origin"
+        | ReferrerPolicy.StrictOrigin -> "strict-origin"
+        | ReferrerPolicy.StrictOriginWhenCrossOrigin -> "strict-origin-when-cross-origin"
+        | ReferrerPolicy.UnsafeUrl -> "unsafe-url"
+
+    [<RequireQualifiedAccess>]
+    type Target =
+        | Blank
+        | Parent
+        | Self
+        | Top
+        | UnfencedTop
+
+    let targetToString =
+        function
+        | Target.Blank -> "_blank"
+        | Target.Parent -> "_parent"
+        | Target.Self -> "_self"
+        | Target.Top -> "_top"
+        | Target.UnfencedTop -> "_unfencedTop"
