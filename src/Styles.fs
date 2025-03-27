@@ -4,6 +4,7 @@ open Fable.Core.JsInterop
 open FreeAct
 open Fable.Core.JS
 
+[<AutoOpen>]
 module Styles =
     [<RequireQualifiedAccess>]
     type Unit =
@@ -115,6 +116,15 @@ module Styles =
         [<CustomOperation("padding")>]
         member inline _.Padding(props, n: int) =
             ("padding", sprintf "%dpx" n :> obj) :: props
+
+        // TODO: Add support for other syntaxes
+        [<CustomOperation("margin")>]
+        member inline _.Margin(props, m: int) =
+            ("margin", lengthToString (Length.Units(m, Unit.Px)) :> obj) :: props
+
+        [<CustomOperation("margin")>]
+        member inline _.Margin(props, m: Length) =
+            ("margin", lengthToString m :> obj) :: props
 
         [<CustomOperation("margin")>]
         member inline _.Margin(props, m: string) = ("margin", m :> obj) :: props
