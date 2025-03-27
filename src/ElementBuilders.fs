@@ -11,7 +11,7 @@ module Builders =
     let button = HtmlElementBuilder("button")
     let p = HtmlElementBuilder("p")
 
-    let a = HtmlElementBuilder("a")
+    let a = AnchorElement()
     let section = HtmlElementBuilder("section")
     let span = HtmlElementBuilder("span")
     let i = HtmlElementBuilder("i")
