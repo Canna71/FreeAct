@@ -30,6 +30,8 @@ type ElementBuilder(tag: string) =
 
     member inline _.Yield(text: string) = Child(Element(unbox text))
 
+    member inline _.Yield(num: int) = Child(Element(unbox num))
+
     member inline _.Combine(prop: ElementProperty, props: ElementProperty list) = prop :: props
 
     member inline _.Combine(props: ElementProperty list, prop: ElementProperty) = props @ [ prop ]
