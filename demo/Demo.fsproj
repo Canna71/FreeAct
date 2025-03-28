@@ -12,5 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Fable.Core" />
+    <PackageReference Include="Fable.React" />
+
   </ItemGroup>
 </Project>

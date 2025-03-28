@@ -4,7 +4,7 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <ChangelogFile>$(MSBuildThisFileDirectory)../CHANGELOG.md</ChangelogFile>
     </PropertyGroup>
-    <ItemGroup><Compile Include="HtmlTypes.fs" />
+    <ItemGroup><Compile Include="Router/RouteBinder.fs" /><Compile Include="HtmlTypes.fs" />
         <Compile Include="FreeAct.Interop.fs" />
         
         <Compile Include="InputTypes.fs" />

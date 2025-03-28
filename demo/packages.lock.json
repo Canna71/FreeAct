@@ -8,6 +8,17 @@
         "resolved": "4.3.0",
         "contentHash": "sbK+hYs7H7I3b3sbgttI4GlvQfNPcIqSz1qPSagF3QbVA46KJ/pWSXC/Dwv0s9M6AeRGmoqcIeD7GUaLn41zkA=="
       },
+      "Fable.React": {
+        "type": "Direct",
+        "requested": "[9.4.0, )",
+        "resolved": "9.4.0",
+        "contentHash": "c33FD2BumoYvu4/8bz2ToWaLZyfq2GMo7nq0RB/Bdoj7KdNObNBw2s1jWTi9whcf/s3tmikoXS4gZUKpD9MJ8g==",
+        "dependencies": {
+          "FSharp.Core": "4.7.2",
+          "Fable.React.Types": "18.3.0",
+          "Fable.ReactDom.Types": "18.2.0"
+        }
+      },
       "FSharp.Core": {
         "type": "Direct",
         "requested": "[5.0.2, )",
@@ -96,17 +107,6 @@
         "requested": "[1.0.0, )",
         "resolved": "1.0.0",
         "contentHash": "TIXktcGpeqE3QOr2coV+w5erpLtfijpfBilhb0MNV2OSao/Y5Zg3r7StF+wZ4jSm4Pkid4HpjshZB/V9fUc/Ew=="
-      },
-      "Fable.React": {
-        "type": "CentralTransitive",
-        "requested": "[9.4.0, )",
-        "resolved": "9.4.0",
-        "contentHash": "c33FD2BumoYvu4/8bz2ToWaLZyfq2GMo7nq0RB/Bdoj7KdNObNBw2s1jWTi9whcf/s3tmikoXS4gZUKpD9MJ8g==",
-        "dependencies": {
-          "FSharp.Core": "4.7.2",
-          "Fable.React.Types": "18.3.0",
-          "Fable.ReactDom.Types": "18.2.0"
-        }
       }
     }
   }
