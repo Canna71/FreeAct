@@ -7,6 +7,12 @@ open Fable.React
 open FreeAct
 open Browser
 open Fable.React.ReactBindings
+open Fable.Core.JS
+
+open UrlTokenizer
+open Router
+
+
 
 let app = 
     div {
@@ -15,7 +21,7 @@ let app =
 
 let container = Browser.Dom.document.getElementById("root")
 if isNull container then
-    Browser.Dom.console.error("No element with id 'app' found.")
+    Browser.Dom.console.error("No element with id 'root' found.")
 else
     let root = ReactDomClient.createRoot(container)
     root.render(app)
