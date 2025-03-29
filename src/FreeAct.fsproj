@@ -5,8 +5,7 @@
         <ChangelogFile>$(MSBuildThisFileDirectory)../CHANGELOG.md</ChangelogFile>
     </PropertyGroup>
     <ItemGroup>
-        <Compile Include="Router/Tokenizer.fs" />
-        <Compile Include="Router/Router.fs" />
+
         <Compile Include="Router/Tests/TestRouter.fs" />
         <Compile Include="FreeAct.Interop.fs" />
         
@@ -17,6 +16,9 @@
         <Compile Include="HtmlEvents.fs" />
         <Compile Include="Styles.fs" />
         <Compile Include="ElementBuilders.fs" />
+        <Compile Include="Router/Tokenizer.fs" />
+        <Compile Include="Router/Router.fs" />
+        <Compile Include="Router/ReactRouter.fs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="EasyBuild.PackageReleaseNotes.Tasks">

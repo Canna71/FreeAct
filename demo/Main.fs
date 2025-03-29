@@ -10,7 +10,7 @@ open Fable.React.ReactBindings
 open Fable.Core.JS
 
 open FreeAct.Router
-open FreeAct.Router.Tests
+open FreeAct.ReactRouter
 
 let home =
     div {
