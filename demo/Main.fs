@@ -9,10 +9,9 @@ open Browser
 open Fable.React.ReactBindings
 open Fable.Core.JS
 
-open UrlTokenizer
-open Router
+open FreeAct.Router.Tests
 
-
+testRouter ()
 
 let app = 
     div {

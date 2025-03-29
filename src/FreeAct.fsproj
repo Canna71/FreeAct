@@ -6,10 +6,11 @@
     </PropertyGroup>
     <ItemGroup>
         <Compile Include="Router/Tokenizer.fs" />
-        <Compile Include="HtmlTypes.fs" />
         <Compile Include="Router/Router.fs" />
+        <Compile Include="Router/Tests/TestRouter.fs" />
         <Compile Include="FreeAct.Interop.fs" />
         
+        <Compile Include="HtmlTypes.fs" />
         <Compile Include="InputTypes.fs" />
         <Compile Include="FreeAct.fs" />
         <Compile Include="CoreHtmlElements.fs" />

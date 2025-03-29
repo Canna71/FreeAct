@@ -1,6 +1,6 @@
-module Router
+module FreeAct.Router
 
-open UrlTokenizer
+open Tokenizer
 
 /// Represents a route handler
 type RouteHandler<'T> = RouteMatchResult -> 'T

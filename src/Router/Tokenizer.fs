@@ -1,4 +1,4 @@
-module UrlTokenizer
+module FreeAct.Tokenizer
 
 open System
 open System.Text.RegularExpressions

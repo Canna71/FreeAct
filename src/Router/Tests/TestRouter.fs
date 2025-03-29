@@ -1,3 +1,7 @@
+module FreeAct.Router.Tests
+
+open FreeAct.Tokenizer
+
 let testTokenizer () =
     printfn "Testing URL Tokenizer:"
 
