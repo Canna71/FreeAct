@@ -7,7 +7,6 @@
     <ItemGroup>
         <Compile Include="Router/Tokenizer.fs" />
         <Compile Include="Router/Router.fs" />
-        <Compile Include="Router/Browser.fs" />
         <Compile Include="Router/Tests/TestRouter.fs" />
         <Compile Include="FreeAct.Interop.fs" />
         

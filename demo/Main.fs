@@ -10,7 +10,6 @@ open Fable.React.ReactBindings
 open Fable.Core.JS
 
 open FreeAct.Router
-open FreeAct.Router.BrowserRouter
 
 let home =
     div {
@@ -33,30 +32,7 @@ let notFound =
         h1 { "404 Not Found" }
         p { "The page you are looking for does not exist." }
     }
-
-/// Creates a router for a React application
-let createRouter (router: Router<ReactElement>) (notFoundElement: ReactElement) =
-    let mutable currentElement = null
-
-    let root = ReactDomClient.createRoot(Browser.Dom.document.getElementById("app"))
-
-    let render result =
-        let element = 
-            match result with
-            | Some element -> element
-            | None -> notFoundElement
-        
-        currentElement <- element
-        root.render(currentElement)
-        // ReactDomClient..render(element, Browser.Dom.document.getElementById("app"))
     
-    BrowserRouter.create {
-        Router = router
-        Render = render
-        BasePath = ""
-        UseHashRouting = false
-        NotFoundHandler = Some (fun () -> notFoundElement)
-    }
 
 let app = 
 
@@ -95,16 +71,14 @@ let app =
                     | Some [ q ] -> q
                     | _ -> ""
                 div {
-                    h1 { sprintf "Search results for: %s" query }
-                    p { "Search results go here." }
+                  h1 { sprintf "Search results for: %s" query }
+                  p { "Search results go here." }
                 }
         )
       |> ignore
 
     // Create the browser router
-    let browserRouter = createRouter router notFound
-    BrowserRouter.start browserRouter |> ignore
-
+  
     div {
       section {
         h1 { "Welcome to the demo!" }
