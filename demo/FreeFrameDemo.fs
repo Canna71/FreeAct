@@ -76,6 +76,7 @@ let filterSubscription = createSubscription appDb (fun state -> state.filter)
 let TodoItemComponent (props: {| todo: TodoItem |}) =
     let todo = props.todo
     li {
+        key (string todo.id)
         className (if todo.completed then "completed" else "")
         div {
             span { todo.text }
