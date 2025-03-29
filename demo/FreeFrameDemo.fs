@@ -30,13 +30,13 @@ let initialState = {
 // Create app-db instance with proper generic type parameters
 let appDb : IAppDb<AppState> = AppDb<AppState>(initialState) :> IAppDb<AppState>
 
-// Define events (just identifiers)
-let addTodoEvent = defineEvent<string>("addTodo")
-let toggleTodoEvent = defineEvent<int>("toggleTodo")
-let deleteTodoEvent = defineEvent<int>("deleteTodo")
-let setFilterEvent = defineEvent<string>("setFilter")
+// Define auto-generated events - no need for any identifiers
+let addTodoEvent = defineAutoEvent<string>() 
+let toggleTodoEvent = defineAutoEvent<int>()
+let deleteTodoEvent = defineAutoEvent<int>()
+let setFilterEvent = defineAutoEvent<string>()
 
-// Define and register event handlers separately
+// Register event handlers
 registerEventHandler(registerHandler addTodoEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
@@ -81,7 +81,7 @@ let TodoItemComponent (props: {| todo: TodoItem |}) =
         div {
             span { todo.text }
             button {
-                onClick (fun _ -> dispatch appDb toggleTodoEvent todo.id)  // Now just needs the event ID and payload
+                onClick (fun _ -> dispatch appDb toggleTodoEvent todo.id)
                 str (if todo.completed then "✓" else "☐")
             }
             button {
@@ -99,7 +99,7 @@ let TodoForm () =
     let handleSubmit (e: Browser.Types.Event) =
         e.preventDefault()
         if text'.Trim() <> "" then
-            dispatch appDb addTodoEvent text'  // Cleaner dispatch with just event ID and payload
+            dispatch appDb addTodoEvent text'
             setText("")
     
     form {
@@ -122,7 +122,7 @@ let TodoFilters () =
         className "filters"
         button {
             className (if currentFilter = "all" then "active" else "")
-            onClick (fun _ -> dispatch appDb setFilterEvent "all")  // Cleaner dispatch
+            onClick (fun _ -> dispatch appDb setFilterEvent "all")
             str "All"
         }
         button {
@@ -147,8 +147,7 @@ let TodoList () =
         ul {
             className "todo-list"
             todos |> List.map (fun todo ->
-                // TODO: how to pass key to child component?
-                TodoItemComponent {| todo = todo |} (*[key (string todo.id)]*)
+                TodoItemComponent {| todo = todo |}
             )
         }
         p {
@@ -158,13 +157,10 @@ let TodoList () =
 
 // Main component
 let FreeFrameApp () =
-    // Hook to render the todos when the component mounts
     Hooks.useEffect((fun () ->
-        // Add some initial todos for demonstration
         dispatch appDb addTodoEvent "Learn F#"
         dispatch appDb addTodoEvent "Build a FreeFrame app"
         dispatch appDb addTodoEvent "Share with the community"
-        
     ), [| |])
     
     div {
