@@ -38,63 +38,58 @@ type AppDb<'T>(initialState: 'T) =
                 notifySubscribers ()
             | _ -> console.error ("Invalid action type dispatched to AppDb")
 
-// ===== Event Handling =====
+// ===== Event Handling with improved separation of concerns =====
 
-// Enhanced event definition with type safety
-type EventDef<'E, 'State> = { id: string; handler: 'E -> 'State -> 'State }
+// Define the event type - just an identifier, no handlers
+type EventId<'E> = { id: string }
 
-// Create a typed event definition with a handler function
-let createEvent<'E, 'State> (id: string) (handler: 'E -> 'State -> 'State) : EventDef<'E, 'State> =
-    { id = id; handler = handler }
+// Define the event handler type - connects an event to its handling logic
+type EventHandler<'E, 'State> = { eventId: EventId<'E>; handler: 'E -> 'State -> 'State }
 
-// For compatibility with existing code - creates an event def without a handler
-// let createEventDef<'E> (id: string) : EventDef<'E, obj> =
-//     {
-//         id = id
-//         handler = fun _ s -> s  // Default no-op handler
-//     }
+// Create an event identifier (no handler attached)
+let defineEvent<'E> (id: string) : EventId<'E> = { id = id }
+
+// Define a handler for an event
+let registerHandler<'E, 'State>
+    (eventId: EventId<'E>)
+    (handler: 'E -> 'State -> 'State)
+    : EventHandler<'E, 'State>
+    =
+    { eventId = eventId; handler = handler }
 
 // Private storage for handlers
 let private eventHandlers = Collections.Generic.Dictionary<string, obj -> obj>()
 
-// Register an event handler - now takes the event definition that already has the handler
-let registerEventHandler<'E, 'T> (eventDef: EventDef<'E, 'T>) =
+// Register an event handler in the system
+let registerEventHandler<'E, 'T> (handler: EventHandler<'E, 'T>) =
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'E
-        let reducer = (fun (state: 'T) -> eventDef.handler typedPayload state) :> obj
+        let reducer = (fun (state: 'T) -> handler.handler typedPayload state) :> obj
         reducer
 
-    eventHandlers.[eventDef.id] <- wrappedHandler
+    eventHandlers.[handler.eventId.id] <- wrappedHandler
 
-// For backward compatibility - register handler separately
-let registerEventHandlerLegacy<'E, 'T> (eventDef: EventDef<'E, obj>) (handler: 'E -> 'T -> 'T) =
-    let wrappedHandler (payload: obj) : obj =
-        let typedPayload = payload :?> 'E
-        let reducer = (fun (state: 'T) -> handler typedPayload state) :> obj
-        reducer
-
-    eventHandlers.[eventDef.id] <- wrappedHandler
-
-// Dispatch an event with payload - works with both event styles
-let dispatch<'E, 'T> (appDb: IAppDb<'T>) (eventDef: EventDef<'E, 'T>) (payload: 'E) =
-    match eventHandlers.TryGetValue(eventDef.id) with
+// Dispatch an event with payload - now only needs the event ID and payload
+let dispatch<'E, 'T> (appDb: IAppDb<'T>) (eventId: EventId<'E>) (payload: 'E) =
+    match eventHandlers.TryGetValue(eventId.id) with
     | true, handler ->
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
-    | false, _ ->
-        // For strongly typed events that haven't been explicitly registered,
-        // we can register them on-the-fly if they have a handler
+    | false, _ -> console.error ($"No handler registered for event: {eventId.id}")
 
-        let wrappedHandler (p: obj) : obj =
-            let typedPayload = p :?> 'E
-            let reducer = (fun (state: 'T) -> eventDef.handler typedPayload state) :> obj
-            reducer
+// ===== Backward Compatibility =====
 
-        eventHandlers.[eventDef.id] <- wrappedHandler
-        let action = wrappedHandler (payload :> obj)
-        appDb.Dispatch(action)
-// | _ ->
-//     console.error($"No handler registered for event: {eventDef.id}")
+// For compatibility with previous code
+type EventDef<'E, 'State> = EventHandler<'E, 'State>
+
+// Create event with handler in one step (for backward compatibility)
+let createEvent<'E, 'State>
+    (id: string)
+    (handler: 'E -> 'State -> 'State)
+    : EventHandler<'E, 'State>
+    =
+    let eventId = defineEvent<'E> id
+    registerHandler eventId handler
 
 // ===== Subscriptions (Views on app-db) =====
 

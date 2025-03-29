@@ -30,37 +30,37 @@ let initialState = {
 // Create app-db instance with proper generic type parameters
 let appDb : IAppDb<AppState> = AppDb<AppState>(initialState) :> IAppDb<AppState>
 
-// Define events with built-in handlers
-let addTodoEvent = createEvent<string, AppState> "addTodo" (fun text state ->
+// Define events (just identifiers)
+let addTodoEvent = defineEvent<string>("addTodo")
+let toggleTodoEvent = defineEvent<int>("toggleTodo")
+let deleteTodoEvent = defineEvent<int>("deleteTodo")
+let setFilterEvent = defineEvent<string>("setFilter")
+
+// Define and register event handlers separately
+registerEventHandler(registerHandler addTodoEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
-)
+))
 
-let toggleTodoEvent = createEvent<int, AppState> "toggleTodo" (fun id state ->
+registerEventHandler(registerHandler toggleTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
         )
     }
-)
+))
 
-let deleteTodoEvent = createEvent<int, AppState> "deleteTodo" (fun id state ->
+registerEventHandler(registerHandler deleteTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
-)
+))
 
-let setFilterEvent = createEvent<string, AppState> "setFilter" (fun filter state ->
+registerEventHandler(registerHandler setFilterEvent (fun filter state ->
     { state with filter = filter }
-)
-
-// Register events - since handlers are defined in the event, we don't need separate handler functions
-registerEventHandler addTodoEvent
-registerEventHandler toggleTodoEvent
-registerEventHandler deleteTodoEvent
-registerEventHandler setFilterEvent
+))
 
 // Create subscriptions
 let todosSubscription = createSubscription appDb (fun state -> state.todos)
@@ -81,7 +81,7 @@ let TodoItemComponent (props: {| todo: TodoItem |}) =
         div {
             span { todo.text }
             button {
-                onClick (fun _ -> dispatch appDb toggleTodoEvent todo.id)  // Type params can be inferred
+                onClick (fun _ -> dispatch appDb toggleTodoEvent todo.id)  // Now just needs the event ID and payload
                 str (if todo.completed then "✓" else "☐")
             }
             button {
@@ -99,7 +99,7 @@ let TodoForm () =
     let handleSubmit (e: Browser.Types.Event) =
         e.preventDefault()
         if text'.Trim() <> "" then
-            dispatch appDb addTodoEvent text'  // Type params can be inferred
+            dispatch appDb addTodoEvent text'  // Cleaner dispatch with just event ID and payload
             setText("")
     
     form {
@@ -122,7 +122,7 @@ let TodoFilters () =
         className "filters"
         button {
             className (if currentFilter = "all" then "active" else "")
-            onClick (fun _ -> dispatch appDb setFilterEvent "all")  // Type params can be inferred
+            onClick (fun _ -> dispatch appDb setFilterEvent "all")  // Cleaner dispatch
             str "All"
         }
         button {
@@ -161,9 +161,9 @@ let FreeFrameApp () =
     // Hook to render the todos when the component mounts
     Hooks.useEffect((fun () ->
         // Add some initial todos for demonstration
-        dispatch<string, AppState> appDb addTodoEvent "Learn F#"
-        dispatch<string, AppState> appDb addTodoEvent "Build a FreeFrame app"
-        dispatch<string, AppState> appDb addTodoEvent "Share with the community"
+        dispatch appDb addTodoEvent "Learn F#"
+        dispatch appDb addTodoEvent "Build a FreeFrame app"
+        dispatch appDb addTodoEvent "Share with the community"
         
     ), [| |])
     
