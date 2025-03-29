@@ -30,21 +30,15 @@ let initialState = {
 // Create app-db instance with proper generic type parameters
 let appDb : IAppDb<AppState> = AppDb<AppState>(initialState) :> IAppDb<AppState>
 
-// Define events with correct generic type parameter
-let addTodoEvent = createEventDef<string>("addTodo")
-let toggleTodoEvent = createEventDef<int>("toggleTodo")
-let deleteTodoEvent = createEventDef<int>("deleteTodo")
-let setFilterEvent = createEventDef<string>("setFilter")
-
-// Register event handlers with explicit type parameters
-registerEventHandler<string, AppState> addTodoEvent (fun text state ->
+// Define events with built-in handlers
+let addTodoEvent = createEvent<string, AppState> "addTodo" (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
 )
 
-registerEventHandler<int, AppState> toggleTodoEvent (fun id state ->
+let toggleTodoEvent = createEvent<int, AppState> "toggleTodo" (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
@@ -52,15 +46,21 @@ registerEventHandler<int, AppState> toggleTodoEvent (fun id state ->
     }
 )
 
-registerEventHandler<int, AppState> deleteTodoEvent (fun id state ->
+let deleteTodoEvent = createEvent<int, AppState> "deleteTodo" (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
 )
 
-registerEventHandler<string, AppState> setFilterEvent (fun filter state ->
+let setFilterEvent = createEvent<string, AppState> "setFilter" (fun filter state ->
     { state with filter = filter }
 )
+
+// Register events - since handlers are defined in the event, we don't need separate handler functions
+registerEventHandler addTodoEvent
+registerEventHandler toggleTodoEvent
+registerEventHandler deleteTodoEvent
+registerEventHandler setFilterEvent
 
 // Create subscriptions
 let todosSubscription = createSubscription appDb (fun state -> state.todos)
@@ -81,11 +81,11 @@ let TodoItemComponent (props: {| todo: TodoItem |}) =
         div {
             span { todo.text }
             button {
-                onClick (fun _ -> dispatch<int, AppState> appDb toggleTodoEvent todo.id)
+                onClick (fun _ -> dispatch appDb toggleTodoEvent todo.id)  // Type params can be inferred
                 str (if todo.completed then "✓" else "☐")
             }
             button {
-                onClick (fun _ -> dispatch<int, AppState> appDb deleteTodoEvent todo.id)
+                onClick (fun _ -> dispatch appDb deleteTodoEvent todo.id)
                 str "🗑"
             }
         }
@@ -99,7 +99,7 @@ let TodoForm () =
     let handleSubmit (e: Browser.Types.Event) =
         e.preventDefault()
         if text'.Trim() <> "" then
-            dispatch<string, AppState> appDb addTodoEvent text'
+            dispatch appDb addTodoEvent text'  // Type params can be inferred
             setText("")
     
     form {
@@ -122,17 +122,17 @@ let TodoFilters () =
         className "filters"
         button {
             className (if currentFilter = "all" then "active" else "")
-            onClick (fun _ -> dispatch<string, AppState> appDb setFilterEvent "all")
+            onClick (fun _ -> dispatch appDb setFilterEvent "all")  // Type params can be inferred
             str "All"
         }
         button {
             className (if currentFilter = "active" then "active" else "")
-            onClick (fun _ -> dispatch<string, AppState> appDb setFilterEvent "active")
+            onClick (fun _ -> dispatch appDb setFilterEvent "active")
             str "Active"
         }
         button {
             className (if currentFilter = "completed" then "active" else "")
-            onClick (fun _ -> dispatch<string, AppState> appDb setFilterEvent "completed")
+            onClick (fun _ -> dispatch appDb setFilterEvent "completed")
             str "Completed"
         }
     }

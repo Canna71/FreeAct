@@ -40,17 +40,34 @@ type AppDb<'T>(initialState: 'T) =
 
 // ===== Event Handling =====
 
-// Event registration and dispatch
-type EventHandler<'T> = 'T -> obj
-type EventDef<'E> = { id: string }
+// Enhanced event definition with type safety
+type EventDef<'E, 'State> = { id: string; handler: 'E -> 'State -> 'State }
 
-let createEventDef<'E> (id: string) : EventDef<'E> = { id = id }
+// Create a typed event definition with a handler function
+let createEvent<'E, 'State> (id: string) (handler: 'E -> 'State -> 'State) : EventDef<'E, 'State> =
+    { id = id; handler = handler }
 
-// Global registry of event handlers
+// For compatibility with existing code - creates an event def without a handler
+// let createEventDef<'E> (id: string) : EventDef<'E, obj> =
+//     {
+//         id = id
+//         handler = fun _ s -> s  // Default no-op handler
+//     }
+
+// Private storage for handlers
 let private eventHandlers = Collections.Generic.Dictionary<string, obj -> obj>()
 
-// Register an event handler
-let registerEventHandler<'E, 'T> (eventDef: EventDef<'E>) (handler: 'E -> 'T -> 'T) =
+// Register an event handler - now takes the event definition that already has the handler
+let registerEventHandler<'E, 'T> (eventDef: EventDef<'E, 'T>) =
+    let wrappedHandler (payload: obj) : obj =
+        let typedPayload = payload :?> 'E
+        let reducer = (fun (state: 'T) -> eventDef.handler typedPayload state) :> obj
+        reducer
+
+    eventHandlers.[eventDef.id] <- wrappedHandler
+
+// For backward compatibility - register handler separately
+let registerEventHandlerLegacy<'E, 'T> (eventDef: EventDef<'E, obj>) (handler: 'E -> 'T -> 'T) =
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'E
         let reducer = (fun (state: 'T) -> handler typedPayload state) :> obj
@@ -58,13 +75,26 @@ let registerEventHandler<'E, 'T> (eventDef: EventDef<'E>) (handler: 'E -> 'T -> 
 
     eventHandlers.[eventDef.id] <- wrappedHandler
 
-// Dispatch an event with payload (fix with correct type parameters)
-let dispatch<'E, 'T> (appDb: IAppDb<'T>) (eventDef: EventDef<'E>) (payload: 'E) =
+// Dispatch an event with payload - works with both event styles
+let dispatch<'E, 'T> (appDb: IAppDb<'T>) (eventDef: EventDef<'E, 'T>) (payload: 'E) =
     match eventHandlers.TryGetValue(eventDef.id) with
     | true, handler ->
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
-    | false, _ -> console.error ($"No handler registered for event: {eventDef.id}")
+    | false, _ ->
+        // For strongly typed events that haven't been explicitly registered,
+        // we can register them on-the-fly if they have a handler
+
+        let wrappedHandler (p: obj) : obj =
+            let typedPayload = p :?> 'E
+            let reducer = (fun (state: 'T) -> eventDef.handler typedPayload state) :> obj
+            reducer
+
+        eventHandlers.[eventDef.id] <- wrappedHandler
+        let action = wrappedHandler (payload :> obj)
+        appDb.Dispatch(action)
+// | _ ->
+//     console.error($"No handler registered for event: {eventDef.id}")
 
 // ===== Subscriptions (Views on app-db) =====
 
