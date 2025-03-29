@@ -4,8 +4,6 @@ printfn "Hello, from the demo!"
 
 // render a simple HTML page using the Fable.React library
 open Fable.React
-open Fable.React.Helpers
-open Fable.React.Props
 open FreeAct
 open Browser
 open Fable.React.ReactBindings
@@ -151,7 +149,6 @@ let container = Browser.Dom.document.getElementById("root")
 if isNull container then
     Browser.Dom.console.error("No element with id 'root' found.")
 else
-    // let root = ReactDomClient.createRoot(container)
-    // console.log("Rendering App...")
-    // root.render(App())
-    ReactDom.render(App(), container)
+    let root = ReactDomClient.createRoot(container)
+    console.log("Rendering App...")
+    root.render(App())
