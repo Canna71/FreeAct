@@ -483,3 +483,11 @@ module HtmlEvents =
         [<CustomOperation("onChange")>]
         member inline _.OnChange(props, handler: EventHandler) =
             Prop("onChange", handler :> obj) :: props
+
+    type FormElement with
+        [<CustomOperation("onSubmit")>]
+        member inline _.OnSubmit(props, value: EventHandler) =
+            Prop("onSubmit", value :> obj) :: props
+
+        [<CustomOperation("onReset")>]
+        member inline _.OnReset(props, value: EventHandler) = Prop("onReset", value :> obj) :: props

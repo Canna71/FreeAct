@@ -73,7 +73,7 @@ let filteredTodosSubscription = createSubscription appDb (fun state ->
 let filterSubscription = createSubscription appDb (fun state -> state.filter)
 
 // React components
-let TodoItem (props: {| todo: TodoItem |}) =
+let TodoItemComponent (props: {| todo: TodoItem |}) =
     let todo = props.todo
     li {
         className (if todo.completed then "completed" else "")
@@ -147,7 +147,7 @@ let TodoList () =
             className "todo-list"
             todos |> List.map (fun todo ->
                 // TODO: how to pass key to child component?
-                TodoItem {| todo = todo |} (*[key (string todo.id)]*)
+                TodoItemComponent {| todo = todo |} (*[key (string todo.id)]*)
             )
         }
         p {
@@ -157,22 +157,29 @@ let TodoList () =
 
 // Main component
 let FreeFrameApp () =
+    // Hook to render the todos when the component mounts
+    Hooks.useEffect((fun () ->
+        // Add some initial todos for demonstration
+        dispatch<string, AppState> appDb addTodoEvent "Learn F#"
+        dispatch<string, AppState> appDb addTodoEvent "Build a FreeFrame app"
+        dispatch<string, AppState> appDb addTodoEvent "Share with the community"
+        
+    ), [| |])
+    
     div {
         className "freeframe-app"
         h1 { "FreeFrame Demo - Todo App" }
         TodoList()
     }
 
-// Initialize the application
+// Initialize the application, can be called directly from the router
 let renderFreeFrameDemo() =
     let container = Browser.Dom.document.getElementById("freeframe-root")
     if not (isNull container) then
         let root = ReactDomClient.createRoot(container)
         root.render(FreeFrameApp())
-        
-        // Add some initial todos for demonstration
-        dispatch<string, AppState> appDb addTodoEvent "Learn F#"
-        dispatch<string, AppState> appDb addTodoEvent "Build a FreeFrame app"
-        dispatch<string, AppState> appDb addTodoEvent "Share with the community"
     else
         console.error("No element with id 'freeframe-root' found.")
+
+// Export the FreeFrameApp component for direct use in the router
+let FreeFrameDemo = FreeFrameApp

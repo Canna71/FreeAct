@@ -348,10 +348,3 @@ module CoreElement =
         [<CustomOperation("acceptCharset")>]
         member inline _.AcceptCharset(props, value: string) =
             Prop("acceptCharset", value :> obj) :: props
-
-        [<CustomOperation("onSubmit")>]
-        member inline _.OnSubmit(props, value: EventHandler) =
-            Prop("onSubmit", value :> obj) :: props
-
-        [<CustomOperation("onReset")>]
-        member inline _.OnReset(props, value: EventHandler) = Prop("onReset", value :> obj) :: props
