@@ -10,6 +10,7 @@ open Fable.React.ReactBindings
 open Fable.Core.JS
 
 open FreeAct.Router
+open FreeAct.Router.Tests
 
 let home =
     div {
@@ -32,7 +33,8 @@ let notFound =
         h1 { "404 Not Found" }
         p { "The page you are looking for does not exist." }
     }
-    
+
+testRouter ()
 
 let app = 
 

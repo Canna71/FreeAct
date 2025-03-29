@@ -19,9 +19,9 @@ type Router<'T>() =
         this
 
     /// Matches a URL against registered routes
-    member this.Match(url: string) : 'T option =
+    member this.Match(url: string) : option<RouteMatchResult * RouteHandler<'T>> =
         match matchRoute (routes |> List.map (fun r -> r.Route)) url with
         | Some(route, result) ->
             let registeredRoute = routes |> List.find (fun r -> r.Route.Pattern = route.Pattern)
-            Some(registeredRoute.Handler result)
+            Some(result, registeredRoute.Handler)
         | None -> None
