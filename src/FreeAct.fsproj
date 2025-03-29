@@ -6,7 +6,6 @@
     </PropertyGroup>
     <ItemGroup>
 
-        <Compile Include="Router/Tests/TestRouter.fs" />
         <Compile Include="FreeAct.Interop.fs" />
         
         <Compile Include="HtmlTypes.fs" />
@@ -19,6 +18,7 @@
         <Compile Include="Router/Tokenizer.fs" />
         <Compile Include="Router/Router.fs" />
         <Compile Include="Router/ReactRouter.fs" />
+        <Compile Include="Router/Tests/TestRouter.fs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="EasyBuild.PackageReleaseNotes.Tasks">

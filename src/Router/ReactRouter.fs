@@ -39,6 +39,8 @@ type RouterProviderProps<'T> =
 
 /// Create a router provider component
 let RouterProvider<'T> (props: RouterProviderProps<'T>) =
+    console.log "RouterProvider initialized"
+
     let initialUrl =
         match props.Mode with
         | HistoryAPI -> window.location.pathname + window.location.search
@@ -117,17 +119,24 @@ let RouterProvider<'T> (props: RouterProviderProps<'T>) =
     ofImport "Provider" "react" {| value = Some routerContext; children = props.Children |} []
 
 /// Routes component that renders the matched route
-let Routes<'T> (props: {| DefaultContent: 'T |}) =
+let Routes<'T when 'T :> ReactElement> (props: {| DefaultContent: 'T |}) : ReactElement =
     let routerContext = Hooks.useContext (RouterContext<'T>)
 
     match routerContext with
     | None ->
         printfn "Router context not found. Make sure to wrap your app with RouterProvider."
-        null
+
+        ofImport
+            "div"
+            "react"
+            {| className = "router-error" |}
+            [
+                str "Router context not found. Make sure to wrap your app with RouterProvider."
+            ]
     | Some context ->
         match context.Router.Match(context.CurrentUrl) with
-        | Some(result, handler) -> handler result |> ofType
-        | None -> props.DefaultContent |> ofType
+        | Some(result, handler) -> handler result
+        | None -> props.DefaultContent
 
 /// Link component that works with the router
 let Link
