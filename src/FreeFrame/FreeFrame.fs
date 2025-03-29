@@ -90,7 +90,7 @@ let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
         }
 
     // Subscribe to app-db changes
-    (appDb.Subscribe(fun newState ->
+    appDb.Subscribe(fun newState ->
         let newValue = selector newState
         // Only notify if the value has changed (simple equality check)
         if not (Object.Equals(currentValue, newValue)) then
@@ -98,7 +98,7 @@ let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
             // Notify all subscribers
             for subscriber in subscribers do
                 subscriber newValue
-    ))
+    )
     |> ignore
 
     subscription
@@ -112,12 +112,13 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
     let value = state.current
 
     // Use the direct value update signature, not the function signature
-    let setState = fun (newValue: 'V) -> state.update (newValue)
+    let setState = fun (newValue: 'V) -> state.update newValue
 
-    Hooks.useEffect (
+    Hooks.useEffectDisposable (
         (fun () ->
             let dispose = subscription.Subscribe(setState)
-            unbox (fun () -> dispose.Dispose())
+
+            dispose
         ),
         [| subscription :> obj |]
     )
