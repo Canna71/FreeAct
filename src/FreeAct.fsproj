@@ -12,13 +12,14 @@
         <Compile Include="InputTypes.fs" />
         <Compile Include="FreeAct.fs" />
         <Compile Include="CoreHtmlElements.fs" />
-        <Compile Include="HtmlEvents.fs" />
         <Compile Include="Styles.fs" />
         <Compile Include="ElementBuilders.fs" />
+        <Compile Include="HtmlEvents.fs" />
         <Compile Include="Router/Tokenizer.fs" />
         <Compile Include="Router/Router.fs" />
         <Compile Include="Router/ReactRouter.fs" />
         <Compile Include="Router/Tests/TestRouter.fs" />
+        <Compile Include="FreeFrame/FreeFrame.fs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="EasyBuild.PackageReleaseNotes.Tasks">

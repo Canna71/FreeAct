@@ -104,6 +104,17 @@ let setupRouter () =
                     p { "Search results go here." }
                 }
         )
+        .Route(
+            "/freeframe", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame Demo" }
+                    div { id "freeframe-root" }
+                    script {
+                        dangerouslySetInnerHTML  "setTimeout(() => Demo.FreeFrameDemo.renderFreeFrameDemo(), 100)"
+                    }
+                }
+          )
 
 // Create a custom navigation component
 let Navigation () =
@@ -115,6 +126,7 @@ let Navigation () =
                 li { Link {| destination = "/about"; className = None; children = [str "About"] |} }
                 li { Link {| destination = "/users"; className = None; children = [str "Users"] |} }
                 li { Link {| destination = "/search?q=example"; className = None; children = [str "Search"] |} }
+                li { Link {| destination = "/freeframe"; className = None; children = [str "FreeFrame Demo"] |} }
             }
         }
     }
@@ -139,10 +151,6 @@ let App () =
             }
         ]
     }
-
-
-
-   
 
 // Initialize the application
 let container = Browser.Dom.document.getElementById("root")

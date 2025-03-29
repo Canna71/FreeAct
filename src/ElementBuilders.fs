@@ -21,7 +21,21 @@ module Builders =
     type ListItemElement = HtmlElementBuilder
     let li = ListItemElement "li"
 
-    let h1 = HtmlElementBuilder "h1"
+    type Header1Element = HtmlElementBuilder
+    let h1 = Header1Element "h1"
+
+    type Header2Element = HtmlElementBuilder
+    let h2 = Header2Element "h2"
+
+    type Header3Element = HtmlElementBuilder
+    let h3 = Header3Element "h3"
+
+    type Header4Element = HtmlElementBuilder
+    let h4 = Header4Element "h4"
+
+    type Header5Element = HtmlElementBuilder
+    let h5 = Header5Element "h5"
+
     let button = HtmlElementBuilder("button")
     let p = HtmlElementBuilder("p")
 
@@ -35,5 +49,9 @@ module Builders =
 
     let input = HtmlElementBuilder("input")
     let strong = HtmlElementBuilder "strong"
+
+    let script = ScriptElement()
+
+    let form = FormElement()
 
     let none: ReactElement = null

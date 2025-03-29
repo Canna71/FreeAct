@@ -97,3 +97,13 @@ module HtmlTypes =
         | Target.Self -> "_self"
         | Target.Top -> "_top"
         | Target.UnfencedTop -> "_unfencedTop"
+
+    [<RequireQualifiedAccess>]
+    type CrossOrigin =
+        | Anonymous
+        | UseCredentials
+
+    let crossOriginToString =
+        function
+        | CrossOrigin.Anonymous -> "anonymous"
+        | CrossOrigin.UseCredentials -> "use-credentials"

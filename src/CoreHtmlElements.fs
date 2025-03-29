@@ -290,3 +290,68 @@ module CoreElement =
         [<CustomOperation("referrerpolicy")>]
         member inline _.ReferrerPolicy(props, value: ReferrerPolicy) =
             Prop("referrerpolicy", referrerPolicyToString value :> obj) :: props
+
+    type ScriptElement() =
+        inherit CoreElementBuilder("script")
+
+        [<CustomOperation("src")>]
+        member inline _.Src(props, value: string) = Prop("src", value :> obj) :: props
+
+        [<CustomOperation("async")>]
+        member inline _.Async(props, value: bool) = Prop("async", value :> obj) :: props
+
+        [<CustomOperation("defer")>]
+        member inline _.Defer(props, value: bool) = Prop("defer", value :> obj) :: props
+
+        [<CustomOperation("crossOrigin")>]
+        member inline _.CrossOrigin(props, value: CrossOrigin) =
+            Prop("crossOrigin", crossOriginToString value :> obj) :: props
+
+        [<CustomOperation("type")>]
+        member inline _.Type(props, value: string) = Prop("type", value :> obj) :: props
+
+        [<CustomOperation("noModule")>]
+        member inline _.NoModule(props, value: bool) = Prop("noModule", value :> obj) :: props
+
+        [<CustomOperation("integrity")>]
+        member inline _.Integrity(props, value: string) =
+            Prop("integrity", value :> obj) :: props
+
+        [<CustomOperation("referrerPolicy")>]
+        member inline _.ReferrerPolicy(props, value: ReferrerPolicy) =
+            Prop("referrerPolicy", referrerPolicyToString value :> obj) :: props
+
+    type FormElement() =
+        inherit HtmlElementBuilder("form")
+
+        [<CustomOperation("action")>]
+        member inline _.Action(props, value: string) = Prop("action", value :> obj) :: props
+
+        [<CustomOperation("method")>]
+        member inline _.Method(props, value: string) = Prop("method", value :> obj) :: props
+
+        [<CustomOperation("target")>]
+        member inline _.Target(props, value: Target) =
+            Prop("target", targetToString value :> obj) :: props
+
+        [<CustomOperation("enctype")>]
+        member inline _.Enctype(props, value: string) = Prop("enctype", value :> obj) :: props
+
+        [<CustomOperation("autocomplete")>]
+        member inline _.AutoComplete(props, value: string) =
+            Prop("autocomplete", value :> obj) :: props
+
+        [<CustomOperation("novalidate")>]
+        member inline _.NoValidate(props, value: bool) =
+            Prop("novalidate", value :> obj) :: props
+
+        [<CustomOperation("acceptCharset")>]
+        member inline _.AcceptCharset(props, value: string) =
+            Prop("acceptCharset", value :> obj) :: props
+
+        [<CustomOperation("onSubmit")>]
+        member inline _.OnSubmit(props, value: EventHandler) =
+            Prop("onSubmit", value :> obj) :: props
+
+        [<CustomOperation("onReset")>]
+        member inline _.OnReset(props, value: EventHandler) = Prop("onReset", value :> obj) :: props
