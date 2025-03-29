@@ -14,32 +14,31 @@ type RouterMode =
     | HashBased
 
 /// Context provider for the router
-type RouterContext<'T> =
+type RouterContextInfo =
     {
-        Router: Router<'T>
+        Router: Router<ReactElement>
         CurrentUrl: string
         Navigate: string -> unit
     }
 
 /// Create a React context for the router
-let private createRouterContext<'T> () =
-    ReactBindings.React.createContext<RouterContext<'T> option> (None)
+let private createRouterContext<'T> () = createContext (None)
 
 /// Global router context instance
-let RouterContext<'T> = createRouterContext<'T> ()
+let RouterContext = createRouterContext ()
 
 /// Router provider component that sets up routing and navigation
-type RouterProviderProps<'T> =
+type RouterProviderProps =
     {
-        Router: Router<'T>
+        Router: Router<ReactElement>
         Mode: RouterMode
-        DefaultContent: 'T
+        DefaultContent: ReactElement
         Children: ReactElement list
     }
 
 /// Create a router provider component
-let RouterProvider<'T> =
-    FunctionComponent.Of(fun (props: RouterProviderProps<'T>) ->
+let RouterProvider =
+    FunctionComponent.Of(fun (props: RouterProviderProps) ->
         console.log "RouterProvider initialized"
 
         let initialUrl =
@@ -126,7 +125,7 @@ let RouterProvider<'T> =
 /// Routes component that renders the matched route
 let Routes =
     FunctionComponent.Of(fun (props: {| DefaultContent: ReactElement |}) ->
-        let routerContext = Hooks.useContext (RouterContext<'T>)
+        let routerContext = Hooks.useContext (RouterContext)
 
         match routerContext with
         | None ->
@@ -152,7 +151,7 @@ let Link =
                                      className: string option
                                      children: ReactElement list
                                  |}) ->
-        let routerContext = Hooks.useContext (RouterContext<ReactElement>)
+        let routerContext = Hooks.useContext (RouterContext)
 
         match routerContext with
         | None ->
@@ -188,7 +187,7 @@ let Link =
 
 /// Hook to get the router navigation function
 let useNavigate<'T> () =
-    let routerContext = Hooks.useContext (RouterContext<'T>)
+    let routerContext = Hooks.useContext (RouterContext)
 
     match routerContext with
     | Some context -> context.Navigate
@@ -198,7 +197,7 @@ let useNavigate<'T> () =
 
 /// Hook to get the current URL
 let useLocation<'T> () =
-    let routerContext = Hooks.useContext (RouterContext<'T>)
+    let routerContext = Hooks.useContext (RouterContext)
 
     match routerContext with
     | Some context -> context.CurrentUrl
