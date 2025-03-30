@@ -11,19 +11,81 @@ open Fable.Core.JS
 
 open FreeAct.Router
 open FreeAct.ReactRouter
+open FreeAct.FreeFrame
+open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
 
+// Define the application state that includes router state
+type AppState = {
+    Router: RouterState<ReactElement>
+    // Add other application state here as needed
+    Count: int
+}
+
+// Initialize the app database with initial state
+let appDb = AppDb<AppState>({
+    Router = createDefaultRouterState()
+    Count = 0
+})
+
+// Helper functions to get and set router state
+let getRouterState (state: AppState) = state.Router
+let setRouterState (routerState: RouterState<ReactElement>) (state: AppState) =
+    { state with Router = routerState }
+
+// Example of an additional event for counter
+type CounterEvent = 
+    | Increment
+    | Decrement
+
+
+// Register counter event handlers
+registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
+    match ev with
+    | Increment -> 
+        { state with Count = state.Count + 1 }
+    | Decrement -> 
+        { state with Count = state.Count - 1 }
+)
+
+
+
+// Create subscriptions for parts of the state
+let useCount () =
+    let subscription = createSubscription appDb (fun state -> state.Count)
+    useSubscription subscription
+
+// Route handlers
 let home route =
+    let count = useCount()
+    
     div {
         h1 { "Home" }
         p { "Welcome to the home page!" }
+        p { sprintf "Current count: %d" count }
         
-        // Example of using Link component
+        button {
+            onClick (fun _ -> dispatchTyped appDb Increment)
+            "Increment"
+        }
+        
+        button {
+            onClick (fun _ -> dispatchTyped appDb Decrement)
+            "Decrement"
+        }
+        
+        // Example of using FreeFrameLink component
         div {
-            Link {| destination = "/about"; className = Some "nav-link"; children = [str "Go to About"] |}
+            FreeFrameLink {| 
+                appDb = appDb
+                destination = "/about"
+                className = Some "nav-link"
+                children = [str "Go to About"] 
+            |}
         }
     }
+
 let about route =
     div {
         h1 { "About" }
@@ -137,44 +199,99 @@ let setupRouter () =
                 }
         )
 
-// Create a custom navigation component
+// Create a custom navigation component using FreeFrameLink
 let Navigation () =
     div {
         className "navigation"
         nav {
             ul {
-                li { Link {| destination = "/"; className = None; children = [str "Home"] |} }
-                li { Link {| destination = "/about"; className = None; children = [str "About"] |} }
-                li { Link {| destination = "/users"; className = None; children = [str "Users"] |} }
-                li { Link {| destination = "/search?q=example"; className = None; children = [str "Search"] |} }
-                li { Link {| destination = "/freeframeeffects"; className = None; children = [str "FreeFrame Demo"] |} }
-                li { Link {| destination = "/freeframecomposition"; className = None; children = [str "FreeFrame Composition"] |} }
-                li { Link {| destination = "/tododemo"; className = None; children = [str "FreeFrame Todo"] |} }
-
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/"
+                        className = None
+                        children = [str "Home"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/about"
+                        className = None
+                        children = [str "About"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/users"
+                        className = None
+                        children = [str "Users"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/search?q=example"
+                        className = None
+                        children = [str "Search"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/freeframeeffects"
+                        className = None
+                        children = [str "FreeFrame Demo"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/freeframecomposition"
+                        className = None
+                        children = [str "FreeFrame Composition"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/tododemo"
+                        className = None
+                        children = [str "FreeFrame Todo"] 
+                    |} 
+                }
             }
         }
     }
 
-// Main app component
+// Main app component using FreeFrameRouter
 let App () =
     console.log("App component rendering...")
     let router = setupRouter()
     
-    RouterProvider {
+    FreeFrameRouterProvider {|
+        AppDb = appDb
         Router = router
-        Mode = RouterMode.HistoryAPI  // Change to HashBased if you prefer hash-based routing
-        DefaultContent = notFound 
+        GetRouterState = getRouterState
+        SetRouterState = setRouterState
+        Mode = RouterMode.HistoryAPI
+        DefaultContent = notFound
         Children = [
             div {
                 className "app-container"
                 Navigation()
                 main {
                     className "content"
-                    Routes {| DefaultContent = notFound |}
+                    FreeFrameRoutes {| 
+                        GetRouterState = getRouterState
+                        AppDb = appDb
+                        DefaultContent = notFound
+                    |}
                 }
             }
         ]
-    }
+    |}
 
 // Initialize the application
 let container = Browser.Dom.document.getElementById("root")

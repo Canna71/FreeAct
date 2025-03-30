@@ -207,6 +207,7 @@ let extractParamNames (tokens: Token list) : string list =
 /// Represents the result of a route match
 type RouteMatchResult =
     {
+        Pattern: string // The matched route pattern
         PathParams: Map<string, string> // Parameters from the URL path
         QueryParams: Map<string, string list> // Query string parameters
         Fragment: string option // URL fragment (hash)
@@ -250,6 +251,7 @@ let createMatcher (pathPattern: string) =
             // Return the complete match result
             Some
                 {
+                    Pattern = pathPattern
                     PathParams = pathParams
                     QueryParams = parsedUrl.QueryParams
                     Fragment = parsedUrl.Fragment
