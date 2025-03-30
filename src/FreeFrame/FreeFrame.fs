@@ -91,28 +91,35 @@ let defineUnionCaseEvent<'Union> (name: string) : EventId<'Union> =
     { key = TypeKey(typeof<'Union>, name) }
 
 // Private storage for handlers
+
 let private eventHandlers = Collections.Generic.Dictionary<EventKey, obj -> obj>()
 
+type EventHandler<'Payload, 'State> = 'Payload -> 'State -> 'State
+
 // Event handler definition
-type EventHandler<'Payload, 'State> =
-    { eventId: EventId<'Payload>; handler: 'Payload -> 'State -> 'State }
+type EventHandlerRegistration<'Payload, 'State> =
+    { eventId: EventId<'Payload>; handler: EventHandler<'Payload, 'State> }
 
 // Register a handler for an event
-let registerHandler<'Payload, 'State>
+let private registerHandler<'Payload, 'State>
     (eventId: EventId<'Payload>)
-    (handler: 'Payload -> 'State -> 'State)
-    : EventHandler<'Payload, 'State>
+    (handler: EventHandler<'Payload, 'State>)
+    : EventHandlerRegistration<'Payload, 'State>
     =
     { eventId = eventId; handler = handler }
 
 // Register an event handler
-let registerEventHandler<'Payload, 'State> (handler: EventHandler<'Payload, 'State>) =
+let registerEventHandler<'Payload, 'State>
+    (eventId: EventId<'Payload>)
+    (handler: EventHandler<'Payload, 'State>)
+    =
+    // let reg = registerHandler eventId handler
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'Payload
-        let reducer = (fun (state: 'State) -> handler.handler typedPayload state) :> obj
+        let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
         reducer
 
-    eventHandlers.[handler.eventId.key] <- wrappedHandler
+    eventHandlers.[eventId.key] <- wrappedHandler
 
 // Dispatch an event with payload
 let dispatch<'Payload, 'State>
@@ -126,43 +133,10 @@ let dispatch<'Payload, 'State>
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
 
-// Direct union dispatch with manual case identifier
-let dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (unionCase: 'Union) (caseName: string) =
-    let unionType = unionCase.GetType()
-    let eventKey = TypeKey(unionType, caseName)
-
-    match eventHandlers.TryGetValue(eventKey) with
-    | true, handler ->
-        let action = handler (unionCase :> obj)
-        appDb.Dispatch(action)
-    | false, _ -> console.error ($"No handler registered for union case: {caseName}")
-
-// Register a handler for a union case
-let registerUnionHandler<'Union, 'State> (unionCaseHandler: 'Union -> 'State -> 'State) =
-    let unionType = typeof<'Union>
-    let eventId = { key = TypeKey(unionType, "") }
-
-    let wrappedHandler (payload: obj) : obj =
-        let typedPayload = payload :?> 'Union
-        let reducer = (fun (state: 'State) -> unionCaseHandler typedPayload state) :> obj
-        reducer
-
-    eventHandlers.[eventId.key] <- wrappedHandler
-
-// Register a handler for a specific union case
-let registerUnionCaseHandler<'Union, 'State>
-    (caseName: string)
-    (handler: 'Union -> 'State -> 'State)
-    =
-    let unionType = typeof<'Union>
-    let eventId = { key = TypeKey(unionType, caseName) }
-
-    let wrappedHandler (payload: obj) : obj =
-        let typedPayload = payload :?> 'Union
-        let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
-        reducer
-
-    eventHandlers.[eventId.key] <- wrappedHandler
+let inline testUnion<'T> () =
+    let unionType = typeof<'T>
+    let typeName = unionType.Name
+    printf "Union type: %s" typeName
 
 // ===== Backward Compatibility =====
 
@@ -170,13 +144,13 @@ let registerUnionCaseHandler<'Union, 'State>
 type EventDef<'Payload, 'State> = EventHandler<'Payload, 'State>
 
 // Create event with handler in one step (for backward compatibility)
-let createEvent<'Payload, 'State>
-    (id: string)
-    (handler: 'Payload -> 'State -> 'State)
-    : EventHandler<'Payload, 'State>
-    =
-    let eventId = defineEvent<'Payload> id
-    registerHandler eventId handler
+// let createEvent<'Payload, 'State>
+//     (id: string)
+//     (handler: 'Payload -> 'State -> 'State)
+//     : EventHandler<'Payload, 'State>
+//     =
+//     let eventId = defineEvent<'Payload> id
+//     registerHandler eventId handler
 
 // ===== Subscriptions (Views on app-db) =====
 

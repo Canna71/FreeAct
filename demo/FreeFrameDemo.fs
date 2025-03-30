@@ -56,103 +56,62 @@ let deleteTodoStringEvent = defineEvent<int>("delete-todo")
 let setFilterStringEvent = defineEvent<string>("set-filter")
 
 // Register handlers for the auto-generated events
-registerEventHandler(registerHandler addTodoEvent (fun text state ->
+registerEventHandler addTodoEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
-))
+)
 
-registerEventHandler(registerHandler toggleTodoEvent (fun id state ->
+registerEventHandler toggleTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
         )
     }
-))
+)
 
-registerEventHandler(registerHandler deleteTodoEvent (fun id state ->
+registerEventHandler deleteTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
-))
+)
 
-registerEventHandler(registerHandler setFilterEvent (fun filter state ->
+registerEventHandler setFilterEvent (fun filter state ->
     { state with filter = filter }
-))
+)
 
 // Register handlers for the string-based events
-registerEventHandler(registerHandler addTodoStringEvent (fun text state ->
+registerEventHandler addTodoStringEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
-))
+)
 
-registerEventHandler(registerHandler toggleTodoStringEvent (fun id state ->
+registerEventHandler toggleTodoStringEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
         )
     }
-))
+)
 
-registerEventHandler(registerHandler deleteTodoStringEvent (fun id state ->
+registerEventHandler deleteTodoStringEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
-))
+)
 
-registerEventHandler(registerHandler setFilterStringEvent (fun filter state ->
+registerEventHandler setFilterStringEvent (fun filter state ->
     { state with filter = filter }
-))
+)
 
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
-// Register handlers for specific union cases
-registerUnionCaseHandler<TodoEvent, AppState> "AddTodo" (fun event state ->
-    match event with
-    | AddTodo text ->
-        let newTodo = { id = state.nextId; text = text; completed = false }
-        { state with 
-            todos = state.todos @ [newTodo]
-            nextId = state.nextId + 1 }
-    | _ -> state  // Can't happen due to type constraints
-)
+testUnion<TodoEvent> ()
 
-registerUnionCaseHandler<TodoEvent, AppState> "ToggleTodo" (fun event state ->
-    match event with
-    | ToggleTodo id ->
-        { state with
-            todos = state.todos |> List.map (fun todo ->
-                if todo.id = id then { todo with completed = not todo.completed } else todo
-            )
-        }
-    | _ -> state  // Can't happen due to type constraints
-)
 
-registerUnionCaseHandler<TodoEvent, AppState> "DeleteTodo" (fun event state ->
-    match event with
-    | DeleteTodo id ->
-        { state with
-            todos = state.todos |> List.filter (fun todo -> todo.id <> id)
-        }
-    | _ -> state  // Can't happen due to type constraints
-)
-
-registerUnionCaseHandler<TodoEvent, AppState> "SetFilter" (fun event state ->
-    match event with
-    | SetFilter filter ->
-        { state with filter = filter }
-    | _ -> state  // Can't happen due to type constraints
-)
-
-// Also register an AdminEvent to show there's no conflict
-registerUnionCaseHandler<AdminEvent, AppState> "AddUser" (fun event state ->
-    // This is just a demonstration, we don't need real implementation
-    console.log("Adding user, no conflict with AddTodo")
-    state
-)
 
 // Create subscriptions
 let todosSubscription = createSubscription appDb (fun state -> state.todos)
@@ -191,7 +150,8 @@ let TodoForm () =
     let handleSubmit (e: Browser.Types.Event) =
         e.preventDefault()
         if text'.Trim() <> "" then
-            dispatchUnion appDb (AddTodo text') "AddTodo"
+            dispatch appDb addTodoEvent text'
+            // dispatchUnion appDb (AddTodo text') "AddTodo"
             setText("")
     
     form {
@@ -260,19 +220,19 @@ let ExampleComponent () =
                 str "Add via Traditional Event"
             }
             
-            // Method 2: Direct union case dispatch (now with explicit case name)
-            button {
-                className "direct-union"
-                onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") "AddTodo")
-                str "Add via Union"
-            }
+            // // Method 2: Direct union case dispatch (now with explicit case name)
+            // button {
+            //     className "direct-union"
+            //     onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") "AddTodo")
+            //     str "Add via Union"
+            // }
             
-            // Show that there's no conflict with AdminEvent
-            button {
-                className "admin-event"
-                onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") "AddUser")
-                str "Add User (Admin)"
-            }
+            // // Show that there's no conflict with AdminEvent
+            // button {
+            //     className "admin-event"
+            //     onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") "AddUser")
+            //     str "Add User (Admin)"
+            // }
         }
     }
 
