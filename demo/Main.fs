@@ -107,14 +107,35 @@ let setupRouter () =
                 }
         )
         .Route(
-            "/freeframe", 
+            "/freeframeeffects", 
             fun _ -> 
                 div {
-                    h1 { "FreeFrame Demo" }
+                    h1 { "FreeFrame Effects Demo" }
                     // Render the component directly
                     // FreeFrameDemo()
+                    EffectsDemo.EffectsDemo()
                 }
           )
+        .Route(
+            "/freeframecomposition", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame Composition Demo" }
+                    // Render the component directly
+                    // FreeFrameDemo()
+                    CompositionDemo.CompositionDemo()
+                }
+        )
+        .Route(
+            "/tododemo", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame ToDo Demo" }
+                    // Render the component directly
+                    // FreeFrameDemo()
+                    TodoDemo.TodoDemo()
+                }
+        )
 
 // Create a custom navigation component
 let Navigation () =
@@ -126,7 +147,10 @@ let Navigation () =
                 li { Link {| destination = "/about"; className = None; children = [str "About"] |} }
                 li { Link {| destination = "/users"; className = None; children = [str "Users"] |} }
                 li { Link {| destination = "/search?q=example"; className = None; children = [str "Search"] |} }
-                li { Link {| destination = "/freeframe"; className = None; children = [str "FreeFrame Demo"] |} }
+                li { Link {| destination = "/freeframeeffects"; className = None; children = [str "FreeFrame Demo"] |} }
+                li { Link {| destination = "/freeframecomposition"; className = None; children = [str "FreeFrame Composition"] |} }
+                li { Link {| destination = "/tododemo"; className = None; children = [str "FreeFrame Todo"] |} }
+
             }
         }
     }
