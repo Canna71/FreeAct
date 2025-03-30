@@ -82,10 +82,11 @@ module EventId =
     // Internal helper to extract the key from an EventId
     let internal key (EventId id) = id
 
+    let inline internal typeKey<'EventType> () = typeof<'EventType>.ToString()
     // Public API for creating events
     let inline named<'Payload> (id: string) : EventId<'Payload> = EventId id
     let inline auto<'Payload> () : EventId<'Payload> = EventId(Guid.NewGuid().ToString())
-    let inline ofType<'EventType> () : EventId<'EventType> = EventId(typeof<'EventType>.ToString())
+    let inline ofType<'EventType> () : EventId<'EventType> = EventId(typeKey<'EventType> ())
 
 // Private storage for handlers - use string as the key
 let private eventHandlers = Collections.Generic.Dictionary<string, obj -> obj>()
@@ -114,21 +115,28 @@ let inline registerTypedEventHandler<'EventType, 'State>
     let eventId = EventId.ofType<'EventType> ()
     registerNamedEventHandler eventId handler
 
+let internal dispatchInternal<'Payload, 'State>
+    (appDb: IAppDb<'State>)
+    (eventId: string)
+    (payload: 'Payload)
+    =
+    match eventHandlers.TryGetValue(eventId) with
+    | true, handler ->
+        let action = handler (payload :> obj)
+        appDb.Dispatch(action)
+    | false, _ -> console.error ($"No handler registered for event")
+
 // Dispatch an event with payload
 let dispatch<'Payload, 'State>
     (appDb: IAppDb<'State>)
     (eventId: EventId<'Payload>)
     (payload: 'Payload)
     =
-    match eventHandlers.TryGetValue(EventId.key eventId) with
-    | true, handler ->
-        let action = handler (payload :> obj)
-        appDb.Dispatch(action)
-    | false, _ -> console.error ($"No handler registered for event")
+    dispatchInternal appDb (EventId.key eventId) payload
 
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
-    let eventId = EventId.ofType<'EventType> ()
-    dispatch appDb eventId payload
+    // let eventId = EventId.ofType<'EventType> ()
+    dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
 
 // ===== Backward Compatibility =====
 

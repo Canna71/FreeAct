@@ -131,7 +131,7 @@ registerTypedEventHandler  (fun event state ->
         }
     | SetFilter filter ->
         { state with filter = filter }
-)
+) 
 
 registerTypedEventHandler (fun event state ->
     match event with
