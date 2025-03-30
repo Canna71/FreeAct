@@ -21,6 +21,13 @@ type AppState = {
     isLoading: bool // Track loading state in the app state
 }
 
+// Add a union type for loading state
+type LoadingState<'T> =
+    | NotStarted
+    | Loading
+    | Loaded of 'T
+    | Failed of string
+
 // Create initial state
 let initialState = {
     todos = []
@@ -455,6 +462,57 @@ let EffectExampleComponent () =
             }
     }
 
+// Add an example using the new union-based loading state
+let EffectWithUnionStateExample () =
+    // Define how to map the result to our union state
+    let mapResultToState (result: Result<TodoItem list, exn>) =
+        match result with
+        | Ok todos -> Loaded todos
+        | Error err -> Failed err.Message
+    
+    // Use the new hook with our union state
+    let loadingState, resultOpt = 
+        useEffectWithUnionState 
+            fetchTodosEffect
+            ()
+            NotStarted  // Initial state
+            mapResultToState  // Result mapping function
+    
+    div {
+        className "effect-example-union"
+        h3 { "Effect Example (Union Loading State)" }
+        
+        match loadingState with
+        | NotStarted -> 
+            div { 
+                className "not-started"
+                str "Effect not started yet" 
+            }
+        | Loading -> 
+            div { 
+                className "loading"
+                str "Loading data..." 
+            }
+        | Loaded todos ->
+            div {
+                className "success"
+                str (sprintf "Successfully loaded %d items" todos.Length)
+                ul {
+                    todos |> List.map (fun todo ->
+                        li {
+                            key (string todo.id)
+                            str todo.text
+                        }
+                    )
+                }
+            }
+        | Failed errorMsg ->
+            div {
+                className "error"
+                str (sprintf "Error: %s" errorMsg)
+            }
+    }
+
 // Main component
 let FreeFrameApp () =
     // Use the useEffect hook to initialize data after component mount,
@@ -475,7 +533,8 @@ let FreeFrameApp () =
         h1 { "FreeFrame Demo - Todo App" }
         TodoList()
         ExampleComponent()
-        EffectExampleComponent() // Add the effect example component
+        EffectExampleComponent() 
+        EffectWithUnionStateExample() // Add the new example with union state
     }
 
 // Initialize the application, can be called directly from the router

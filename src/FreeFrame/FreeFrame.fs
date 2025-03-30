@@ -359,7 +359,46 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
             | _ -> () // No event to dispatch
         )
 
-// Hook for handling effects in React components - using Result
+// A more generic hook for effects that allows custom loading state handling
+let useEffectWithCustomState<'Payload, 'Result, 'LoadingState>
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    (initialLoadingState: 'LoadingState)
+    (setLoading: 'LoadingState -> unit)
+    (updateLoadingOnResult: Result<'Result, exn> -> 'LoadingState)
+    =
+    let resultState = Hooks.useState<Result<'Result, exn> option> None
+
+    Hooks.useEffect (
+        (fun () ->
+            // Set initial loading state
+            setLoading initialLoadingState
+
+            runEffect
+                effectId
+                payload
+                (fun result ->
+                    resultState.update (Some result)
+                    setLoading (updateLoadingOnResult result)
+                )
+        ),
+        [| box payload |]
+    )
+
+    resultState.current
+
+// Simplified version that just passes through the result without managing loading state
+let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
+    let resultState = Hooks.useState<Result<'Result, exn> option> None
+
+    Hooks.useEffect (
+        (fun () -> runEffect effectId payload (fun result -> resultState.update (Some result))),
+        [| box payload |]
+    )
+
+    resultState.current
+
+// Original hook for handling effects in React components (maintained for backward compatibility)
 let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
     let loadingState = Hooks.useState true
     let resultState = Hooks.useState<Result<'Result, exn> option> None
@@ -379,7 +418,28 @@ let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payloa
 
     loadingState.current, resultState.current
 
-// Hook for handling effects that automatically retrigger on dependencies - using Result
+// Custom version for discriminated union loading state
+let useEffectWithUnionState<'Payload, 'Result, 'LoadingState>
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    (initialState: 'LoadingState)
+    (onResult: Result<'Result, exn> -> 'LoadingState)
+    =
+    let stateHook = Hooks.useState initialState
+    let resultState = useEffectSimple effectId payload
+
+    Hooks.useEffect (
+        (fun () ->
+            match resultState with
+            | Some result -> stateHook.update (onResult result)
+            | None -> stateHook.update initialState
+        ),
+        [| box resultState |]
+    )
+
+    stateHook.current, resultState
+
+// Original hook for dependencies (maintained for backward compatibility)
 let useEffectWithDeps<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payloadFn: unit -> 'Payload)
@@ -404,3 +464,32 @@ let useEffectWithDeps<'Payload, 'Result>
     )
 
     loadingState.current, resultState.current
+
+// A more generic hook with dependencies and custom loading state handling
+let useEffectWithDepsAndCustomState<'Payload, 'Result, 'LoadingState>
+    (effectId: EffectId<'Payload, 'Result>)
+    (payloadFn: unit -> 'Payload)
+    (initialLoadingState: 'LoadingState)
+    (setLoading: 'LoadingState -> unit)
+    (updateLoadingOnResult: Result<'Result, exn> -> 'LoadingState)
+    (dependencies: obj array)
+    =
+    let resultState = Hooks.useState<Result<'Result, exn> option> None
+
+    Hooks.useEffect (
+        (fun () ->
+            // Set initial loading state
+            setLoading initialLoadingState
+
+            runEffect
+                effectId
+                (payloadFn ())
+                (fun result ->
+                    resultState.update (Some result)
+                    setLoading (updateLoadingOnResult result)
+                )
+        ),
+        dependencies
+    )
+
+    resultState.current
