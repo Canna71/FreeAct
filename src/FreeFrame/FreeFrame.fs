@@ -12,15 +12,18 @@ type IAppDb<'T> =
     abstract member GetState: unit -> 'T
     abstract member Subscribe: ('T -> unit) -> IDisposable
     abstract member Dispatch: obj -> unit
-    abstract member ForceRefresh: unit -> unit // New method to force refresh
+    abstract member ForceRefresh: unit -> unit
+    abstract member BatchProcess: (unit -> unit) -> unit // New method for batch processing
 
 type AppDb<'T>(initialState: 'T) =
     let mutable state = initialState
     let subscribers = ResizeArray<'T -> unit>()
+    let mutable batchProcessing = false
 
     let notifySubscribers () =
-        for subscriber in subscribers do
-            subscriber state
+        if not batchProcessing then
+            for subscriber in subscribers do
+                subscriber state
 
     interface IAppDb<'T> with
         member _.GetState() = state
@@ -39,16 +42,32 @@ type AppDb<'T>(initialState: 'T) =
                 notifySubscribers ()
             | _ -> console.error ("Invalid action type dispatched to AppDb")
 
-        member _.ForceRefresh() = notifySubscribers ()
+        member _.ForceRefresh() =
+            for subscriber in subscribers do
+                subscriber state
 
-// Batch dispatch to execute multiple dispatches and force a refresh at the end
+        member _.BatchProcess(action) =
+            // Set batch processing flag to temporarily disable notifications
+            batchProcessing <- true
+
+            try
+                // Execute the batch action
+                action ()
+            finally
+                // Restore normal behavior and notify subscribers once
+                batchProcessing <- false
+
+                for subscriber in subscribers do
+                    subscriber state
+
+// Improved batch dispatch function
 let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) list) =
-    // Execute all dispatches
-    for dispatchFn in dispatches do
-        dispatchFn ()
-
-    // Force a refresh after all dispatches
-    appDb.ForceRefresh()
+    appDb.BatchProcess(fun () ->
+        // Execute all dispatches without triggering notifications
+        for dispatchFn in dispatches do
+            dispatchFn ()
+    )
+// A single notification will be sent after all dispatches
 
 // ===== Improved Event Handling =====
 
