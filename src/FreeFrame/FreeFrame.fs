@@ -135,7 +135,6 @@ let dispatch<'Payload, 'State>
     dispatchInternal appDb (EventId.key eventId) payload
 
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
-    // let eventId = EventId.ofType<'EventType> ()
     dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
 
 // ===== Subscriptions (Views on app-db) =====
@@ -214,3 +213,184 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
 
     // Return the current value from state
     state.current
+
+// ===== Effect System =====
+
+// A type to represent an effect
+type Effect = Effect of id: string * payload: obj
+
+// A type to represent the result of an effect
+type EffectResult =
+    | Success of obj
+    | Failure of exn
+
+// Simplified EffectId implementation
+type EffectId<'Payload, 'Result> = private EffectId of string
+
+// Module to encapsulate EffectId operations
+module EffectId =
+    // Internal helper to create an EffectId
+    let internal create<'Payload, 'Result> (id: string) : EffectId<'Payload, 'Result> = EffectId id
+
+    // Internal helper to extract the key from an EffectId
+    let internal key (EffectId id) = id
+
+    // Public API for creating effects
+    let inline named<'Payload, 'Result> (id: string) : EffectId<'Payload, 'Result> = EffectId id
+
+    let inline auto<'Payload, 'Result> () : EffectId<'Payload, 'Result> =
+        EffectId(Guid.NewGuid().ToString())
+
+// Effect handler type
+type EffectHandler<'Payload, 'Result> = 'Payload -> Async<'Result>
+
+// Private storage for effect handlers
+let private effectHandlers =
+    Collections.Generic.Dictionary<string, obj -> Async<obj>>()
+
+// Register an effect handler
+let registerEffectHandler<'Payload, 'Result>
+    (effectId: EffectId<'Payload, 'Result>)
+    (handler: EffectHandler<'Payload, 'Result>)
+    =
+    let wrappedHandler (payload: obj) : Async<obj> =
+        async {
+            let typedPayload = payload :?> 'Payload
+            let! result = handler typedPayload
+            return result :> obj
+        }
+
+    effectHandlers.[EffectId.key effectId] <- wrappedHandler
+
+// Execute an effect
+let runEffect<'Payload, 'Result, 'State>
+    (appDb: IAppDb<'State>)
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    (onSuccess: 'Result -> unit)
+    (onError: exn -> unit)
+    =
+    async {
+        match effectHandlers.TryGetValue(EffectId.key effectId) with
+        | true, handler ->
+            try
+                let! result = handler (payload :> obj)
+                let typedResult = result :?> 'Result
+                onSuccess typedResult
+            with ex ->
+                onError ex
+        | false, _ ->
+            console.error ($"No handler registered for effect {EffectId.key effectId}")
+            onError (Exception($"No handler registered for effect {EffectId.key effectId}"))
+    }
+    |> Async.StartImmediate
+
+// Version that returns a promise for more flexibility
+let runEffectAsPromise<'Payload, 'Result, 'State>
+    (appDb: IAppDb<'State>)
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    : JS.Promise<'Result>
+    =
+    let promise =
+        Async.StartAsPromise(
+            async {
+                match effectHandlers.TryGetValue(EffectId.key effectId) with
+                | true, handler ->
+                    let! result = handler (payload :> obj)
+                    return result :?> 'Result
+                | false, _ ->
+                    let msg = $"No handler registered for effect {EffectId.key effectId}"
+                    console.error msg
+                    return raise (Exception(msg))
+            }
+        )
+
+    promise
+
+// Chain multiple effects together
+let chainEffects<'State> (appDb: IAppDb<'State>) (effects: (unit -> unit) list) =
+    for effect in effects do
+        effect ()
+
+// Helper to dispatch an event after an effect completes
+let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
+    (appDb: IAppDb<'State>)
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    (eventCreator: 'Result -> EventId<'EventPayload> * 'EventPayload)
+    =
+    runEffect
+        appDb
+        effectId
+        payload
+        (fun result ->
+            let (eventId, eventPayload) = eventCreator result
+            dispatch appDb eventId eventPayload
+        )
+        (fun error -> console.error ("Effect failed: ", error))
+
+// Hook for handling effects in React components
+let useEffect<'Payload, 'Result, 'State>
+    (appDb: IAppDb<'State>)
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    =
+
+    let loadingState = Hooks.useState true
+    let errorState = Hooks.useState<Option<exn>> None
+    let resultState = Hooks.useState<Option<'Result>> None
+
+    Hooks.useEffect (
+        (fun () ->
+            runEffect
+                appDb
+                effectId
+                payload
+                (fun result ->
+                    resultState.update (Some result)
+                    loadingState.update false
+                )
+                (fun error ->
+                    errorState.update (Some error)
+                    loadingState.update false
+                )
+        ),
+        [| box payload |]
+    )
+
+    loadingState.current, resultState.current, errorState.current
+
+// Hook for handling effects that automatically retrigger on dependencies
+let useEffectWithDeps<'Payload, 'Result, 'State>
+    (appDb: IAppDb<'State>)
+    (effectId: EffectId<'Payload, 'Result>)
+    (payloadFn: unit -> 'Payload)
+    (dependencies: obj array)
+    =
+
+    let loadingState = Hooks.useState true
+    let errorState = Hooks.useState<Option<exn>> None
+    let resultState = Hooks.useState<Option<'Result>> None
+
+    Hooks.useEffect (
+        (fun () ->
+            loadingState.update true
+
+            runEffect
+                appDb
+                effectId
+                (payloadFn ())
+                (fun result ->
+                    resultState.update (Some result)
+                    loadingState.update false
+                )
+                (fun error ->
+                    errorState.update (Some error)
+                    loadingState.update false
+                )
+        ),
+        dependencies
+    )
+
+    loadingState.current, resultState.current, errorState.current
