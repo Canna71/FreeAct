@@ -71,29 +71,24 @@ let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) li
 
 // ===== Improved Event Handling =====
 
-// Internal event identifier (not exposed to users)
-// type private EventKey =
-//     | StringKey of string
-//     | TypeKey of Type  // Type + a string identifier for the union case
-//     | AutoKey of Guid // Auto-generated unique ID
-type EventKey = string
+// Simplified EventId implementation
+type EventId<'Payload> = private EventId of string
 
-// Public event identifier - generic on the payload type
-type EventId<'Payload> = private { key: EventKey }
+// Module to encapsulate EventId operations
+module EventId =
+    // Internal helper to create an EventId
+    let internal create<'Payload> (id: string) : EventId<'Payload> = EventId id
 
-// Create a string-based event
-let inline defineNamedEvent<'Payload> (id: string) : EventId<'Payload> = { key = id }
+    // Internal helper to extract the key from an EventId
+    let internal key (EventId id) = id
 
-// Create an auto-generated event ID
-let inline defineEvent<'Payload> () : EventId<'Payload> = { key = Guid.NewGuid().ToString() }
+    // Public API for creating events
+    let inline named<'Payload> (id: string) : EventId<'Payload> = EventId id
+    let inline auto<'Payload> () : EventId<'Payload> = EventId(Guid.NewGuid().ToString())
+    let inline ofType<'EventType> () : EventId<'EventType> = EventId(typeof<'EventType>.ToString())
 
-let inline defineTypedEvent<'EventType> () : EventId<'EventType> =
-    // Create an event ID for a specific type
-    { key = typeof<'EventType>.ToString() }
-
-// Private storage for handlers
-
-let private eventHandlers = Collections.Generic.Dictionary<EventKey, obj -> obj>()
+// Private storage for handlers - use string as the key
+let private eventHandlers = Collections.Generic.Dictionary<string, obj -> obj>()
 
 type EventHandler<'Payload, 'State> = 'Payload -> 'State -> 'State
 
@@ -101,31 +96,22 @@ type EventHandler<'Payload, 'State> = 'Payload -> 'State -> 'State
 type EventHandlerRegistration<'Payload, 'State> =
     { eventId: EventId<'Payload>; handler: EventHandler<'Payload, 'State> }
 
-// Register a handler for an event
-// let private registerHandler<'Payload, 'State>
-//     (eventId: EventId<'Payload>)
-//     (handler: EventHandler<'Payload, 'State>)
-//     : EventHandlerRegistration<'Payload, 'State>
-//     =
-//     { eventId = eventId; handler = handler }
-
 // Register an event handler
 let registerNamedEventHandler<'Payload, 'State>
     (eventId: EventId<'Payload>)
     (handler: EventHandler<'Payload, 'State>)
     =
-    // let reg = registerHandler eventId handler
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'Payload
         let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
         reducer
 
-    eventHandlers.[eventId.key] <- wrappedHandler
+    eventHandlers.[EventId.key eventId] <- wrappedHandler
 
 let inline registerTypedEventHandler<'EventType, 'State>
     (handler: EventHandler<'EventType, 'State>)
     =
-    let eventId = defineTypedEvent<'EventType> ()
+    let eventId = EventId.ofType<'EventType> ()
     registerNamedEventHandler eventId handler
 
 // Dispatch an event with payload
@@ -134,14 +120,14 @@ let dispatch<'Payload, 'State>
     (eventId: EventId<'Payload>)
     (payload: 'Payload)
     =
-    match eventHandlers.TryGetValue(eventId.key) with
+    match eventHandlers.TryGetValue(EventId.key eventId) with
     | true, handler ->
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
 
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
-    let eventId = defineTypedEvent<'EventType> ()
+    let eventId = EventId.ofType<'EventType> ()
     dispatch appDb eventId payload
 
 // ===== Backward Compatibility =====

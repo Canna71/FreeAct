@@ -44,17 +44,19 @@ type AdminEvent =
     | TogglePermission of int  // Note that this has same shape as ToggleTodo
 
 // === Method 1: Using traditional event identifiers (auto-generated) ===
-let addTodoEvent = defineEvent<string>() 
-let toggleTodoEvent = defineEvent<int>()
-let deleteTodoEvent = defineEvent<int>()
-let setFilterEvent = defineEvent<string>()
+let addTodoEvent = EventId.auto<string>()
+let toggleTodoEvent = EventId.auto<int>()
+let deleteTodoEvent = EventId.auto<int>()
+let setFilterEvent = EventId.auto<string>()
 
 // === Method 1b: Using string-based event identifiers ===
-let addTodoNamedEvent = defineNamedEvent<string>("add-todo")
-let toggleTodoNamedEvent = defineNamedEvent<int>("toggle-todo")
-let deleteTodoNamedEvent = defineNamedEvent<int>("delete-todo")
-let setFilterNamedEvent = defineNamedEvent<string>("set-filter")
+let addTodoNamedEvent = EventId.named<string>("add-todo")
+let toggleTodoNamedEvent = EventId.named<int>("toggle-todo")
+let deleteTodoNamedEvent = EventId.named<int>("delete-todo")
+let setFilterNamedEvent = EventId.named<string>("set-filter")
 
+// === Method 2: Using type-based events ===
+let todoEventId = EventId.ofType<TodoEvent>()
 
 // Register handlers for the auto-generated events
 registerNamedEventHandler addTodoEvent (fun text state ->
@@ -131,7 +133,7 @@ registerTypedEventHandler  (fun event state ->
         { state with filter = filter }
 )
 
-registerNamedEventHandler (defineTypedEvent<AdminEvent>()) (fun event state ->
+registerTypedEventHandler (fun event state ->
     match event with
     | AddUser name ->
         printfn "Adding user: %s" name
