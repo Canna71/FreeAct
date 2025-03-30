@@ -278,11 +278,17 @@ let ExampleComponent () =
 
 // Main component
 let FreeFrameApp () =
+    // Use the useEffect hook to initialize data after component mount,
+    // but use batchDispatch to ensure state updates are properly processed
     Hooks.useEffect((fun () ->
         printfn "FreeFrameApp mounted"
-        dispatch appDb addTodoEvent "Learn F#"
-        dispatch appDb addTodoEvent "Build a FreeFrame app"
-        dispatch appDb addTodoEvent "Share with the community"
+        
+        // Use batch dispatch to ensure all events are processed and subscribers are notified
+        batchDispatch appDb [
+            fun () -> dispatch appDb addTodoEvent "Learn F#"
+            fun () -> dispatch appDb addTodoEvent "Build a FreeFrame app"
+            fun () -> dispatch appDb addTodoEvent "Share with the community"
+        ]
     ), [| |])
     
     div {

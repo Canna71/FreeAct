@@ -12,6 +12,7 @@ type IAppDb<'T> =
     abstract member GetState: unit -> 'T
     abstract member Subscribe: ('T -> unit) -> IDisposable
     abstract member Dispatch: obj -> unit
+    abstract member ForceRefresh: unit -> unit // New method to force refresh
 
 type AppDb<'T>(initialState: 'T) =
     let mutable state = initialState
@@ -37,6 +38,17 @@ type AppDb<'T>(initialState: 'T) =
                 state <- reducer state
                 notifySubscribers ()
             | _ -> console.error ("Invalid action type dispatched to AppDb")
+
+        member _.ForceRefresh() = notifySubscribers ()
+
+// Batch dispatch to execute multiple dispatches and force a refresh at the end
+let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) list) =
+    // Execute all dispatches
+    for dispatchFn in dispatches do
+        dispatchFn ()
+
+    // Force a refresh after all dispatches
+    appDb.ForceRefresh()
 
 // ===== Improved Event Handling =====
 
