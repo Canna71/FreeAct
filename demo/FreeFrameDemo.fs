@@ -57,14 +57,14 @@ let setFilterNamedEvent = defineNamedEvent<string>("set-filter")
 
 
 // Register handlers for the auto-generated events
-registerEventHandler addTodoEvent (fun text state ->
+registerNamedEventHandler addTodoEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
 )
 
-registerEventHandler toggleTodoEvent (fun id state ->
+registerNamedEventHandler toggleTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
@@ -72,25 +72,25 @@ registerEventHandler toggleTodoEvent (fun id state ->
     }
 )
 
-registerEventHandler deleteTodoEvent (fun id state ->
+registerNamedEventHandler deleteTodoEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
 )
 
-registerEventHandler setFilterEvent (fun filter state ->
+registerNamedEventHandler setFilterEvent (fun filter state ->
     { state with filter = filter }
 )
 
 // Register handlers for the string-based events
-registerEventHandler addTodoNamedEvent (fun text state ->
+registerNamedEventHandler addTodoNamedEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
 )
 
-registerEventHandler toggleTodoNamedEvent (fun id state ->
+registerNamedEventHandler toggleTodoNamedEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
@@ -98,19 +98,19 @@ registerEventHandler toggleTodoNamedEvent (fun id state ->
     }
 )
 
-registerEventHandler deleteTodoNamedEvent (fun id state ->
+registerNamedEventHandler deleteTodoNamedEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
 )
 
-registerEventHandler setFilterNamedEvent (fun filter state ->
+registerNamedEventHandler setFilterNamedEvent (fun filter state ->
     { state with filter = filter }
 )
 
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
-registerUnionEventHandler  (fun event state ->
+registerTypedEventHandler  (fun event state ->
     match event with
     | AddTodo text ->
         let newTodo = { id = state.nextId; text = text; completed = false }
@@ -131,7 +131,7 @@ registerUnionEventHandler  (fun event state ->
         { state with filter = filter }
 )
 
-registerEventHandler (defineUnionEvent<AdminEvent>()) (fun event state ->
+registerNamedEventHandler (defineTypedEvent<AdminEvent>()) (fun event state ->
     match event with
     | AddUser name ->
         printfn "Adding user: %s" name
@@ -262,14 +262,14 @@ let ExampleComponent () =
             // Method 2: Direct union case dispatch (now with explicit case name)
             button {
                 className "direct-union"
-                onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") )
+                onClick (fun _ -> dispatchTyped appDb (AddTodo "Task via union dispatch") )
                 str "Add via Union"
             }
             
             // Show that there's no conflict with AdminEvent
             button {
                 className "admin-event"
-                onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") )
+                onClick (fun _ -> dispatchTyped appDb (AddUser "Admin action") )
                 str "Add User (Admin)"
             }
         }

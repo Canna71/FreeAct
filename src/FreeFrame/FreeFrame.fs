@@ -87,9 +87,9 @@ let inline defineNamedEvent<'Payload> (id: string) : EventId<'Payload> = { key =
 // Create an auto-generated event ID
 let inline defineEvent<'Payload> () : EventId<'Payload> = { key = Guid.NewGuid().ToString() }
 
-let inline defineUnionEvent<'Union> () : EventId<'Union> =
-    // Create an event ID for a specific union
-    { key = typeof<'Union>.ToString() }
+let inline defineTypedEvent<'EventType> () : EventId<'EventType> =
+    // Create an event ID for a specific type
+    { key = typeof<'EventType>.ToString() }
 
 // Private storage for handlers
 
@@ -102,15 +102,15 @@ type EventHandlerRegistration<'Payload, 'State> =
     { eventId: EventId<'Payload>; handler: EventHandler<'Payload, 'State> }
 
 // Register a handler for an event
-let private registerHandler<'Payload, 'State>
-    (eventId: EventId<'Payload>)
-    (handler: EventHandler<'Payload, 'State>)
-    : EventHandlerRegistration<'Payload, 'State>
-    =
-    { eventId = eventId; handler = handler }
+// let private registerHandler<'Payload, 'State>
+//     (eventId: EventId<'Payload>)
+//     (handler: EventHandler<'Payload, 'State>)
+//     : EventHandlerRegistration<'Payload, 'State>
+//     =
+//     { eventId = eventId; handler = handler }
 
 // Register an event handler
-let registerEventHandler<'Payload, 'State>
+let registerNamedEventHandler<'Payload, 'State>
     (eventId: EventId<'Payload>)
     (handler: EventHandler<'Payload, 'State>)
     =
@@ -122,9 +122,11 @@ let registerEventHandler<'Payload, 'State>
 
     eventHandlers.[eventId.key] <- wrappedHandler
 
-let inline registerUnionEventHandler<'Union, 'State> (handler: EventHandler<'Union, 'State>) =
-    let eventId = defineUnionEvent<'Union> ()
-    registerEventHandler eventId handler
+let inline registerTypedEventHandler<'EventType, 'State>
+    (handler: EventHandler<'EventType, 'State>)
+    =
+    let eventId = defineTypedEvent<'EventType> ()
+    registerNamedEventHandler eventId handler
 
 // Dispatch an event with payload
 let dispatch<'Payload, 'State>
@@ -138,19 +140,14 @@ let dispatch<'Payload, 'State>
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
 
-let inline dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (payload: 'Union) =
-    let eventId = defineUnionEvent<'Union> ()
+let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
+    let eventId = defineTypedEvent<'EventType> ()
     dispatch appDb eventId payload
-
-let inline testUnion<'T> () =
-    let unionType = typeof<'T>
-    let typeName = unionType.Name
-    printf "Union type: %s" typeName
 
 // ===== Backward Compatibility =====
 
 // For compatibility with previous code
-type EventDef<'Payload, 'State> = EventHandler<'Payload, 'State>
+// type EventDef<'Payload, 'State> = EventHandler<'Payload, 'State>
 
 // Create event with handler in one step (for backward compatibility)
 // let createEvent<'Payload, 'State>
