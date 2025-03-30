@@ -6,6 +6,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="FreeFrameDemo.fs" />
+    <Compile Include="EffectsDemo.fs" />
+    <Compile Include="CompositionDemo.fs" />
+    <Compile Include="TodoDemo.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>

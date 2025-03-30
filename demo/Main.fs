@@ -12,6 +12,7 @@ open Fable.Core.JS
 open FreeAct.Router
 open FreeAct.ReactRouter
 open Demo.FreeFrameDemo
+open Demo
 
 let home route =
     div {
@@ -111,7 +112,7 @@ let setupRouter () =
                 div {
                     h1 { "FreeFrame Demo" }
                     // Render the component directly
-                    FreeFrameDemo()
+                    // FreeFrameDemo()
                 }
           )
 
