@@ -30,13 +30,20 @@ let initialState = {
 // Create app-db instance with proper generic type parameters
 let appDb : IAppDb<AppState> = AppDb<AppState>(initialState) :> IAppDb<AppState>
 
-// Define auto-generated events - no need for any identifiers
+// Define a discriminated union for all Todo events
+type TodoEvent = 
+    | AddTodo of string
+    | ToggleTodo of int
+    | DeleteTodo of int
+    | SetFilter of string
+
+// === Method 1: Using traditional event identifiers (auto-generated) ===
 let addTodoEvent = defineAutoEvent<string>() 
 let toggleTodoEvent = defineAutoEvent<int>()
 let deleteTodoEvent = defineAutoEvent<int>()
 let setFilterEvent = defineAutoEvent<string>()
 
-// Register event handlers
+// Register handlers for traditional events
 registerEventHandler(registerHandler addTodoEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
@@ -61,6 +68,33 @@ registerEventHandler(registerHandler deleteTodoEvent (fun id state ->
 registerEventHandler(registerHandler setFilterEvent (fun filter state ->
     { state with filter = filter }
 ))
+
+// === Method 2: Using union-based event handling (alternative) ===
+
+// Register a handler for the entire union type
+registerUnionHandler<TodoEvent, AppState> (fun event state ->
+    match event with
+    | AddTodo text ->
+        let newTodo = { id = state.nextId; text = text; completed = false }
+        { state with 
+            todos = state.todos @ [newTodo]
+            nextId = state.nextId + 1 }
+            
+    | ToggleTodo id ->
+        { state with
+            todos = state.todos |> List.map (fun todo ->
+                if todo.id = id then { todo with completed = not todo.completed } else todo
+            )
+        }
+            
+    | DeleteTodo id ->
+        { state with
+            todos = state.todos |> List.filter (fun todo -> todo.id <> id)
+        }
+            
+    | SetFilter filter ->
+        { state with filter = filter }
+)
 
 // Create subscriptions
 let todosSubscription = createSubscription appDb (fun state -> state.todos)
@@ -155,6 +189,21 @@ let TodoList () =
         }
     }
 
+// Example component showing both dispatch methods
+let ExampleComponent () =
+    div {
+        button {
+            // Method 1: Traditional event dispatch
+            onClick (fun _ -> dispatch appDb addTodoEvent "Task via traditional dispatch")
+            str "Add via Traditional"
+        }
+        button {
+            // Method 2: Union-based dispatch
+            onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch"))
+            str "Add via Union"
+        }
+    }
+
 // Main component
 let FreeFrameApp () =
     Hooks.useEffect((fun () ->
@@ -167,6 +216,7 @@ let FreeFrameApp () =
         className "freeframe-app"
         h1 { "FreeFrame Demo - Todo App" }
         TodoList()
+        ExampleComponent()
     }
 
 // Initialize the application, can be called directly from the router

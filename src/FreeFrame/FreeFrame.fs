@@ -38,29 +38,27 @@ type AppDb<'T>(initialState: 'T) =
                 notifySubscribers ()
             | _ -> console.error ("Invalid action type dispatched to AppDb")
 
-// ===== Event Handling with automatic ID generation =====
+// ===== Improved Event Handling =====
 
 // Internal event identifier (not exposed to users)
 type private EventKey =
     | StringKey of string
-    | TypeKey of Type * obj // Type and the discriminator value
+    | TypeKey of Type // Just the type, no sample value needed
     | AutoKey of Guid // Auto-generated unique ID
 
 // Public event identifier - generic on the payload type
 type EventId<'Payload> = private { key: EventKey }
 
-// Create a string-based event (for backward compatibility)
+// Create a string-based event
 let defineEvent<'Payload> (id: string) : EventId<'Payload> = { key = StringKey id }
 
-// Create a union-based event with a specific case
-let defineUnionEvent<'Payload> (caseValue: 'Payload) : EventId<'Payload> =
-    let t = caseValue.GetType()
-    { key = TypeKey(t, caseValue) }
-
-// Create an auto-generated event ID - no need for any identifier
+// Create an auto-generated event ID
 let defineAutoEvent<'Payload> () : EventId<'Payload> = { key = AutoKey(Guid.NewGuid()) }
 
-// Private storage for handlers - keyed by our internal EventKey
+// Create a union-based event from a union type - no sample value needed
+let defineUnionEvent<'Union, 'Payload> () : EventId<'Payload> = { key = TypeKey(typeof<'Union>) }
+
+// Private storage for handlers
 let private eventHandlers = Collections.Generic.Dictionary<EventKey, obj -> obj>()
 
 // Event handler definition
@@ -75,7 +73,7 @@ let registerHandler<'Payload, 'State>
     =
     { eventId = eventId; handler = handler }
 
-// Register an event handler in the system
+// Register an event handler
 let registerEventHandler<'Payload, 'State> (handler: EventHandler<'Payload, 'State>) =
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'Payload
@@ -95,6 +93,29 @@ let dispatch<'Payload, 'State>
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
+
+// Direct union dispatch - dispatch a union case directly
+let dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (unionCase: 'Union) =
+    let unionType = unionCase.GetType()
+    let eventKey = TypeKey(unionType)
+
+    match eventHandlers.TryGetValue(eventKey) with
+    | true, handler ->
+        let action = handler (unionCase :> obj)
+        appDb.Dispatch(action)
+    | false, _ -> console.error ($"No handler registered for union type: {unionType.Name}")
+
+// Register a handler for a union case
+let registerUnionHandler<'Union, 'State> (unionCaseHandler: 'Union -> 'State -> 'State) =
+    let unionType = typeof<'Union>
+    let eventId = { key = TypeKey(unionType) }
+
+    let wrappedHandler (payload: obj) : obj =
+        let typedPayload = payload :?> 'Union
+        let reducer = (fun (state: 'State) -> unionCaseHandler typedPayload state) :> obj
+        reducer
+
+    eventHandlers.[eventId.key] <- wrappedHandler
 
 // ===== Backward Compatibility =====
 
