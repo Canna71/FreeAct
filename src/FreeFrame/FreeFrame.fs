@@ -72,23 +72,24 @@ let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) li
 // ===== Improved Event Handling =====
 
 // Internal event identifier (not exposed to users)
-type private EventKey =
-    | StringKey of string
-    | TypeKey of Type * string // Type + a string identifier for the union case
-    | AutoKey of Guid // Auto-generated unique ID
+// type private EventKey =
+//     | StringKey of string
+//     | TypeKey of Type  // Type + a string identifier for the union case
+//     | AutoKey of Guid // Auto-generated unique ID
+type EventKey = string
 
 // Public event identifier - generic on the payload type
 type EventId<'Payload> = private { key: EventKey }
 
 // Create a string-based event
-let defineEvent<'Payload> (id: string) : EventId<'Payload> = { key = StringKey id }
+let inline defineNamedEvent<'Payload> (id: string) : EventId<'Payload> = { key = id }
 
 // Create an auto-generated event ID
-let defineAutoEvent<'Payload> () : EventId<'Payload> = { key = AutoKey(Guid.NewGuid()) }
+let inline defineEvent<'Payload> () : EventId<'Payload> = { key = Guid.NewGuid().ToString() }
 
-// Create an event ID for a specific union case - with a manually provided name
-let defineUnionCaseEvent<'Union> (name: string) : EventId<'Union> =
-    { key = TypeKey(typeof<'Union>, name) }
+let inline defineUnionEvent<'Union> () : EventId<'Union> =
+    // Create an event ID for a specific union
+    { key = typeof<'Union>.ToString() }
 
 // Private storage for handlers
 
@@ -132,6 +133,10 @@ let dispatch<'Payload, 'State>
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
+
+let inline dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (payload: 'Union) =
+    let eventId = defineUnionEvent<'Union> ()
+    dispatch appDb eventId payload
 
 let inline testUnion<'T> () =
     let unionType = typeof<'T>

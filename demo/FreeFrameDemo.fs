@@ -44,16 +44,17 @@ type AdminEvent =
     | TogglePermission of int  // Note that this has same shape as ToggleTodo
 
 // === Method 1: Using traditional event identifiers (auto-generated) ===
-let addTodoEvent = defineAutoEvent<string>() 
-let toggleTodoEvent = defineAutoEvent<int>()
-let deleteTodoEvent = defineAutoEvent<int>()
-let setFilterEvent = defineAutoEvent<string>()
+let addTodoEvent = defineEvent<string>() 
+let toggleTodoEvent = defineEvent<int>()
+let deleteTodoEvent = defineEvent<int>()
+let setFilterEvent = defineEvent<string>()
 
 // === Method 1b: Using string-based event identifiers ===
-let addTodoStringEvent = defineEvent<string>("add-todo")
-let toggleTodoStringEvent = defineEvent<int>("toggle-todo")
-let deleteTodoStringEvent = defineEvent<int>("delete-todo")
-let setFilterStringEvent = defineEvent<string>("set-filter")
+let addTodoNamedEvent = defineNamedEvent<string>("add-todo")
+let toggleTodoNamedEvent = defineNamedEvent<int>("toggle-todo")
+let deleteTodoNamedEvent = defineNamedEvent<int>("delete-todo")
+let setFilterNamedEvent = defineNamedEvent<string>("set-filter")
+
 
 // Register handlers for the auto-generated events
 registerEventHandler addTodoEvent (fun text state ->
@@ -82,14 +83,14 @@ registerEventHandler setFilterEvent (fun filter state ->
 )
 
 // Register handlers for the string-based events
-registerEventHandler addTodoStringEvent (fun text state ->
+registerEventHandler addTodoNamedEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
     { state with 
         todos = state.todos @ [newTodo]
         nextId = state.nextId + 1 }
 )
 
-registerEventHandler toggleTodoStringEvent (fun id state ->
+registerEventHandler toggleTodoNamedEvent (fun id state ->
     { state with
         todos = state.todos |> List.map (fun todo ->
             if todo.id = id then { todo with completed = not todo.completed } else todo
@@ -97,19 +98,57 @@ registerEventHandler toggleTodoStringEvent (fun id state ->
     }
 )
 
-registerEventHandler deleteTodoStringEvent (fun id state ->
+registerEventHandler deleteTodoNamedEvent (fun id state ->
     { state with
         todos = state.todos |> List.filter (fun todo -> todo.id <> id)
     }
 )
 
-registerEventHandler setFilterStringEvent (fun filter state ->
+registerEventHandler setFilterNamedEvent (fun filter state ->
     { state with filter = filter }
 )
 
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
-testUnion<TodoEvent> ()
+registerEventHandler (defineUnionEvent<TodoEvent>()) (fun event state ->
+    match event with
+    | AddTodo text ->
+        let newTodo = { id = state.nextId; text = text; completed = false }
+        { state with 
+            todos = state.todos @ [newTodo]
+            nextId = state.nextId + 1 }
+    | ToggleTodo id ->
+        { state with
+            todos = state.todos |> List.map (fun todo ->
+                if todo.id = id then { todo with completed = not todo.completed } else todo
+            )
+        }
+    | DeleteTodo id ->
+        { state with
+            todos = state.todos |> List.filter (fun todo -> todo.id <> id)
+        }
+    | SetFilter filter ->
+        { state with filter = filter }
+)
+
+registerEventHandler (defineUnionEvent<AdminEvent>()) (fun event state ->
+    match event with
+    | AddUser name ->
+        printfn "Adding user: %s" name
+        // Handle adding a user
+        state
+    | DeleteUser id ->
+        printfn "Deleting user with ID: %d" id
+        // Handle deleting a user
+        state
+    | TogglePermission id ->
+        printfn "Toggling permission for user with ID: %d" id
+        // Handle toggling permission for a user
+        state
+)
+
+
+// testUnion<TodoEvent> ()
 
 
 
@@ -220,19 +259,19 @@ let ExampleComponent () =
                 str "Add via Traditional Event"
             }
             
-            // // Method 2: Direct union case dispatch (now with explicit case name)
-            // button {
-            //     className "direct-union"
-            //     onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") "AddTodo")
-            //     str "Add via Union"
-            // }
+            // Method 2: Direct union case dispatch (now with explicit case name)
+            button {
+                className "direct-union"
+                onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") )
+                str "Add via Union"
+            }
             
-            // // Show that there's no conflict with AdminEvent
-            // button {
-            //     className "admin-event"
-            //     onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") "AddUser")
-            //     str "Add User (Admin)"
-            // }
+            // Show that there's no conflict with AdminEvent
+            button {
+                className "admin-event"
+                onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") )
+                str "Add User (Admin)"
+            }
         }
     }
 
