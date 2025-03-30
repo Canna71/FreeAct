@@ -138,20 +138,6 @@ let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: '
     // let eventId = EventId.ofType<'EventType> ()
     dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
 
-// ===== Backward Compatibility =====
-
-// For compatibility with previous code
-// type EventDef<'Payload, 'State> = EventHandler<'Payload, 'State>
-
-// Create event with handler in one step (for backward compatibility)
-// let createEvent<'Payload, 'State>
-//     (id: string)
-//     (handler: 'Payload -> 'State -> 'State)
-//     : EventHandler<'Payload, 'State>
-//     =
-//     let eventId = defineEvent<'Payload> id
-//     registerHandler eventId handler
-
 // ===== Subscriptions (Views on app-db) =====
 
 type ISubscription<'V> =
