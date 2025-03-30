@@ -49,6 +49,64 @@ let toggleTodoEvent = defineAutoEvent<int>()
 let deleteTodoEvent = defineAutoEvent<int>()
 let setFilterEvent = defineAutoEvent<string>()
 
+// === Method 1b: Using string-based event identifiers ===
+let addTodoStringEvent = defineEvent<string>("add-todo")
+let toggleTodoStringEvent = defineEvent<int>("toggle-todo")
+let deleteTodoStringEvent = defineEvent<int>("delete-todo")
+let setFilterStringEvent = defineEvent<string>("set-filter")
+
+// Register handlers for the auto-generated events
+registerEventHandler(registerHandler addTodoEvent (fun text state ->
+    let newTodo = { id = state.nextId; text = text; completed = false }
+    { state with 
+        todos = state.todos @ [newTodo]
+        nextId = state.nextId + 1 }
+))
+
+registerEventHandler(registerHandler toggleTodoEvent (fun id state ->
+    { state with
+        todos = state.todos |> List.map (fun todo ->
+            if todo.id = id then { todo with completed = not todo.completed } else todo
+        )
+    }
+))
+
+registerEventHandler(registerHandler deleteTodoEvent (fun id state ->
+    { state with
+        todos = state.todos |> List.filter (fun todo -> todo.id <> id)
+    }
+))
+
+registerEventHandler(registerHandler setFilterEvent (fun filter state ->
+    { state with filter = filter }
+))
+
+// Register handlers for the string-based events
+registerEventHandler(registerHandler addTodoStringEvent (fun text state ->
+    let newTodo = { id = state.nextId; text = text; completed = false }
+    { state with 
+        todos = state.todos @ [newTodo]
+        nextId = state.nextId + 1 }
+))
+
+registerEventHandler(registerHandler toggleTodoStringEvent (fun id state ->
+    { state with
+        todos = state.todos |> List.map (fun todo ->
+            if todo.id = id then { todo with completed = not todo.completed } else todo
+        )
+    }
+))
+
+registerEventHandler(registerHandler deleteTodoStringEvent (fun id state ->
+    { state with
+        todos = state.todos |> List.filter (fun todo -> todo.id <> id)
+    }
+))
+
+registerEventHandler(registerHandler setFilterStringEvent (fun filter state ->
+    { state with filter = filter }
+))
+
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
 // Register handlers for specific union cases
