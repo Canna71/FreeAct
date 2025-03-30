@@ -122,6 +122,10 @@ let registerEventHandler<'Payload, 'State>
 
     eventHandlers.[eventId.key] <- wrappedHandler
 
+let inline registerUnionEventHandler<'Union, 'State> (handler: EventHandler<'Union, 'State>) =
+    let eventId = defineUnionEvent<'Union> ()
+    registerEventHandler eventId handler
+
 // Dispatch an event with payload
 let dispatch<'Payload, 'State>
     (appDb: IAppDb<'State>)

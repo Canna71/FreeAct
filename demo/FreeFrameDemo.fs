@@ -110,7 +110,7 @@ registerEventHandler setFilterNamedEvent (fun filter state ->
 
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
-registerEventHandler (defineUnionEvent<TodoEvent>()) (fun event state ->
+registerUnionEventHandler  (fun event state ->
     match event with
     | AddTodo text ->
         let newTodo = { id = state.nextId; text = text; completed = false }
