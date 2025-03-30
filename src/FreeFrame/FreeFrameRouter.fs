@@ -218,58 +218,60 @@ let FreeFrameLink<'State>
     }
 
 /// Create a router provider component that connects the FreeFrame router to React
-let FreeFrameRouterProvider<'Content, 'State>
-    (props:
-        {|
-            AppDb: IAppDb<'State>
-            Router: Router<'Content>
-            GetRouterState: 'State -> RouterState<'Content>
-            SetRouterState: RouterState<'Content> -> 'State -> 'State
-            Mode: RouterMode
-            DefaultContent: 'Content
-            Children: ReactElement list
-        |})
-    =
+let FreeFrameRouterProvider<'Content, 'State> =
+    FunctionComponent.Of(fun
+                             (props:
+                                 {|
+                                     AppDb: IAppDb<'State>
+                                     Router: Router<'Content>
+                                     GetRouterState: 'State -> RouterState<'Content>
+                                     SetRouterState: RouterState<'Content> -> 'State -> 'State
+                                     Mode: RouterMode
+                                     DefaultContent: 'Content
+                                     Children: ReactElement list
+                                 |}) ->
 
-    // Initialize router on component mount
-    Hooks.useEffectDisposable (
-        (fun () ->
-            let cleanup =
-                initializeRouter
-                    props.AppDb
-                    props.Router
-                    props.GetRouterState
-                    props.SetRouterState
-                    props.Mode
-                    props.DefaultContent
+        // Initialize router on component mount
+        Hooks.useEffectDisposable (
+            (fun () ->
+                let cleanup =
+                    initializeRouter
+                        props.AppDb
+                        props.Router
+                        props.GetRouterState
+                        props.SetRouterState
+                        props.Mode
+                        props.DefaultContent
 
-            { new IDisposable with
-                member _.Dispose() = cleanup ()
-            }
-        ),
-        [| box props.Router; box props.Mode |]
+                { new IDisposable with
+                    member _.Dispose() = cleanup ()
+                }
+            ),
+            [| box props.Router; box props.Mode |]
+        )
+
+        // Render children
+        fragment { props.Children }
     )
 
-    // Render children
-    fragment { props.Children }
-
 /// Create a routes component that renders the current route content
-let FreeFrameRoutes<'Content, 'State>
-    (props:
-        {|
-            GetRouterState: 'State -> RouterState<'Content>
-            AppDb: IAppDb<'State>
-            DefaultContent: 'Content
-        |})
-    =
+let FreeFrameRoutes<'State> =
+    FunctionComponent.Of(fun
+                             (props:
+                                 {|
+                                     GetRouterState: 'State -> RouterState<ReactElement>
+                                     AppDb: IAppDb<'State>
+                                     DefaultContent: ReactElement
+                                 |}) ->
 
-    let subscription = createSubscription props.AppDb props.GetRouterState
-    let routerState = useSubscription subscription
+        let subscription = createSubscription props.AppDb props.GetRouterState
+        let routerState = useSubscription subscription
 
-    // Render the current route content or default content
-    match routerState.Content with
-    | Some content -> content
-    | None -> props.DefaultContent
+        // Render the current route content or default content
+        match routerState.Content with
+        | Some content -> content
+        | None -> props.DefaultContent
+    )
 
 /// Utility function to navigate programmatically
 let navigateTo<'State> (appDb: IAppDb<'State>) (path: string) =
