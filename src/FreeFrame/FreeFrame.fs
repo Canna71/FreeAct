@@ -217,22 +217,40 @@ let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
 
 // ===== React Integration =====
 
-// React hook to use a subscription in a React component
+// React hook to use a subscription in a React component with immediate subscription
 let useSubscription<'V> (subscription: ISubscription<'V>) =
     let initialValue = subscription.Value
+
+    // Create the state hook with the initial value
     let state = Hooks.useState (initialValue)
-    let value = state.current
 
-    // Use the direct value update signature, not the function signature
-    let setState = fun (newValue: 'V) -> state.update newValue
+    // Subscribe immediately using useRef to manage the subscription reference
+    let subscriptionRef = Hooks.useRef (None)
 
+    // If we don't have a subscription yet, create one immediately
+    if subscriptionRef.current.IsNone then
+        // Function to update the React state when subscription value changes
+        let setState = fun (newValue: 'V) -> state.update (newValue)
+
+        // Create the subscription right away
+        let dispose = subscription.Subscribe(setState)
+
+        // Store the dispose function in the ref
+        subscriptionRef.current <- Some dispose
+
+    // Use Effect for cleanup only
     Hooks.useEffectDisposable (
         (fun () ->
-            let dispose = subscription.Subscribe(setState)
-
-            dispose
+            // Return the dispose function for cleanup
+            { new IDisposable with
+                member _.Dispose() =
+                    match subscriptionRef.current with
+                    | Some dispose -> dispose.Dispose()
+                    | None -> ()
+            }
         ),
         [| subscription :> obj |]
     )
 
-    value
+    // Return the current value from state
+    state.current
