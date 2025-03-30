@@ -36,7 +36,7 @@ module Builders =
     type Header5Element = HtmlElementBuilder
     let h5 = Header5Element "h5"
 
-    let button = HtmlElementBuilder("button")
+    let button = ButtonElement()
     let p = HtmlElementBuilder("p")
 
     let a = AnchorElement()

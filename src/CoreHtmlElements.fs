@@ -348,3 +348,22 @@ module CoreElement =
         [<CustomOperation("acceptCharset")>]
         member inline _.AcceptCharset(props, value: string) =
             Prop("acceptCharset", value :> obj) :: props
+
+    type InteractiveFormElement(tag: string) =
+        inherit HtmlElementBuilder(tag)
+
+        [<CustomOperation("disabled")>]
+        member inline _.Disabled(props, value: bool) = Prop("disabled", value :> obj) :: props
+
+        [<CustomOperation("required")>]
+        member inline _.Required(props, value: bool) = Prop("required", value :> obj) :: props
+
+    type ButtonElement() =
+        inherit InteractiveFormElement "button"
+
+        [<CustomOperation("type'")>]
+        member inline _.Type(props, value: ButtonType) =
+            Prop("type", buttonTypeToString value :> obj) :: props
+
+        [<CustomOperation("value")>]
+        member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props

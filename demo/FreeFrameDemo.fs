@@ -18,6 +18,7 @@ type AppState = {
     todos: TodoItem list
     filter: string  // "all" | "active" | "completed"
     nextId: int
+    isLoading: bool // Track loading state in the app state
 }
 
 // Create initial state
@@ -25,6 +26,7 @@ let initialState = {
     todos = []
     filter = "all"
     nextId = 1
+    isLoading = false
 }
 
 // Create app-db instance with proper generic type parameters
@@ -36,6 +38,8 @@ type TodoEvent =
     | ToggleTodo of int
     | DeleteTodo of int
     | SetFilter of string
+    | SetLoading of bool
+    | SetTodos of TodoItem list  // New event to set todos from API
 
 // Define another union type to demonstrate that there's no conflict
 type AdminEvent = 
@@ -48,12 +52,16 @@ let addTodoEvent = EventId.auto<string>()
 let toggleTodoEvent = EventId.auto<int>()
 let deleteTodoEvent = EventId.auto<int>()
 let setFilterEvent = EventId.auto<string>()
+let setLoadingEvent = EventId.auto<bool>()
+let setTodosEvent = EventId.auto<TodoItem list>()
 
 // === Method 1b: Using string-based event identifiers ===
 let addTodoNamedEvent = EventId.named<string>("add-todo")
 let toggleTodoNamedEvent = EventId.named<int>("toggle-todo")
 let deleteTodoNamedEvent = EventId.named<int>("delete-todo")
 let setFilterNamedEvent = EventId.named<string>("set-filter")
+let setLoadingNamedEvent = EventId.named<bool>("set-loading")
+let setTodosNamedEvent = EventId.named<TodoItem list>("set-todos")
 
 // === Method 2: Using type-based events ===
 let todoEventId = EventId.ofType<TodoEvent>()
@@ -84,6 +92,21 @@ registerNamedEventHandler setFilterEvent (fun filter state ->
     { state with filter = filter }
 )
 
+registerNamedEventHandler setLoadingEvent (fun isLoading state ->
+    { state with isLoading = isLoading }
+)
+
+registerNamedEventHandler setTodosEvent (fun todos state ->
+    { state with 
+        todos = todos
+        nextId = 
+            match todos with
+            | [] -> 1
+            | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+        isLoading = false
+    }
+)
+
 // Register handlers for the string-based events
 registerNamedEventHandler addTodoNamedEvent (fun text state ->
     let newTodo = { id = state.nextId; text = text; completed = false }
@@ -110,6 +133,21 @@ registerNamedEventHandler setFilterNamedEvent (fun filter state ->
     { state with filter = filter }
 )
 
+registerNamedEventHandler setLoadingNamedEvent (fun isLoading state ->
+    { state with isLoading = isLoading }
+)
+
+registerNamedEventHandler setTodosNamedEvent (fun todos state ->
+    { state with 
+        todos = todos
+        nextId = 
+            match todos with
+            | [] -> 1
+            | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+        isLoading = false
+    }
+)
+
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
 registerTypedEventHandler  (fun event state ->
@@ -131,6 +169,17 @@ registerTypedEventHandler  (fun event state ->
         }
     | SetFilter filter ->
         { state with filter = filter }
+    | SetLoading isLoading ->
+        { state with isLoading = isLoading }
+    | SetTodos todos ->
+        { state with 
+            todos = todos
+            nextId = 
+                match todos with
+                | [] -> 1
+                | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+            isLoading = false
+        }
 ) 
 
 registerTypedEventHandler (fun event state ->
@@ -163,6 +212,48 @@ let filteredTodosSubscription = createSubscription appDb (fun state ->
     | _ -> state.todos
 )
 let filterSubscription = createSubscription appDb (fun state -> state.filter)
+let isLoadingSubscription = createSubscription appDb (fun state -> state.isLoading)
+
+// === Define an effect for loading todos from a simulated API ===
+// Define a specialized result type for the fetchTodos effect
+type FetchTodosResult =
+    | TodosLoaded of TodoItem list
+    | FetchFailed of string
+let fetchTodosEffect = EffectId.named<unit, TodoItem list>("fetch-todos")
+// Add this with your other event declarations
+let fetchTodosResultEvent = EventId.auto<FetchTodosResult>()
+
+// Register a handler for this dedicated result event
+registerNamedEventHandler fetchTodosResultEvent (fun result state ->
+    match result with
+    | TodosLoaded todos -> 
+        { state with 
+            todos = todos
+            nextId = 
+                match todos with
+                | [] -> 1
+                | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+            isLoading = false 
+        }
+    | FetchFailed err -> 
+        // Just turn off loading, keep existing todos
+        console.error("Error loading todos:", err)
+        { state with isLoading = false }
+)
+
+// Register the effect handler - simulate an API call with a delay
+registerEffectHandler fetchTodosEffect (fun _ -> async {
+    // Simulate network latency
+    do! Async.Sleep 2000
+    
+    // Return mock data as if it came from an API
+    return [
+        { id = 101; text = "Learn F# and FreeFrame"; completed = false }
+        { id = 102; text = "Build an awesome application"; completed = false }
+        { id = 103; text = "Deploy to production"; completed = false }
+        { id = 104; text = "Share with the community"; completed = true }
+    ]
+})
 
 // React components
 let TodoItemComponent (props: {| todo: TodoItem |}) =
@@ -230,13 +321,60 @@ let TodoFilters () =
         }
     }
 
+let LoadTodosButton () =
+    let isLoading = useSubscription isLoadingSubscription
+    
+    div {
+        className "load-todos-container"
+        button {
+            disabled isLoading
+            className "load-button"
+            onClick (fun _ -> 
+                // Set loading state
+                dispatch appDb setLoadingEvent true
+                
+                // Run the effect and handle the result with the specialized result type
+                dispatchAfterEffect appDb fetchTodosEffect () (fun result ->
+                    // Transform the raw effect result into our domain-specific result type
+                    let resultValue = 
+                        match result with
+                        | Ok todos -> TodosLoaded todos
+                        | Error err -> FetchFailed err.Message
+                    
+                    // Return the single event type with the domain result
+                    Some fetchTodosResultEvent, Some resultValue
+                )
+            )
+            
+            if isLoading then
+                str "Loading..."
+            else
+                str "Load Todos from API"
+        }
+        
+        if isLoading then
+            div {
+                className "loading-indicator"
+                str "Please wait, loading data..."
+            }
+    }
+
 let TodoList () =
     let todos = useSubscription filteredTodosSubscription
+    let isLoading = useSubscription isLoadingSubscription
     
     div {
         h2 { "Todo List" }
         TodoForm()
         TodoFilters()
+        LoadTodosButton() // Add the load button
+        
+        if isLoading then
+            div {
+                className "loading-overlay"
+                str "Loading..."
+            }
+        
         ul {
             className "todo-list"
             todos |> List.map (fun todo ->
@@ -277,6 +415,46 @@ let ExampleComponent () =
         }
     }
 
+// Example component with Effects
+let EffectExampleComponent () =
+    // Use the F# idiomatic hook for effects
+    let isLoading, result = useEffect fetchTodosEffect ()
+    
+    div {
+        className "effect-example"
+        h3 { "Effect Example (Auto-Loading)" }
+        
+        match isLoading, result with
+        | true, _ -> 
+            div { 
+                className "loading"
+                str "Loading data..." 
+            }
+        | false, Some (Ok todos) ->
+            div {
+                className "success"
+                str (sprintf "Successfully loaded %d items" todos.Length)
+                ul {
+                    todos |> List.map (fun todo ->
+                        li {
+                            key (string todo.id)
+                            str todo.text
+                        }
+                    )
+                }
+            }
+        | false, Some (Error err) ->
+            div {
+                className "error"
+                str (sprintf "Error: %s" err.Message)
+            }
+        | false, None ->
+            div {
+                className "none"
+                str "No data loaded yet."
+            }
+    }
+
 // Main component
 let FreeFrameApp () =
     // Use the useEffect hook to initialize data after component mount,
@@ -297,6 +475,7 @@ let FreeFrameApp () =
         h1 { "FreeFrame Demo - Todo App" }
         TodoList()
         ExampleComponent()
+        EffectExampleComponent() // Add the effect example component
     }
 
 // Initialize the application, can be called directly from the router

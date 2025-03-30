@@ -107,3 +107,15 @@ module HtmlTypes =
         function
         | CrossOrigin.Anonymous -> "anonymous"
         | CrossOrigin.UseCredentials -> "use-credentials"
+
+    [<RequireQualifiedAccess>]
+    type ButtonType =
+        | Button
+        | Submit
+        | Reset
+
+    let buttonTypeToString =
+        function
+        | ButtonType.Button -> "button"
+        | ButtonType.Submit -> "submit"
+        | ButtonType.Reset -> "reset"

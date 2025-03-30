@@ -270,12 +270,11 @@ let registerEffectHandler<'Payload, 'Result>
 
     effectHandlers.[EffectId.key effectId] <- wrappedHandler
 
-// Execute an effect - simplified without unnecessary appDb parameter
+// Execute an effect - returns Result<'Success, exn> to be more F# idiomatic
 let runEffect<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
-    (onSuccess: 'Result -> unit)
-    (onError: exn -> unit)
+    (callback: Result<'Result, exn> -> unit)
     =
     async {
         match effectHandlers.TryGetValue(EffectId.key effectId) with
@@ -283,60 +282,87 @@ let runEffect<'Payload, 'Result>
             try
                 let! result = handler (payload :> obj)
                 let typedResult = result :?> 'Result
-                onSuccess typedResult
+                callback (Ok typedResult)
             with ex ->
-                onError ex
+                callback (Error ex)
         | false, _ ->
-            console.error ($"No handler registered for effect {EffectId.key effectId}")
-            onError (Exception($"No handler registered for effect {EffectId.key effectId}"))
+            let error = Exception($"No handler registered for effect {EffectId.key effectId}")
+            console.error (error.Message)
+            callback (Error error)
     }
     |> Async.StartImmediate
 
-// Version that returns a promise - simplified without unnecessary appDb parameter
+// Version that returns a promise with Result
 let runEffectAsPromise<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
-    : JS.Promise<'Result>
+    : JS.Promise<Result<'Result, exn>>
     =
     Async.StartAsPromise(
         async {
+            try
+                match effectHandlers.TryGetValue(EffectId.key effectId) with
+                | true, handler ->
+                    let! result = handler (payload :> obj)
+                    return Ok(result :?> 'Result)
+                | false, _ ->
+                    let error =
+                        Exception($"No handler registered for effect {EffectId.key effectId}")
+
+                    console.error (error.Message)
+                    return Error error
+            with ex ->
+                return Error ex
+        }
+    )
+
+// Async version - more F# idiomatic
+let runEffectAsync<'Payload, 'Result>
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    : Async<Result<'Result, exn>>
+    =
+    async {
+        try
             match effectHandlers.TryGetValue(EffectId.key effectId) with
             | true, handler ->
                 let! result = handler (payload :> obj)
-                return result :?> 'Result
+                return Ok(result :?> 'Result)
             | false, _ ->
-                let msg = $"No handler registered for effect {EffectId.key effectId}"
-                console.error msg
-                return raise (Exception(msg))
-        }
-    )
+                let error = Exception($"No handler registered for effect {EffectId.key effectId}")
+                console.error (error.Message)
+                return Error error
+        with ex ->
+            return Error ex
+    }
 
 // Chain multiple effects together - simplified without unnecessary appDb parameter
 let chainEffects (effects: (unit -> unit) list) =
     for effect in effects do
         effect ()
 
-// Helper to dispatch an event after an effect completes
+// Helper to dispatch an event after an effect completes - using Result
 let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
     (appDb: IAppDb<'State>)
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
-    (eventCreator: 'Result -> EventId<'EventPayload> * 'EventPayload)
+    (onResult: Result<'Result, exn> -> EventId<'EventPayload> option * 'EventPayload option)
     =
     runEffect
         effectId
         payload
         (fun result ->
-            let (eventId, eventPayload) = eventCreator result
-            dispatch appDb eventId eventPayload
-        )
-        (fun error -> console.error ("Effect failed: ", error))
+            let (eventIdOpt, eventPayloadOpt) = onResult result
 
-// Hook for handling effects in React components - simplified without unnecessary appDb parameter
+            match eventIdOpt, eventPayloadOpt with
+            | Some eventId, Some eventPayload -> dispatch appDb eventId eventPayload
+            | _ -> () // No event to dispatch
+        )
+
+// Hook for handling effects in React components - using Result
 let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
     let loadingState = Hooks.useState true
-    let errorState = Hooks.useState<Option<exn>> None
-    let resultState = Hooks.useState<Option<'Result>> None
+    let resultState = Hooks.useState<Result<'Result, exn> option> None
 
     Hooks.useEffect (
         (fun () ->
@@ -347,25 +373,20 @@ let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payloa
                     resultState.update (Some result)
                     loadingState.update false
                 )
-                (fun error ->
-                    errorState.update (Some error)
-                    loadingState.update false
-                )
         ),
         [| box payload |]
     )
 
-    loadingState.current, resultState.current, errorState.current
+    loadingState.current, resultState.current
 
-// Hook for handling effects that automatically retrigger on dependencies - simplified without unnecessary appDb parameter
+// Hook for handling effects that automatically retrigger on dependencies - using Result
 let useEffectWithDeps<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payloadFn: unit -> 'Payload)
     (dependencies: obj array)
     =
     let loadingState = Hooks.useState true
-    let errorState = Hooks.useState<Option<exn>> None
-    let resultState = Hooks.useState<Option<'Result>> None
+    let resultState = Hooks.useState<Result<'Result, exn> option> None
 
     Hooks.useEffect (
         (fun () ->
@@ -378,12 +399,8 @@ let useEffectWithDeps<'Payload, 'Result>
                     resultState.update (Some result)
                     loadingState.update false
                 )
-                (fun error ->
-                    errorState.update (Some error)
-                    loadingState.update false
-                )
         ),
         dependencies
     )
 
-    loadingState.current, resultState.current, errorState.current
+    loadingState.current, resultState.current
