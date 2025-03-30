@@ -5,7 +5,9 @@ open Fable.Core
 open Browser
 open Fable.React
 
-// ===== Application State (app-db) =====
+// =================================================
+//            Application State (app-db)
+// =================================================
 
 // Generic state container with type safety
 type IAppDb<'T> =
@@ -69,9 +71,11 @@ let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) li
     )
 // A single notification will be sent after all dispatches
 
-// ===== Improved Event Handling =====
+// =================================================
+//             Events (event system)
+// =================================================
 
-// Simplified EventId implementation
+//  EventId implementation
 type EventId<'Payload> = private EventId of string
 
 // Module to encapsulate EventId operations
@@ -137,7 +141,9 @@ let dispatch<'Payload, 'State>
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
     dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
 
-// ===== Subscriptions (Views on app-db) =====
+// =======================================================
+//             Subscriptions (views on app-db)
+// =======================================================
 
 type ISubscription<'V> =
     abstract member Value: 'V
@@ -214,7 +220,9 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
     // Return the current value from state
     state.current
 
-// ===== Effect System =====
+// =====================================================
+//             Effects (side effects)
+// =====================================================
 
 // A type to represent an effect
 type Effect = Effect of id: string * payload: obj
@@ -224,7 +232,7 @@ type EffectResult =
     | Success of obj
     | Failure of exn
 
-// Simplified EffectId implementation
+//  EffectId implementation
 type EffectId<'Payload, 'Result> = private EffectId of string
 
 // Module to encapsulate EffectId operations
@@ -262,9 +270,8 @@ let registerEffectHandler<'Payload, 'Result>
 
     effectHandlers.[EffectId.key effectId] <- wrappedHandler
 
-// Execute an effect
-let runEffect<'Payload, 'Result, 'State>
-    (appDb: IAppDb<'State>)
+// Execute an effect - simplified without unnecessary appDb parameter
+let runEffect<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
     (onSuccess: 'Result -> unit)
@@ -285,31 +292,27 @@ let runEffect<'Payload, 'Result, 'State>
     }
     |> Async.StartImmediate
 
-// Version that returns a promise for more flexibility
-let runEffectAsPromise<'Payload, 'Result, 'State>
-    (appDb: IAppDb<'State>)
+// Version that returns a promise - simplified without unnecessary appDb parameter
+let runEffectAsPromise<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
     : JS.Promise<'Result>
     =
-    let promise =
-        Async.StartAsPromise(
-            async {
-                match effectHandlers.TryGetValue(EffectId.key effectId) with
-                | true, handler ->
-                    let! result = handler (payload :> obj)
-                    return result :?> 'Result
-                | false, _ ->
-                    let msg = $"No handler registered for effect {EffectId.key effectId}"
-                    console.error msg
-                    return raise (Exception(msg))
-            }
-        )
+    Async.StartAsPromise(
+        async {
+            match effectHandlers.TryGetValue(EffectId.key effectId) with
+            | true, handler ->
+                let! result = handler (payload :> obj)
+                return result :?> 'Result
+            | false, _ ->
+                let msg = $"No handler registered for effect {EffectId.key effectId}"
+                console.error msg
+                return raise (Exception(msg))
+        }
+    )
 
-    promise
-
-// Chain multiple effects together
-let chainEffects<'State> (appDb: IAppDb<'State>) (effects: (unit -> unit) list) =
+// Chain multiple effects together - simplified without unnecessary appDb parameter
+let chainEffects (effects: (unit -> unit) list) =
     for effect in effects do
         effect ()
 
@@ -321,7 +324,6 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
     (eventCreator: 'Result -> EventId<'EventPayload> * 'EventPayload)
     =
     runEffect
-        appDb
         effectId
         payload
         (fun result ->
@@ -330,13 +332,8 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
         )
         (fun error -> console.error ("Effect failed: ", error))
 
-// Hook for handling effects in React components
-let useEffect<'Payload, 'Result, 'State>
-    (appDb: IAppDb<'State>)
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    =
-
+// Hook for handling effects in React components - simplified without unnecessary appDb parameter
+let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
     let loadingState = Hooks.useState true
     let errorState = Hooks.useState<Option<exn>> None
     let resultState = Hooks.useState<Option<'Result>> None
@@ -344,7 +341,6 @@ let useEffect<'Payload, 'Result, 'State>
     Hooks.useEffect (
         (fun () ->
             runEffect
-                appDb
                 effectId
                 payload
                 (fun result ->
@@ -361,14 +357,12 @@ let useEffect<'Payload, 'Result, 'State>
 
     loadingState.current, resultState.current, errorState.current
 
-// Hook for handling effects that automatically retrigger on dependencies
-let useEffectWithDeps<'Payload, 'Result, 'State>
-    (appDb: IAppDb<'State>)
+// Hook for handling effects that automatically retrigger on dependencies - simplified without unnecessary appDb parameter
+let useEffectWithDeps<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
     (payloadFn: unit -> 'Payload)
     (dependencies: obj array)
     =
-
     let loadingState = Hooks.useState true
     let errorState = Hooks.useState<Option<exn>> None
     let resultState = Hooks.useState<Option<'Result>> None
@@ -378,7 +372,6 @@ let useEffectWithDeps<'Payload, 'Result, 'State>
             loadingState.update true
 
             runEffect
-                appDb
                 effectId
                 (payloadFn ())
                 (fun result ->
