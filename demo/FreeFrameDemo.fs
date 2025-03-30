@@ -37,63 +37,63 @@ type TodoEvent =
     | DeleteTodo of int
     | SetFilter of string
 
+// Define another union type to demonstrate that there's no conflict
+type AdminEvent = 
+    | AddUser of string    // Note that this has same shape as AddTodo
+    | DeleteUser of int    // Note that this has same shape as DeleteTodo
+    | TogglePermission of int  // Note that this has same shape as ToggleTodo
+
 // === Method 1: Using traditional event identifiers (auto-generated) ===
 let addTodoEvent = defineAutoEvent<string>() 
 let toggleTodoEvent = defineAutoEvent<int>()
 let deleteTodoEvent = defineAutoEvent<int>()
 let setFilterEvent = defineAutoEvent<string>()
 
-// Register handlers for traditional events
-registerEventHandler(registerHandler addTodoEvent (fun text state ->
-    let newTodo = { id = state.nextId; text = text; completed = false }
-    { state with 
-        todos = state.todos @ [newTodo]
-        nextId = state.nextId + 1 }
-))
+// === Method 2: Using union-based event handling (safer approach) with manual case names ===
 
-registerEventHandler(registerHandler toggleTodoEvent (fun id state ->
-    { state with
-        todos = state.todos |> List.map (fun todo ->
-            if todo.id = id then { todo with completed = not todo.completed } else todo
-        )
-    }
-))
-
-registerEventHandler(registerHandler deleteTodoEvent (fun id state ->
-    { state with
-        todos = state.todos |> List.filter (fun todo -> todo.id <> id)
-    }
-))
-
-registerEventHandler(registerHandler setFilterEvent (fun filter state ->
-    { state with filter = filter }
-))
-
-// === Method 2: Using union-based event handling (alternative) ===
-
-// Register a handler for the entire union type
-registerUnionHandler<TodoEvent, AppState> (fun event state ->
+// Register handlers for specific union cases
+registerUnionCaseHandler<TodoEvent, AppState> "AddTodo" (fun event state ->
     match event with
     | AddTodo text ->
         let newTodo = { id = state.nextId; text = text; completed = false }
         { state with 
             todos = state.todos @ [newTodo]
             nextId = state.nextId + 1 }
-            
+    | _ -> state  // Can't happen due to type constraints
+)
+
+registerUnionCaseHandler<TodoEvent, AppState> "ToggleTodo" (fun event state ->
+    match event with
     | ToggleTodo id ->
         { state with
             todos = state.todos |> List.map (fun todo ->
                 if todo.id = id then { todo with completed = not todo.completed } else todo
             )
         }
-            
+    | _ -> state  // Can't happen due to type constraints
+)
+
+registerUnionCaseHandler<TodoEvent, AppState> "DeleteTodo" (fun event state ->
+    match event with
     | DeleteTodo id ->
         { state with
             todos = state.todos |> List.filter (fun todo -> todo.id <> id)
         }
-            
+    | _ -> state  // Can't happen due to type constraints
+)
+
+registerUnionCaseHandler<TodoEvent, AppState> "SetFilter" (fun event state ->
+    match event with
     | SetFilter filter ->
         { state with filter = filter }
+    | _ -> state  // Can't happen due to type constraints
+)
+
+// Also register an AdminEvent to show there's no conflict
+registerUnionCaseHandler<AdminEvent, AppState> "AddUser" (fun event state ->
+    // This is just a demonstration, we don't need real implementation
+    console.log("Adding user, no conflict with AddTodo")
+    state
 )
 
 // Create subscriptions
@@ -133,7 +133,7 @@ let TodoForm () =
     let handleSubmit (e: Browser.Types.Event) =
         e.preventDefault()
         if text'.Trim() <> "" then
-            dispatch appDb addTodoEvent text'
+            dispatchUnion appDb (AddTodo text') "AddTodo"
             setText("")
     
     form {
@@ -189,24 +189,39 @@ let TodoList () =
         }
     }
 
-// Example component showing both dispatch methods
+// Example component showing both dispatch methods with improved union handling
 let ExampleComponent () =
     div {
-        button {
+        className "dispatch-examples"
+        h3 { "Two Ways to Dispatch Events" }
+        div {
             // Method 1: Traditional event dispatch
-            onClick (fun _ -> dispatch appDb addTodoEvent "Task via traditional dispatch")
-            str "Add via Traditional"
-        }
-        button {
-            // Method 2: Union-based dispatch
-            onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch"))
-            str "Add via Union"
+            button {
+                className "traditional"
+                onClick (fun _ -> dispatch appDb addTodoEvent "Task via traditional dispatch")
+                str "Add via Traditional Event"
+            }
+            
+            // Method 2: Direct union case dispatch (now with explicit case name)
+            button {
+                className "direct-union"
+                onClick (fun _ -> dispatchUnion appDb (AddTodo "Task via union dispatch") "AddTodo")
+                str "Add via Union"
+            }
+            
+            // Show that there's no conflict with AdminEvent
+            button {
+                className "admin-event"
+                onClick (fun _ -> dispatchUnion appDb (AddUser "Admin action") "AddUser")
+                str "Add User (Admin)"
+            }
         }
     }
 
 // Main component
 let FreeFrameApp () =
     Hooks.useEffect((fun () ->
+        printfn "FreeFrameApp mounted"
         dispatch appDb addTodoEvent "Learn F#"
         dispatch appDb addTodoEvent "Build a FreeFrame app"
         dispatch appDb addTodoEvent "Share with the community"

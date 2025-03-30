@@ -43,7 +43,7 @@ type AppDb<'T>(initialState: 'T) =
 // Internal event identifier (not exposed to users)
 type private EventKey =
     | StringKey of string
-    | TypeKey of Type // Just the type, no sample value needed
+    | TypeKey of Type * string // Type + a string identifier for the union case
     | AutoKey of Guid // Auto-generated unique ID
 
 // Public event identifier - generic on the payload type
@@ -55,8 +55,9 @@ let defineEvent<'Payload> (id: string) : EventId<'Payload> = { key = StringKey i
 // Create an auto-generated event ID
 let defineAutoEvent<'Payload> () : EventId<'Payload> = { key = AutoKey(Guid.NewGuid()) }
 
-// Create a union-based event from a union type - no sample value needed
-let defineUnionEvent<'Union, 'Payload> () : EventId<'Payload> = { key = TypeKey(typeof<'Union>) }
+// Create an event ID for a specific union case - with a manually provided name
+let defineUnionCaseEvent<'Union> (name: string) : EventId<'Union> =
+    { key = TypeKey(typeof<'Union>, name) }
 
 // Private storage for handlers
 let private eventHandlers = Collections.Generic.Dictionary<EventKey, obj -> obj>()
@@ -94,25 +95,40 @@ let dispatch<'Payload, 'State>
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
 
-// Direct union dispatch - dispatch a union case directly
-let dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (unionCase: 'Union) =
+// Direct union dispatch with manual case identifier
+let dispatchUnion<'Union, 'State> (appDb: IAppDb<'State>) (unionCase: 'Union) (caseName: string) =
     let unionType = unionCase.GetType()
-    let eventKey = TypeKey(unionType)
+    let eventKey = TypeKey(unionType, caseName)
 
     match eventHandlers.TryGetValue(eventKey) with
     | true, handler ->
         let action = handler (unionCase :> obj)
         appDb.Dispatch(action)
-    | false, _ -> console.error ($"No handler registered for union type: {unionType.Name}")
+    | false, _ -> console.error ($"No handler registered for union case: {caseName}")
 
 // Register a handler for a union case
 let registerUnionHandler<'Union, 'State> (unionCaseHandler: 'Union -> 'State -> 'State) =
     let unionType = typeof<'Union>
-    let eventId = { key = TypeKey(unionType) }
+    let eventId = { key = TypeKey(unionType, "") }
 
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'Union
         let reducer = (fun (state: 'State) -> unionCaseHandler typedPayload state) :> obj
+        reducer
+
+    eventHandlers.[eventId.key] <- wrappedHandler
+
+// Register a handler for a specific union case
+let registerUnionCaseHandler<'Union, 'State>
+    (caseName: string)
+    (handler: 'Union -> 'State -> 'State)
+    =
+    let unionType = typeof<'Union>
+    let eventId = { key = TypeKey(unionType, caseName) }
+
+    let wrappedHandler (payload: obj) : obj =
+        let typedPayload = payload :?> 'Union
+        let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
         reducer
 
     eventHandlers.[eventId.key] <- wrappedHandler
