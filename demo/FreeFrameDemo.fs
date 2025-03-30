@@ -306,6 +306,191 @@ let TodoForm () =
         }
     }
 
+// Add an example for subscription composition
+let SubscriptionCompositionExample () =
+    // Create two more specialized subscriptions from our existing ones
+    let completedTodosSubscription = mapSubscription todosSubscription (fun todos -> 
+        todos |> List.filter (fun t -> t.completed))
+    
+    let activeTodosSubscription = mapSubscription todosSubscription (fun todos -> 
+        todos |> List.filter (fun t -> not t.completed))
+    
+    // Combine them to get a summary subscription
+    let summarySubscription = 
+      combineSubscriptions 
+        completedTodosSubscription 
+        activeTodosSubscription
+        (fun completed active -> 
+            {| completed = completed.Length; active = active.Length |})
+    
+    // Use the combined subscription
+    let summary = useSubscription summarySubscription
+    
+    div {
+        className "subscription-composition-example"
+        h3 { "Subscription Composition Example" }
+        
+        div {
+            className "todos-summary"
+            p {
+                str (sprintf "Active tasks: %d" summary.active)
+            }
+            p {
+                str (sprintf "Completed tasks: %d" summary.completed)
+            }
+            p {
+                str (sprintf "Total: %d" (summary.active + summary.completed))
+            }
+        }
+    }
+
+// Example of more complex combined effects
+// First, define a new effect for "analyzing" todos
+type TodoAnalysis = {
+    totalCount: int
+    completedCount: int
+    activeCount: int
+    averageTextLength: float
+}
+
+let analyzeTodosEffect = EffectId.named<TodoItem list, TodoAnalysis>("analyze-todos")
+
+// Register the effect handler
+registerEffectHandler analyzeTodosEffect (fun todos -> async {
+    // Simulate processing time
+    do! Async.Sleep 1500
+    
+    let completed = todos |> List.filter (fun t -> t.completed)
+    let active = todos |> List.filter (fun t -> not t.completed)
+    let totalTextLength = todos |> List.sumBy (fun t -> t.text.Length)
+    let avgLength = 
+        if todos.Length > 0 then 
+            float totalTextLength / float todos.Length 
+        else 
+            0.0
+            
+    return {
+        totalCount = todos.Length
+        completedCount = completed.Length
+        activeCount = active.Length
+        averageTextLength = avgLength
+    }
+})
+
+// Add an example for effect composition
+let EffectCompositionExample () =
+    // Use combined effects to fetch todos and analyze them in parallel
+    let isLoading, resultOpt = 
+      useCombinedEffects
+        fetchTodosEffect
+        ()
+        analyzeTodosEffect
+        [{ id = 999; text = "Example task"; completed = false }] // Default analysis if fetch fails
+        (fun todos analysis -> {| todos = todos; analysis = analysis |})
+    
+    div {
+        className "effect-composition-example"
+        h3 { "Effect Composition Example" }
+        
+        match isLoading, resultOpt with
+        | true, _ -> 
+            div { 
+                className "loading"
+                str "Loading and analyzing data simultaneously..." 
+            }
+        | false, Some (Ok combined) ->
+            div {
+                className "success"
+                h4 { "Fetched Todos" }
+                ul {
+                    combined.todos |> List.map (fun todo ->
+                        li {
+                            key (string todo.id)
+                            str todo.text
+                        }
+                    )
+                }
+                
+                h4 { "Analysis Results" }
+                p { str (sprintf "Total todos: %d" combined.analysis.totalCount) }
+                p { str (sprintf "Completed: %d" combined.analysis.completedCount) }
+                p { str (sprintf "Active: %d" combined.analysis.activeCount) }
+                p { str (sprintf "Average text length: %.1f characters" combined.analysis.averageTextLength) }
+            }
+        | false, Some (Error err) ->
+            div {
+                className "error"
+                str (sprintf "Error: %s" err.Message)
+            }
+        | false, None ->
+            div {
+                className "none"
+                str "No data loaded yet."
+            }
+    }
+
+// Add a chained effects example
+// Define a second effect that depends on the result of the first
+let prioritizeTodosEffect = EffectId.named<TodoItem list, TodoItem list>("prioritize-todos")
+
+// Register the effect handler
+registerEffectHandler prioritizeTodosEffect (fun todos -> async {
+    // Simulate processing time
+    do! Async.Sleep 1000
+    
+    // Sort todos by completion status (active first) and then alphabetically
+    return todos 
+        |> List.sortBy (fun t -> (t.completed, t.text.ToLower()))
+})
+
+let ChainedEffectsExample () =
+    // Use chained effects: fetch todos, then prioritize them
+    let isLoading, resultOpt = 
+      useChainedEffect
+        fetchTodosEffect
+        ()
+        id  // Pass the result directly
+        prioritizeTodosEffect
+    
+    div {
+        className "chained-effects-example"
+        h3 { "Chained Effects Example" }
+        
+        match isLoading, resultOpt with
+        | true, _ -> 
+            div { 
+                className "loading"
+                str "Loading todos, then prioritizing them..." 
+            }
+        | false, Some (Ok prioritizedTodos) ->
+              div {
+                  className "success"
+                  h4 { "Prioritized Todos" }
+                  ol {
+                      prioritizedTodos |> List.map (fun todo ->
+                          li {
+                              key (string todo.id)
+                              className (if todo.completed then "completed-todo" else "active-todo")
+                              str todo.text
+                          }
+                      )
+                  }
+                  p { 
+                      str "Todos are sorted with active ones first, then alphabetically." 
+                  }
+              }
+        | false, Some (Error err) ->
+            div {
+                className "error"
+                str (sprintf "Error: %s" err.Message)
+            }
+        | false, None ->
+            div {
+                className "none"
+                str "No data loaded yet."
+            }
+    }
+
 let TodoFilters () =
     let currentFilter = useSubscription filterSubscription
     
@@ -535,6 +720,15 @@ let FreeFrameApp () =
         ExampleComponent()
         EffectExampleComponent() 
         EffectWithUnionStateExample() // Add the new example with union state
+        
+        // Add the new composition examples
+        div {
+            className "composition-examples"
+            h2 { "Composition Examples" }
+            SubscriptionCompositionExample()
+            EffectCompositionExample()
+            ChainedEffectsExample()
+        }
     }
 
 // Initialize the application, can be called directly from the router

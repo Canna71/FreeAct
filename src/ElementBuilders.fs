@@ -15,6 +15,9 @@ module Builders =
     type MainElement = HtmlElementBuilder
     let main = MainElement "main"
 
+    type OrderedListElement = HtmlElementBuilder
+    let ol = OrderedListElement "ol"
+
     type UnorderedListElement = HtmlElementBuilder
     let ul = UnorderedListElement "ul"
 

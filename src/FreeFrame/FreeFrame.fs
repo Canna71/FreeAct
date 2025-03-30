@@ -180,45 +180,162 @@ let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
 
     subscription
 
-// ===== React Integration =====
+// =====================================================
+//             Subscription Composition
+// =====================================================
 
-// React hook to use a subscription in a React component with immediate subscription
-let useSubscription<'V> (subscription: ISubscription<'V>) =
-    let initialValue = subscription.Value
+// Combine two subscriptions into a new one
+let combineSubscriptions<'A, 'B, 'C>
+    (subA: ISubscription<'A>)
+    (subB: ISubscription<'B>)
+    (combiner: 'A -> 'B -> 'C)
+    : ISubscription<'C>
+    =
 
-    // Create the state hook with the initial value
-    let state = Hooks.useState (initialValue)
+    let mutable currentValueA = subA.Value
+    let mutable currentValueB = subB.Value
+    let mutable currentValueC = combiner currentValueA currentValueB
+    let subscribers = ResizeArray<'C -> unit>()
 
-    // Subscribe immediately using useRef to manage the subscription reference
-    let subscriptionRef = Hooks.useRef (None)
+    let subscription =
+        { new ISubscription<'C> with
+            member _.Value = currentValueC
 
-    // If we don't have a subscription yet, create one immediately
-    if subscriptionRef.current.IsNone then
-        // Function to update the React state when subscription value changes
-        let setState = fun (newValue: 'V) -> state.update (newValue)
+            member _.Subscribe(callback) =
+                subscribers.Add(callback)
 
-        // Create the subscription right away
-        let dispose = subscription.Subscribe(setState)
+                { new IDisposable with
+                    member _.Dispose() = subscribers.Remove(callback) |> ignore
+                }
+        }
 
-        // Store the dispose function in the ref
-        subscriptionRef.current <- Some dispose
+    // Subscribe to first subscription
+    let disposeA =
+        subA.Subscribe(fun newValueA ->
+            currentValueA <- newValueA
+            let newValueC = combiner currentValueA currentValueB
 
-    // Use Effect for cleanup only
-    Hooks.useEffectDisposable (
-        (fun () ->
-            // Return the dispose function for cleanup
+            if not (Object.Equals(currentValueC, newValueC)) then
+                currentValueC <- newValueC
+
+                for subscriber in subscribers do
+                    subscriber newValueC
+        )
+
+    // Subscribe to second subscription
+    let disposeB =
+        subB.Subscribe(fun newValueB ->
+            currentValueB <- newValueB
+            let newValueC = combiner currentValueA currentValueB
+
+            if not (Object.Equals(currentValueC, newValueC)) then
+                currentValueC <- newValueC
+
+                for subscriber in subscribers do
+                    subscriber newValueC
+        )
+
+    // Add a special handler to dispose both subscriptions
+    { new ISubscription<'C> with
+        member _.Value = currentValueC
+
+        member _.Subscribe(callback) =
+            let innerSub = subscription.Subscribe(callback)
+
             { new IDisposable with
                 member _.Dispose() =
-                    match subscriptionRef.current with
-                    | Some dispose -> dispose.Dispose()
-                    | None -> ()
-            }
-        ),
-        [| subscription :> obj |]
-    )
+                    innerSub.Dispose()
 
-    // Return the current value from state
-    state.current
+                    // If we're the last subscriber, clean up the source subscriptions
+                    if subscribers.Count = 0 then
+                        disposeA.Dispose()
+                        disposeB.Dispose()
+            }
+    }
+
+// Combine three subscriptions
+let combine3Subscriptions<'A, 'B, 'C, 'D>
+    (subA: ISubscription<'A>)
+    (subB: ISubscription<'B>)
+    (subC: ISubscription<'C>)
+    (combiner: 'A -> 'B -> 'C -> 'D)
+    : ISubscription<'D>
+    =
+
+    // First combine A and B
+    let subAB = combineSubscriptions subA subB (fun a b -> (a, b))
+
+    // Then combine the result with C
+    combineSubscriptions subAB subC (fun (a, b) c -> combiner a b c)
+
+// Map a subscription to a new type
+let mapSubscription<'A, 'B>
+    (subscription: ISubscription<'A>)
+    (mapper: 'A -> 'B)
+    : ISubscription<'B>
+    =
+
+    let mutable currentValueA = subscription.Value
+    let mutable currentValueB = mapper currentValueA
+    let subscribers = ResizeArray<'B -> unit>()
+
+    let mappedSubscription =
+        { new ISubscription<'B> with
+            member _.Value = currentValueB
+
+            member _.Subscribe(callback) =
+                subscribers.Add(callback)
+
+                { new IDisposable with
+                    member _.Dispose() = subscribers.Remove(callback) |> ignore
+                }
+        }
+
+    // Subscribe to the source subscription
+    let dispose =
+        subscription.Subscribe(fun newValueA ->
+            currentValueA <- newValueA
+            let newValueB = mapper newValueA
+
+            if not (Object.Equals(currentValueB, newValueB)) then
+                currentValueB <- newValueB
+
+                for subscriber in subscribers do
+                    subscriber newValueB
+        )
+
+    // Add a special handler to dispose the source subscription
+    { new ISubscription<'B> with
+        member _.Value = currentValueB
+
+        member _.Subscribe(callback) =
+            let innerSub = mappedSubscription.Subscribe(callback)
+
+            { new IDisposable with
+                member _.Dispose() =
+                    innerSub.Dispose()
+
+                    // If we're the last subscriber, clean up the source subscription
+                    if subscribers.Count = 0 then
+                        dispose.Dispose()
+            }
+    }
+
+// Filter a subscription
+let filterSubscription<'A>
+    (subscription: ISubscription<'A>)
+    (predicate: 'A -> bool)
+    : ISubscription<'A option>
+    =
+
+    mapSubscription
+        subscription
+        (fun value ->
+            if predicate value then
+                Some value
+            else
+                None
+        )
 
 // =====================================================
 //             Effects (side effects)
@@ -359,6 +476,119 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
             | _ -> () // No event to dispatch
         )
 
+// =====================================================
+//             Effect Composition
+// =====================================================
+
+// Chain two effects where the second effect depends on the result of the first
+let chainEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
+    (effect1: EffectId<'PayloadA, 'ResultA>)
+    (payload1: 'PayloadA)
+    (createPayload2: 'ResultA -> 'PayloadB)
+    (effect2: EffectId<'PayloadB, 'ResultB>)
+    : Async<Result<'ResultB, exn>>
+    =
+
+    async {
+        // Run the first effect
+        let! result1 = runEffectAsync effect1 payload1
+
+        // If the first effect succeeds, run the second
+        match result1 with
+        | Ok resultA ->
+            let payload2 = createPayload2 resultA
+            return! runEffectAsync effect2 payload2
+        | Error e -> return Error e
+    }
+
+// Run two effects in parallel and combine their results
+let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
+    (effect1: EffectId<'PayloadA, 'ResultA>)
+    (payload1: 'PayloadA)
+    (effect2: EffectId<'PayloadB, 'ResultB>)
+    (payload2: 'PayloadB)
+    (combiner: 'ResultA -> 'ResultB -> 'Combined)
+    : Async<Result<'Combined, exn>>
+    =
+
+    async {
+        // Create async computations that return boxed objects to allow different types
+        let task1 =
+            async {
+                let! result = runEffectAsync effect1 payload1
+                return box result // Box the result to make it compatible with an array
+            }
+
+        let task2 =
+            async {
+                let! result = runEffectAsync effect2 payload2
+                return box result // Box the result
+            }
+
+        // Run tasks in parallel
+        let! results = Async.Parallel [| task1; task2 |]
+
+        // Unbox and handle the results
+        let result1 = unbox<Result<'ResultA, exn>> results.[0]
+        let result2 = unbox<Result<'ResultB, exn>> results.[1]
+
+        // Combine the results if both succeed
+        match result1, result2 with
+        | Ok r1, Ok r2 -> return Ok(combiner r1 r2)
+        | Error e, _ -> return Error e
+        | _, Error e -> return Error e
+    }
+
+// ===== React Integration =====
+
+// React hook to use a subscription in a React component with immediate subscription
+let useSubscription<'V> (subscription: ISubscription<'V>) =
+    let initialValue = subscription.Value
+
+    // Create the state hook with the initial value
+    let state = Hooks.useState (initialValue)
+
+    // Subscribe immediately using useRef to manage the subscription reference
+    let subscriptionRef = Hooks.useRef (None)
+
+    // If we don't have a subscription yet, create one immediately
+    if subscriptionRef.current.IsNone then
+        // Function to update the React state when subscription value changes
+        let setState = fun (newValue: 'V) -> state.update (newValue)
+
+        // Create the subscription right away
+        let dispose = subscription.Subscribe(setState)
+
+        // Store the dispose function in the ref
+        subscriptionRef.current <- Some dispose
+
+    // Use Effect for cleanup only
+    Hooks.useEffectDisposable (
+        (fun () ->
+            // Return the dispose function for cleanup
+            { new IDisposable with
+                member _.Dispose() =
+                    match subscriptionRef.current with
+                    | Some dispose -> dispose.Dispose()
+                    | None -> ()
+            }
+        ),
+        [| subscription :> obj |]
+    )
+
+    // Return the current value from state
+    state.current
+
+// React hook for combined subscription
+let useCombinedSubscription<'A, 'B, 'C>
+    (subA: ISubscription<'A>)
+    (subB: ISubscription<'B>)
+    (combiner: 'A -> 'B -> 'C)
+    =
+
+    let combinedSub = combineSubscriptions subA subB combiner
+    useSubscription combinedSub
+
 // A more generic hook for effects that allows custom loading state handling
 let useEffectWithCustomState<'Payload, 'Result, 'LoadingState>
     (effectId: EffectId<'Payload, 'Result>)
@@ -493,3 +723,74 @@ let useEffectWithDepsAndCustomState<'Payload, 'Result, 'LoadingState>
     )
 
     resultState.current
+
+// React hook for chained effects
+let useChainedEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
+    (effect1: EffectId<'PayloadA, 'ResultA>)
+    (payload1: 'PayloadA)
+    (createPayload2: 'ResultA -> 'PayloadB)
+    (effect2: EffectId<'PayloadB, 'ResultB>)
+    =
+
+    let loadingState = Hooks.useState true
+    let resultState = Hooks.useState<Result<'ResultB, exn> option> None
+
+    Hooks.useEffect (
+        (fun () ->
+            loadingState.update true
+
+            async {
+                let! result = chainEffect effect1 payload1 createPayload2 effect2
+
+                // Update state with the result
+                Browser.Dom.window.setTimeout (
+                    (fun () ->
+                        resultState.update (Some result)
+                        loadingState.update false
+                    ),
+                    0
+                )
+                |> ignore
+            }
+            |> Async.StartImmediate
+        ),
+        [| box payload1 |]
+    )
+
+    loadingState.current, resultState.current
+
+// React hook for combined effects
+let useCombinedEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
+    (effect1: EffectId<'PayloadA, 'ResultA>)
+    (payload1: 'PayloadA)
+    (effect2: EffectId<'PayloadB, 'ResultB>)
+    (payload2: 'PayloadB)
+    (combiner: 'ResultA -> 'ResultB -> 'Combined)
+    =
+
+    let loadingState = Hooks.useState true
+    let resultState = Hooks.useState<Result<'Combined, exn> option> None
+
+    Hooks.useEffect (
+        (fun () ->
+            loadingState.update true
+
+            async {
+                let! result = combineEffects effect1 payload1 effect2 payload2 combiner
+
+                // Update state with the result
+                Browser.Dom.window.setTimeout (
+                    (fun () ->
+                        resultState.update (Some result)
+                        loadingState.update false
+                    ),
+                    0
+                )
+                |> ignore
+            }
+            |> Async.StartImmediate
+        ),
+        [| box payload1; box payload2 |]
+    )
+
+    loadingState.current, resultState.current
