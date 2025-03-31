@@ -582,11 +582,19 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
 
 // creates a new subscription based on the selector
 let useView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
-    // Create a subscription using the selector
-    let subscription = createSubscription appDb selector
+    // Create a subscription using the selector, storing it in a ref and disposing it
+    // when the component unmounts
+    let subscriptionRef = Hooks.useRef (None)
 
-    // Use the subscription in the React component
-    useSubscription subscription
+    if subscriptionRef.current.IsNone then
+        // Function to update the React state when subscription value changes
+        // Create the subscription right away
+        let subscription = createSubscription appDb selector
+        // Store the subscription in the ref
+        subscriptionRef.current <- Some subscription
+
+    useSubscription subscriptionRef.current.Value
+
 // Return the subscription object
 
 // React hook for combined subscription
