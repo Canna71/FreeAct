@@ -89,17 +89,22 @@ let FreeFrameRouterProvider<'State> =
                                      Children: ReactElement list
                                  |}) ->
 
-        // Register handler for route events if not already done
+        // Register router event handler - only once when component mounts
         Hooks.useEffect (
             (fun () ->
+                console.log ("Setting up router event handler")
+
                 // Register handler for router events
                 registerTypedEventHandler<RouterEvent, 'State> (fun event state ->
                     match event with
                     | RouteChanged(path, routeMatchOpt) ->
+                        console.log ("RouteChanged event received for path:", path)
                         let currentRouter = props.GetRouterState state
 
                         match routeMatchOpt with
                         | Some routeMatch ->
+                            console.log ("Route match found:", routeMatch)
+
                             let newRouterState =
                                 { currentRouter with
                                     CurrentRoute = routeMatch.Pattern
@@ -109,8 +114,10 @@ let FreeFrameRouterProvider<'State> =
                                     Fragment = routeMatch.Fragment
                                 }
 
+                            // Return the updated state
                             props.SetRouterState newRouterState state
                         | None ->
+                            console.log ("No route match found")
                             // If no match, just update the path
                             let newRouterState =
                                 { currentRouter with
@@ -121,8 +128,11 @@ let FreeFrameRouterProvider<'State> =
                                     Fragment = None
                                 }
 
+                            // Return the updated state
                             props.SetRouterState newRouterState state
+
                     | NavigateTo path ->
+                        console.log ("NavigateTo event received for path:", path)
                         // Update browser URL
                         window.history.pushState (null, "", path)
 
@@ -134,15 +144,24 @@ let FreeFrameRouterProvider<'State> =
                             | Some(result, _) -> Some result
                             | None -> None
 
-                        dispatchTyped<RouterEvent, 'State>
-                            props.AppDb
-                            (RouteChanged(path, routeResult))
+                        // Dispatch as a separate action to avoid recursion
+                        Browser.Dom.window.setTimeout (
+                            (fun () ->
+                                dispatchTyped<RouterEvent, 'State>
+                                    props.AppDb
+                                    (RouteChanged(path, routeResult))
+                            ),
+                            0
+                        )
+                        |> ignore
 
-                        // Return unchanged state since we'll handle the change via the RouteChanged event
+                        // Return unchanged state
                         state
+
                     | NavigateBack ->
                         window.history.back ()
                         state
+
                     | NavigateForward ->
                         window.history.forward ()
                         state
@@ -244,7 +263,6 @@ let FreeFrameRouterProvider<'State> =
                         window.removeEventListener ("popstate", handlePopState)
                         window.removeEventListener ("hashchange", handleHashChange)
                 }
-
             ),
             [| box props.Mode; box props.Router |]
         )
@@ -264,8 +282,18 @@ let FreeFrameRoutes<'State> =
                                      DefaultContent: ReactElement
                                  |}) ->
 
+        // Create a subscription to watch the router state
         let subscription = createSubscription props.AppDb props.GetRouterState
         let routerState = useSubscription subscription
+
+        // Add debugging to verify the subscription is working
+        Hooks.useEffect (
+            (fun () ->
+                console.log ("FreeFrameRoutes rendering with path:", routerState.CurrentPath)
+                console.log ("Router state:", routerState)
+            ),
+            [| box routerState |]
+        )
 
         // Match the current path and render the appropriate component
         match props.Router.Match(routerState.CurrentPath) with
@@ -279,8 +307,11 @@ let FreeFrameRoutes<'State> =
                     Fragment = routerState.Fragment
                 }
 
+            // Call the handler to get the React element to render
             handler result
-        | None -> props.DefaultContent
+        | None ->
+            console.log ("No route match found for path:", routerState.CurrentPath)
+            props.DefaultContent
     )
 
 /// Utility function to navigate programmatically

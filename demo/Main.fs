@@ -32,6 +32,7 @@ let appDb = AppDb<AppState>({
 // Helper functions to get and set router state
 let getRouterState (state: AppState) = state.Router
 let setRouterState (routerState: RouterState) (state: AppState) =
+    console.log("Setting router state:", routerState)
     { state with Router = routerState }
 
 // Example of an additional event for counter
@@ -115,87 +116,6 @@ let notFound  =
         }
     }
 
-// Create a router instance
-let setupRouter () =
-    let router = Router<ReactElement>()
-    
-    router
-        .Route("/", home)
-        .Route("/about", about)
-        .Route("/users", users)
-        .Route(
-            "/users/:userId",
-            fun result ->
-                let userId = result.PathParams.["userId"]
-                div {
-                    h1 { sprintf "User: %s" userId }
-                    p { "User details go here." }
-                    div {
-                        Link {| 
-                            destination = sprintf "/users/%s/posts/123" userId
-                            className = Some "nav-link"
-                            children = [str "View User's Post"] 
-                        |}
-                    }
-                }
-        )
-        .Route(
-            "/users/:userId/posts/:postId",
-            fun result ->
-                let userId = result.PathParams.["userId"]
-                let postId = result.PathParams.["postId"]
-                div {
-                    h1 { sprintf "Post %s by User %s" postId userId }
-                    p { "Post details go here." }
-                    div {
-                        Link {| destination = "/users"; className = Some "nav-link"; children = [str "Back to Users"] |}
-                    }
-                }
-        )
-        .Route("/users/admin", fun _ -> div { h1 { "Admin Panel" } })
-        .Route(
-            "/search",
-            fun result ->
-                let query =
-                    match result.QueryParams.TryFind "q" with
-                    | Some [ q ] -> q
-                    | _ -> ""
-                div {
-                    h1 { sprintf "Search results for: %s" query }
-                    p { "Search results go here." }
-                }
-        )
-        .Route(
-            "/freeframeeffects", 
-            fun _ -> 
-                div {
-                    h1 { "FreeFrame Effects Demo" }
-                    // Render the component directly
-                    // FreeFrameDemo()
-                    EffectsDemo.EffectsDemo()
-                }
-          )
-        .Route(
-            "/freeframecomposition", 
-            fun _ -> 
-                div {
-                    h1 { "FreeFrame Composition Demo" }
-                    // Render the component directly
-                    // FreeFrameDemo()
-                    CompositionDemo.CompositionDemo()
-                }
-        )
-        .Route(
-            "/tododemo", 
-            fun _ -> 
-                div {
-                    h1 { "FreeFrame ToDo Demo" }
-                    // Render the component directly
-                    // FreeFrameDemo()
-                    TodoDemo.TodoDemo()
-                }
-        )
-
 // Create a custom navigation component using FreeFrameLink
 let Navigation () =
     div {
@@ -265,7 +185,86 @@ let Navigation () =
 // Main app component using FreeFrameRouter
 let App () =
     console.log("App component rendering...")
-    let router = setupRouter()
+    
+    // Create a fresh router instance
+    let router = 
+        let r = Router<ReactElement>()
+        
+        r.Route("/", home)
+         .Route("/about", about)
+         .Route("/users", users)
+         .Route(
+            "/users/:userId",
+            fun result ->
+                let userId = result.PathParams.["userId"]
+                div {
+                    h1 { sprintf "User: %s" userId }
+                    p { "User details go here." }
+                    div {
+                        Link {| 
+                            destination = sprintf "/users/%s/posts/123" userId
+                            className = Some "nav-link"
+                            children = [str "View User's Post"] 
+                        |}
+                    }
+                }
+         )
+         .Route(
+            "/users/:userId/posts/:postId",
+            fun result ->
+                let userId = result.PathParams.["userId"]
+                let postId = result.PathParams.["postId"]
+                div {
+                    h1 { sprintf "Post %s by User %s" postId userId }
+                    p { "Post details go here." }
+                    div {
+                        Link {| destination = "/users"; className = Some "nav-link"; children = [str "Back to Users"] |}
+                    }
+                }
+         )
+         .Route("/users/admin", fun _ -> div { h1 { "Admin Panel" } })
+         .Route(
+            "/search",
+            fun result ->
+                let query =
+                    match result.QueryParams.TryFind "q" with
+                    | Some [ q ] -> q
+                    | _ -> ""
+                div {
+                    h1 { sprintf "Search results for: %s" query }
+                    p { "Search results go here." }
+                }
+         )
+         .Route(
+            "/freeframeeffects", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame Effects Demo" }
+                    // Render the component directly
+                    // FreeFrameDemo()
+                    EffectsDemo.EffectsDemo()
+                }
+         )
+         .Route(
+            "/freeframecomposition", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame Composition Demo" }
+                    // Render the component directly
+                    // FreeFrameDemo()
+                    CompositionDemo.CompositionDemo()
+                }
+         )
+         .Route(
+            "/tododemo", 
+            fun _ -> 
+                div {
+                    h1 { "FreeFrame ToDo Demo" }
+                    // Render the component directly
+                    // FreeFrameDemo()
+                    TodoDemo.TodoDemo()
+                }
+         )
     
     FreeFrameRouterProvider {|
         AppDb = appDb
