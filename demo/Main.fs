@@ -15,6 +15,7 @@ open FreeAct.FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
+open FreeAct.FreeFrameSubscription
 
 // Define the application state that includes router state
 type AppState = {
@@ -54,8 +55,7 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
 
 // Create subscriptions for parts of the state
 let useCount () =
-    let subscription = createSubscription appDb (fun state -> state.Count)
-    useSubscription subscription
+    useSubscription appDb (fun state -> state.Count)
 
 // Route handlers
 let home route =

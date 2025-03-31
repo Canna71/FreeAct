@@ -9,6 +9,7 @@ open FreeAct.Router
 open FreeAct.FreeFrame
 open System
 open FreeAct.Tokenizer
+open FreeAct.FreeFrameSubscription
 
 // ==================================================
 //           FreeFrame Router Integration
@@ -287,8 +288,15 @@ let FreeFrameRoutes<'State> =
                                  |}) ->
 
         // Create a subscription to watch router state changes
-        let subscription = createSubscription props.AppDb props.GetRouterState
-        let routerState = useSubscription subscription
+        let routerState = useSubscription props.AppDb props.GetRouterState
+
+        // For debugging - log when route changes are detected
+        Hooks.useEffect (
+            (fun () ->
+                console.log ("FreeFrameRoutes detected route change:", routerState.CurrentPath)
+            ),
+            [| box routerState.CurrentPath |]
+        )
 
         // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
@@ -322,5 +330,4 @@ let navigateForward<'State> (appDb: IAppDb<'State>) () =
 
 /// Hook to access the current route information
 let useRoute<'State> (appDb: IAppDb<'State>) (getRouterState: 'State -> RouterState) =
-    let subscription = createSubscription appDb getRouterState
-    useSubscription subscription
+    useSubscription appDb getRouterState
