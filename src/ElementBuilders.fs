@@ -57,8 +57,6 @@ module Builders =
 
     let form = FormElement()
 
-    //TODO: will it work?
-    type FragmentElement = HtmlElementBuilder
-    let fragment = FragmentElement "Fragment"
+    let fragment = FragmentElement()
 
     let none: ReactElement = null

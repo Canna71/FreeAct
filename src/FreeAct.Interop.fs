@@ -14,16 +14,11 @@ type ICSSUnit = interface end
 
 [<Import("createElement", "react")>]
 [<Emit "$0.apply(null, [$1, $2, ...$3])">]
-let inline reactElementApply
-    (name: string)
-    (props: 'a)
-    (nested: #seq<ReactElement>)
-    : ReactElement
-    =
+let inline reactElementApply (name: obj) (props: 'a) (nested: #seq<ReactElement>) : ReactElement =
     jsNative
 
 let inline createElement
-    name
+    (name: obj)
     (properties: IReactProperty list)
     (children: ReactElement list)
     : ReactElement

@@ -18,7 +18,7 @@ type ElementProperty =
     | Child of ChildElement
 
 // Element builder using method chaining for props
-type ElementBuilder(tag: string) =
+type ElementBuilder(tag: obj) =
 
     // member inline _.Yield(prop) = HtmlProp prop
 
@@ -101,7 +101,7 @@ type ElementBuilder(tag: string) =
     member inline _.Prop(props, prop: HtmlProp) = Prop prop :: props
 
 // Derived builder with children operation
-type ElementWithChildrenBuilder(tag: string) =
+type ElementWithChildrenBuilder(tag: obj) =
     inherit ElementBuilder(tag)
 
     member inline _.Yield(reactElement: ReactElement) = [ Child(Element reactElement) ]
@@ -119,3 +119,6 @@ type ElementWithChildrenBuilder(tag: string) =
     member _.Children(props, elements: ReactElement list) =
         // Child(ElementList elements) :: props
         (elements |> List.map (fun el -> Child(Element el))) @ props
+
+type FragmentElement() =
+    inherit ElementWithChildrenBuilder(Fable.React.ReactBindings.React.Fragment)
