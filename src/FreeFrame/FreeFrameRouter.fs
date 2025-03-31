@@ -7,7 +7,6 @@ open Fable.React
 open FreeAct
 open FreeAct.Router
 open FreeAct.FreeFrame
-
 open System
 
 // ==================================================
@@ -35,8 +34,8 @@ type RouteResult<'Content> =
     }
 
 /// Events for router actions
-type RouterEvent<'Content> =
-    | RouteChanged of RouteResult<'Content>
+type RouterEvent =
+    | RouteChanged of string // Just pass the path here, we'll resolve it later
     | NavigateTo of string
     | NavigateBack
     | NavigateForward
@@ -45,13 +44,6 @@ type RouterEvent<'Content> =
 type RouterMode =
     | HashBased
     | HistoryAPI
-
-/// Event IDs for router events
-module RouterEvents =
-    let routeChangedEvent<'Content> = EventId.auto<'Content> ()
-    let navigateToEvent = EventId.auto ()
-    let navigateBackEvent = EventId.auto ()
-    let navigateForwardEvent = EventId.auto ()
 
 /// Create a default router state
 let createDefaultRouterState<'Content> () : RouterState<'Content> =
@@ -63,57 +55,8 @@ let createDefaultRouterState<'Content> () : RouterState<'Content> =
         Content = None
     }
 
-/// Register event handlers for router events
-let registerRouterEvents<'Content, 'State>
-    (getRouterState: 'State -> RouterState<'Content>)
-    (setRouterState: RouterState<'Content> -> 'State -> 'State)
-    =
-
-    // Handle route changed events
-    registerNamedEventHandler
-        RouterEvents.routeChangedEvent
-        (fun (RouteChanged result) state ->
-            let currentRouter = getRouterState state
-
-            let newRouterState =
-                { currentRouter with
-                    CurrentRoute = result.MatchedRoute
-                    CurrentPath = result.Path
-                    PathParams = result.PathParams
-                    QueryParams = result.QueryParams
-                    Content = Some result.Content
-                }
-
-            setRouterState newRouterState state
-        )
-
-    // Handle navigate to events
-    registerNamedEventHandler
-        RouterEvents.navigateToEvent
-        (fun (path) state ->
-            // Update browser URL but don't trigger another event - the popstate event will handle that
-            window.history.pushState (null, "", path)
-            state
-        )
-
-    // Handle navigate back events
-    registerNamedEventHandler
-        RouterEvents.navigateBackEvent
-        (fun _ state ->
-            window.history.back ()
-            state
-        )
-
-    // Handle navigate forward events
-    registerNamedEventHandler
-        RouterEvents.navigateForwardEvent
-        (fun _ state ->
-            window.history.forward ()
-            state
-        )
-
-/// Initialize the router with the FreeFrame state management
-let initializeRouter<'Content, 'State>
+/// Register event handlers for router events within a React component
+let setupRouterState<'Content, 'State>
     (appDb: IAppDb<'State>)
     (router: Router<'Content>)
     (getRouterState: 'State -> RouterState<'Content>)
@@ -122,100 +65,106 @@ let initializeRouter<'Content, 'State>
     (defaultContent: 'Content)
     =
 
-    // Register event handlers
-    registerRouterEvents getRouterState setRouterState
+    // Handle a route change by processing the route and updating state
+    let handleRouteChange path =
+        let (matchResult, content) =
+            match router.Match(path) with
+            | Some(result, handler) ->
+                // Execute the handler to get the content
+                let content = handler result
+                (result, content)
+            | None ->
+                // Create default result for not found
+                let parsedUrl = Tokenizer.parseUrl path
 
-    // Handle browser navigation events (popstate)
-    let handleLocationChange _ =
-        let path =
-            match mode with
-            | RouterMode.HashBased ->
-                let hash = window.location.hash
+                let result: Tokenizer.RouteMatchResult =
+                    {
+                        Pattern = ""
+                        PathParams = Map.empty
+                        QueryParams = parsedUrl.QueryParams
+                        Fragment = parsedUrl.Fragment
+                    }
 
-                if hash.StartsWith("#") then
-                    hash.Substring(1)
-                else
-                    hash
-            | RouterMode.HistoryAPI -> window.location.pathname + window.location.search
+                (result, defaultContent)
 
-        // Use the router's Match method to find a matching route
-        match router.Match(path) with
-        | Some(matchResult, handler) ->
-            // Get query parameters from the URL
-            let parsedUrl = FreeAct.Tokenizer.parseUrl path
+        // Create a route result to update state
+        let routeResult =
+            {
+                MatchedRoute = matchResult.Pattern
+                Path = path
+                PathParams = matchResult.PathParams
+                QueryParams = matchResult.QueryParams
+                Content = content
+            }
 
-            // // Create a route match result
-            // let matchResult = {
-            //     PathParams = Map.empty  // Will be populated by the handler
-            //     QueryParams = parsedUrl.QueryParams
-            //     Fragment = parsedUrl.Fragment
-            // }
+        // Update router state via reducer
+        appDb.Dispatch(fun (state: 'State) ->
+            let currentRouter = getRouterState state
 
-            // Execute the handler to get the content
-            let content = handler matchResult
-
-            // // Create a result to dispatch
-            let routeResult =
-                {
-                    MatchedRoute = matchResult.Pattern // We don't have direct access to the matched pattern
-                    Path = path
-                    PathParams = matchResult.PathParams
-                    QueryParams = matchResult.QueryParams
-                    Content = content
+            let newRouterState =
+                { currentRouter with
+                    CurrentRoute = routeResult.MatchedRoute
+                    CurrentPath = routeResult.Path
+                    PathParams = routeResult.PathParams
+                    QueryParams = routeResult.QueryParams
+                    Content = Some routeResult.Content
                 }
 
-            // Dispatch route changed event
-            dispatch appDb RouterEvents.routeChangedEvent routeResult
-        | None ->
-            // Create a default route result for not found
-            let notFoundResult =
-                {
-                    MatchedRoute = ""
-                    Path = path
-                    PathParams = Map.empty
-                    QueryParams = Map.empty
-                    Content = defaultContent
-                }
+            setRouterState newRouterState state
+        )
 
-            dispatch appDb RouterEvents.routeChangedEvent notFoundResult
+    // Register handler for route changed events
+    registerTypedEventHandler<RouterEvent, 'State> (fun event state ->
+        match event with
+        | RouteChanged path ->
+            // Route changes are handled separately to avoid recursive updates
+            // We just return the state unchanged here
+            state
+        | NavigateTo path ->
+            // Update browser URL
+            window.history.pushState (null, "", path)
+            // We'll handle the actual route change via the popstate event
+            state
+        | NavigateBack ->
+            window.history.back ()
+            state
+        | NavigateForward ->
+            window.history.forward ()
+            state
+    )
 
-    // Set up event listener for popstate
-    window.addEventListener ("popstate", handleLocationChange)
-
-    // Handle initial route
-    handleLocationChange null
-
-    // Return a function to clean up the event listener
-    fun () -> window.removeEventListener ("popstate", handleLocationChange)
+    // Return the handler function so it can be used within useEffect
+    handleRouteChange
 
 /// Create a link component that uses the FreeFrame router
-let FreeFrameLink<'State>
-    (props:
-        {|
-            appDb: IAppDb<'State>
-            destination: string
-            className: string option
-            children: ReactElement list
-        |})
-    =
+let FreeFrameLink<'State> =
+    FunctionComponent.Of(fun
+                             (props:
+                                 {|
+                                     appDb: IAppDb<'State>
+                                     destination: string
+                                     className: string option
+                                     children: ReactElement list
+                                 |}) ->
 
-    let handleClick (e: Browser.Types.MouseEvent) =
-        e.preventDefault ()
-        dispatch props.appDb RouterEvents.navigateToEvent props.destination
+        let handleClick (e: Browser.Types.MouseEvent) =
+            e.preventDefault ()
+            dispatchTyped<RouterEvent, 'State> props.appDb (NavigateTo props.destination)
 
-    a {
-        href props.destination
-        onClick handleClick
+        a {
+            href props.destination
+            onClick handleClick
 
-        className
-            [
-                match props.className with
-                | Some className' -> yield className'
-                | _ -> ()
-            ]
+            className
+                [
+                    match props.className with
+                    | Some className' -> yield className'
+                    | _ -> ()
+                ]
 
-        children props.children
-    }
+            children props.children
+        }
+    )
 
 /// Create a router provider component that connects the FreeFrame router to React
 let FreeFrameRouterProvider<'Content, 'State> =
@@ -231,23 +180,85 @@ let FreeFrameRouterProvider<'Content, 'State> =
                                      Children: ReactElement list
                                  |}) ->
 
-        // Initialize router on component mount
+        // Set up the router state and get the handler for route changes
+        let handleRouteChange =
+            setupRouterState
+                props.AppDb
+                props.Router
+                props.GetRouterState
+                props.SetRouterState
+                props.Mode
+                props.DefaultContent
+
+        // Keep track of the current URL for rendering
+        let initialUrl =
+            match props.Mode with
+            | HistoryAPI -> window.location.pathname + window.location.search
+            | HashBased ->
+                let hash = window.location.hash
+
+                if hash.StartsWith("#") then
+                    hash.Substring(1)
+                else
+                    "/"
+
+        let urlState = Hooks.useState initialUrl
+
+        // Handle browser navigation events
         Hooks.useEffectDisposable (
             (fun () ->
-                let cleanup =
-                    initializeRouter
-                        props.AppDb
-                        props.Router
-                        props.GetRouterState
-                        props.SetRouterState
-                        props.Mode
-                        props.DefaultContent
+                // Function to handle popstate events
+                let handlePopState _ =
+                    let path =
+                        match props.Mode with
+                        | HistoryAPI -> window.location.pathname + window.location.search
+                        | HashBased ->
+                            let hash = window.location.hash
+
+                            if hash.StartsWith("#") then
+                                hash.Substring(1)
+                            else
+                                "/"
+
+                    // Update our local state
+                    urlState.update path
+                    // Process the route change
+                    handleRouteChange path
+
+                // Function to handle hashchange events
+                let handleHashChange _ =
+                    if props.Mode = HashBased then
+                        let hash = window.location.hash
+
+                        let path =
+                            if hash.StartsWith("#") then
+                                hash.Substring(1)
+                            else
+                                "/"
+
+                        // Update our local state
+                        urlState.update path
+                        // Process the route change
+                        handleRouteChange path
+
+                // Add event listeners
+                window.addEventListener ("popstate", handlePopState)
+                window.addEventListener ("hashchange", handleHashChange)
+
+                // Process the initial route
+                handleRouteChange urlState.current
+
+                // Cleanup function
 
                 { new IDisposable with
-                    member _.Dispose() = cleanup ()
+                    member _.Dispose() =
+                        // Remove event listeners on cleanup
+                        window.removeEventListener ("popstate", handlePopState)
+                        window.removeEventListener ("hashchange", handleHashChange)
                 }
+
             ),
-            [| box props.Router; box props.Mode |]
+            [| box props.Mode; box props.Router |]
         )
 
         // Render children
@@ -275,15 +286,15 @@ let FreeFrameRoutes<'State> =
 
 /// Utility function to navigate programmatically
 let navigateTo<'State> (appDb: IAppDb<'State>) (path: string) =
-    dispatch appDb RouterEvents.navigateToEvent path
+    dispatchTyped<RouterEvent, 'State> appDb (NavigateTo path)
 
 /// Utility function to navigate back
 let navigateBack<'State> (appDb: IAppDb<'State>) () =
-    dispatch appDb RouterEvents.navigateBackEvent ()
+    dispatchTyped<RouterEvent, 'State> appDb NavigateBack
 
 /// Utility function to navigate forward
 let navigateForward<'State> (appDb: IAppDb<'State>) () =
-    dispatch appDb RouterEvents.navigateForwardEvent ()
+    dispatchTyped<RouterEvent, 'State> appDb NavigateForward
 
 /// Hook to access the current route information
 let useRoute<'Content, 'State>

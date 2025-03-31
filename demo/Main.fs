@@ -39,7 +39,6 @@ type CounterEvent =
     | Increment
     | Decrement
 
-
 // Register counter event handlers
 registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
     match ev with
@@ -48,8 +47,6 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
     | Decrement -> 
         { state with Count = state.Count - 1 }
 )
-
-
 
 // Create subscriptions for parts of the state
 let useCount () =
