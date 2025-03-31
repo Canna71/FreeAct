@@ -32,8 +32,11 @@ let appDb = AppDb<AppState>({
 // Helper functions to get and set router state
 let getRouterState (state: AppState) = state.Router
 let setRouterState (routerState: RouterState) (state: AppState) =
-    console.log("Setting router state:", routerState)
-    { state with Router = routerState }
+    // Only update if something actually changed
+    if routerState <> state.Router then
+        { state with Router = routerState }
+    else
+        state
 
 // Example of an additional event for counter
 type CounterEvent = 
@@ -186,14 +189,12 @@ let Navigation () =
 let App () =
     console.log("App component rendering...")
     
-    // Create a fresh router instance
-    let router = 
-        let r = Router<ReactElement>()
-        
-        r.Route("/", home)
-         .Route("/about", about)
-         .Route("/users", users)
-         .Route(
+    // Create the router
+    let router = Router<ReactElement>()
+    router.Route("/", home)
+          .Route("/about", about)
+          .Route("/users", users)
+          .Route(
             "/users/:userId",
             fun result ->
                 let userId = result.PathParams.["userId"]
@@ -208,8 +209,8 @@ let App () =
                         |}
                     }
                 }
-         )
-         .Route(
+          )
+          .Route(
             "/users/:userId/posts/:postId",
             fun result ->
                 let userId = result.PathParams.["userId"]
@@ -221,9 +222,9 @@ let App () =
                         Link {| destination = "/users"; className = Some "nav-link"; children = [str "Back to Users"] |}
                     }
                 }
-         )
-         .Route("/users/admin", fun _ -> div { h1 { "Admin Panel" } })
-         .Route(
+          )
+          .Route("/users/admin", fun _ -> div { h1 { "Admin Panel" } })
+          .Route(
             "/search",
             fun result ->
                 let query =
@@ -234,8 +235,8 @@ let App () =
                     h1 { sprintf "Search results for: %s" query }
                     p { "Search results go here." }
                 }
-         )
-         .Route(
+          )
+          .Route(
             "/freeframeeffects", 
             fun _ -> 
                 div {
@@ -244,8 +245,8 @@ let App () =
                     // FreeFrameDemo()
                     EffectsDemo.EffectsDemo()
                 }
-         )
-         .Route(
+          )
+          .Route(
             "/freeframecomposition", 
             fun _ -> 
                 div {
@@ -254,8 +255,8 @@ let App () =
                     // FreeFrameDemo()
                     CompositionDemo.CompositionDemo()
                 }
-         )
-         .Route(
+          )
+          .Route(
             "/tododemo", 
             fun _ -> 
                 div {
@@ -264,7 +265,8 @@ let App () =
                     // FreeFrameDemo()
                     TodoDemo.TodoDemo()
                 }
-         )
+          )
+          |> ignore
     
     FreeFrameRouterProvider {|
         AppDb = appDb

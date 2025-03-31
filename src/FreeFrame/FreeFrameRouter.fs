@@ -26,7 +26,7 @@ type RouterState =
 
 /// Events for router actions
 type RouterEvent =
-    | RouteChanged of path: string * result: Tokenizer.RouteMatchResult option
+    | RouteChanged of path: string * result: RouteMatchResult option
     | NavigateTo of string
     | NavigateBack
     | NavigateForward
@@ -68,8 +68,8 @@ let FreeFrameLink<'State> =
             className
                 [
                     match props.className with
-                    | Some className' -> yield className'
-                    | _ -> ()
+                    | Some className -> yield className
+                    | None -> ()
                 ]
 
             children props.children
@@ -89,22 +89,17 @@ let FreeFrameRouterProvider<'State> =
                                      Children: ReactElement list
                                  |}) ->
 
-        // Register router event handler - only once when component mounts
+        // Register router event handler
         Hooks.useEffect (
             (fun () ->
-                console.log ("Setting up router event handler")
-
                 // Register handler for router events
                 registerTypedEventHandler<RouterEvent, 'State> (fun event state ->
                     match event with
                     | RouteChanged(path, routeMatchOpt) ->
-                        console.log ("RouteChanged event received for path:", path)
                         let currentRouter = props.GetRouterState state
 
                         match routeMatchOpt with
                         | Some routeMatch ->
-                            console.log ("Route match found:", routeMatch)
-
                             let newRouterState =
                                 { currentRouter with
                                     CurrentRoute = routeMatch.Pattern
@@ -114,10 +109,8 @@ let FreeFrameRouterProvider<'State> =
                                     Fragment = routeMatch.Fragment
                                 }
 
-                            // Return the updated state
                             props.SetRouterState newRouterState state
                         | None ->
-                            console.log ("No route match found")
                             // If no match, just update the path
                             let newRouterState =
                                 { currentRouter with
@@ -128,15 +121,13 @@ let FreeFrameRouterProvider<'State> =
                                     Fragment = None
                                 }
 
-                            // Return the updated state
                             props.SetRouterState newRouterState state
 
                     | NavigateTo path ->
-                        console.log ("NavigateTo event received for path:", path)
                         // Update browser URL
                         window.history.pushState (null, "", path)
 
-                        // Also trigger a route change event
+                        // Match the route
                         let matchResult = props.Router.Match(path)
 
                         let routeResult =
@@ -144,19 +135,39 @@ let FreeFrameRouterProvider<'State> =
                             | Some(result, _) -> Some result
                             | None -> None
 
-                        // Dispatch as a separate action to avoid recursion
-                        Browser.Dom.window.setTimeout (
-                            (fun () ->
-                                dispatchTyped<RouterEvent, 'State>
-                                    props.AppDb
-                                    (RouteChanged(path, routeResult))
-                            ),
-                            0
-                        )
-                        |> ignore
+                        // Create a new router state
+                        let currentRouter = props.GetRouterState state
 
-                        // Return unchanged state
-                        state
+                        // Update state based on match result
+                        let newState =
+                            match routeResult with
+                            | Some routeMatch ->
+                                let newRouterState =
+                                    { currentRouter with
+                                        CurrentRoute = routeMatch.Pattern
+                                        CurrentPath = path
+                                        PathParams = routeMatch.PathParams
+                                        QueryParams = routeMatch.QueryParams
+                                        Fragment = routeMatch.Fragment
+                                    }
+
+                                props.SetRouterState newRouterState state
+                            | None ->
+                                let newRouterState =
+                                    { currentRouter with
+                                        CurrentRoute = ""
+                                        CurrentPath = path
+                                        PathParams = Map.empty
+                                        QueryParams = Map.empty
+                                        Fragment = None
+                                    }
+
+                                props.SetRouterState newRouterState state
+
+                        // Ensure subscribers are notified
+                        props.AppDb.ForceRefresh()
+
+                        newState
 
                     | NavigateBack ->
                         window.history.back ()
@@ -169,20 +180,6 @@ let FreeFrameRouterProvider<'State> =
             ),
             [||] // Empty dependency array - only run once
         )
-
-        // Keep track of the current URL for rendering
-        let initialUrl =
-            match props.Mode with
-            | HistoryAPI -> window.location.pathname + window.location.search
-            | HashBased ->
-                let hash = window.location.hash
-
-                if hash.StartsWith("#") then
-                    hash.Substring(1)
-                else
-                    "/"
-
-        let urlState = Hooks.useState initialUrl
 
         // Handle browser navigation events
         Hooks.useEffectDisposable (
@@ -200,10 +197,7 @@ let FreeFrameRouterProvider<'State> =
                             else
                                 "/"
 
-                    // Update our local state
-                    urlState.update path
-
-                    // Dispatch route changed event
+                    // Match the route
                     let matchResult = props.Router.Match(path)
 
                     let routeMatch =
@@ -211,6 +205,7 @@ let FreeFrameRouterProvider<'State> =
                         | Some(result, _) -> Some result
                         | None -> None
 
+                    // Dispatch route changed event
                     dispatchTyped<RouterEvent, 'State>
                         props.AppDb
                         (RouteChanged(path, routeMatch))
@@ -226,10 +221,7 @@ let FreeFrameRouterProvider<'State> =
                             else
                                 "/"
 
-                        // Update our local state
-                        urlState.update path
-
-                        // Dispatch route changed event
+                        // Match the route
                         let matchResult = props.Router.Match(path)
 
                         let routeMatch =
@@ -237,6 +229,7 @@ let FreeFrameRouterProvider<'State> =
                             | Some(result, _) -> Some result
                             | None -> None
 
+                        // Dispatch route changed event
                         dispatchTyped<RouterEvent, 'State>
                             props.AppDb
                             (RouteChanged(path, routeMatch))
@@ -246,25 +239,36 @@ let FreeFrameRouterProvider<'State> =
                 window.addEventListener ("hashchange", handleHashChange)
 
                 // Process the initial route
-                let path = urlState.current
-                let matchResult = props.Router.Match(path)
+                let initialPath =
+                    match props.Mode with
+                    | HistoryAPI -> window.location.pathname + window.location.search
+                    | HashBased ->
+                        let hash = window.location.hash
+
+                        if hash.StartsWith("#") then
+                            hash.Substring(1)
+                        else
+                            "/"
+
+                let matchResult = props.Router.Match(initialPath)
 
                 let routeMatch =
                     match matchResult with
                     | Some(result, _) -> Some result
                     | None -> None
 
-                dispatchTyped<RouterEvent, 'State> props.AppDb (RouteChanged(path, routeMatch))
+                dispatchTyped<RouterEvent, 'State>
+                    props.AppDb
+                    (RouteChanged(initialPath, routeMatch))
 
                 // Cleanup function
                 { new IDisposable with
                     member _.Dispose() =
-                        // Remove event listeners on cleanup
                         window.removeEventListener ("popstate", handlePopState)
                         window.removeEventListener ("hashchange", handleHashChange)
                 }
             ),
-            [| box props.Mode; box props.Router |]
+            [| box props.Mode |]
         )
 
         // Render children
@@ -282,23 +286,14 @@ let FreeFrameRoutes<'State> =
                                      DefaultContent: ReactElement
                                  |}) ->
 
-        // Create a subscription to watch the router state
+        // Create a subscription to watch router state changes
         let subscription = createSubscription props.AppDb props.GetRouterState
         let routerState = useSubscription subscription
 
-        // Add debugging to verify the subscription is working
-        Hooks.useEffect (
-            (fun () ->
-                console.log ("FreeFrameRoutes rendering with path:", routerState.CurrentPath)
-                console.log ("Router state:", routerState)
-            ),
-            [| box routerState |]
-        )
-
-        // Match the current path and render the appropriate component
+        // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
         | Some(_, handler) ->
-            // Create a fresh route match result to pass to the handler
+            // Create a route match result to pass to the handler
             let result =
                 {
                     Pattern = routerState.CurrentRoute
@@ -307,11 +302,10 @@ let FreeFrameRoutes<'State> =
                     Fragment = routerState.Fragment
                 }
 
-            // Call the handler to get the React element to render
+            // Render the matched route
             handler result
-        | None ->
-            console.log ("No route match found for path:", routerState.CurrentPath)
-            props.DefaultContent
+
+        | None -> props.DefaultContent
     )
 
 /// Utility function to navigate programmatically
