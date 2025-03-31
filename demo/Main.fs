@@ -88,6 +88,7 @@ let home route =
     }
 
 let about route =
+    printfn "About page"
     div {
         h1 { "About" }
         p { "This is the about page." }
@@ -262,10 +263,10 @@ let App () =
                 div {
                     h1 { "FreeFrame ToDo Demo" }
                     // Render the component directly
-                    // FreeFrameDemo()
+                    // FreeFrameDemo
                     TodoDemo.TodoDemo()
                 }
-          )
+            )
           |> ignore
     
     FreeFrameRouterProvider {|

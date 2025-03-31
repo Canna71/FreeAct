@@ -272,6 +272,7 @@ let FreeFrameRouterProvider<'State> =
             [| box props.Mode |]
         )
 
+        printfn "FreeFrameRouterProvider initialized with mode: %A" props.Mode
         // Render children
         fragment { children props.Children }
     )
@@ -298,6 +299,8 @@ let FreeFrameRoutes<'State> =
             [| box routerState.CurrentPath |]
         )
 
+        printfn "FreeFrameRoutes detected route change: %s" routerState.CurrentPath
+
         // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
         | Some(_, handler) ->
@@ -310,6 +313,7 @@ let FreeFrameRoutes<'State> =
                     Fragment = routerState.Fragment
                 }
 
+            printfn "FreeFrameRoutes matched route: %s" routerState.CurrentRoute
             // Render the matched route
             handler result
 

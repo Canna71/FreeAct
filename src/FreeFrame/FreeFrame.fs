@@ -126,6 +126,7 @@ let internal dispatchInternal<'Payload, 'State>
     =
     match eventHandlers.TryGetValue(eventId) with
     | true, handler ->
+        console.log ($"Dispatching event {eventId} with payload {payload}")
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")

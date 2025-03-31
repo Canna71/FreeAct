@@ -8,6 +8,7 @@ open FreeAct.FreeFrame
 /// Properly managed subscription hook that handles disposal and updates
 let useSubscription<'State, 'Value> (appDb: IAppDb<'State>) (selector: 'State -> 'Value) =
     // Get the initial value for state
+    printfn "useSubscription called"
     let initialValue = selector (appDb.GetState())
     let state = Hooks.useState initialValue
 
@@ -16,7 +17,9 @@ let useSubscription<'State, 'Value> (appDb: IAppDb<'State>) (selector: 'State ->
 
     // Set up subscription with proper cleanup
     Hooks.useEffectDisposable (
+
         (fun () ->
+            printfn "sibscribing to appDb %A" selector
             // Create the subscription callback
             let onStateChanged (newValue: 'Value) = state.update newValue
 
