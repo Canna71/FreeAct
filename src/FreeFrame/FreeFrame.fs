@@ -543,7 +543,6 @@ let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
 // ===== React Integration =====
 
 // React hook to use a subscription in a React component with immediate subscription
-[<Obsolete("This hook doesn't properly dispose subscriptions. Use FreeFrameSubscription.useSubscription instead.")>]
 let useSubscription<'V> (subscription: ISubscription<'V>) =
     let initialValue = subscription.Value
 
@@ -580,6 +579,15 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
 
     // Return the current value from state
     state.current
+
+// creates a new subscription based on the selector
+let useView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
+    // Create a subscription using the selector
+    let subscription = createSubscription appDb selector
+
+    // Use the subscription in the React component
+    useSubscription subscription
+// Return the subscription object
 
 // React hook for combined subscription
 let useCombinedSubscription<'A, 'B, 'C>

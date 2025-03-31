@@ -55,7 +55,7 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
 
 // Create subscriptions for parts of the state
 let useCount () =
-    useSubscription appDb (fun state -> state.Count)
+    useView appDb (fun state -> state.Count)
 
 // Route handlers
 let home route =

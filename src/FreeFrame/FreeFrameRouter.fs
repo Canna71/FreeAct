@@ -289,7 +289,7 @@ let FreeFrameRoutes<'State> =
                                  |}) ->
 
         // Create a subscription to watch router state changes
-        let routerState = useSubscription props.AppDb props.GetRouterState
+        let routerState = useView props.AppDb props.GetRouterState
 
         // For debugging - log when route changes are detected
         Hooks.useEffect (
@@ -334,4 +334,4 @@ let navigateForward<'State> (appDb: IAppDb<'State>) () =
 
 /// Hook to access the current route information
 let useRoute<'State> (appDb: IAppDb<'State>) (getRouterState: 'State -> RouterState) =
-    useSubscription appDb getRouterState
+    useView appDb getRouterState
