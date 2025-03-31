@@ -186,7 +186,7 @@ let initializeRouter<'Content, 'State>
     handleLocationChange null
 
     // Return a function to clean up the event listener
-    (fun () -> window.removeEventListener ("popstate", handleLocationChange))
+    fun () -> window.removeEventListener ("popstate", handleLocationChange)
 
 /// Create a link component that uses the FreeFrame router
 let FreeFrameLink<'State>
