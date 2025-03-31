@@ -18,7 +18,7 @@ open Demo
 
 // Define the application state that includes router state
 type AppState = {
-    Router: RouterState<ReactElement>
+    Router: RouterState
     // Add other application state here as needed
     Count: int
 }
@@ -31,7 +31,7 @@ let appDb = AppDb<AppState>({
 
 // Helper functions to get and set router state
 let getRouterState (state: AppState) = state.Router
-let setRouterState (routerState: RouterState<ReactElement>) (state: AppState) =
+let setRouterState (routerState: RouterState) (state: AppState) =
     { state with Router = routerState }
 
 // Example of an additional event for counter
@@ -273,7 +273,6 @@ let App () =
         GetRouterState = getRouterState
         SetRouterState = setRouterState
         Mode = RouterMode.HistoryAPI
-        DefaultContent = notFound
         Children = [
             div {
                 className "app-container"
@@ -281,6 +280,7 @@ let App () =
                 main {
                     className "content"
                     FreeFrameRoutes {| 
+                        Router = router
                         GetRouterState = getRouterState
                         AppDb = appDb
                         DefaultContent = notFound
