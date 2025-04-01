@@ -569,6 +569,7 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
 
     // If we don't have a subscription yet, create one immediately
     if subscriptionRef.current.IsNone then
+        console.log ("Creating subscriptionRef for ", subscription)
         // Function to update the React state when subscription value changes
         let setState = fun (newValue: 'V) -> state.update (newValue)
 
@@ -584,6 +585,8 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
             // Return the dispose function for cleanup
             { new IDisposable with
                 member _.Dispose() =
+                    console.log ("Disposing of subscriptionRef for ", subscription)
+
                     match subscriptionRef.current with
                     | Some dispose -> dispose.Dispose()
                     | None -> ()

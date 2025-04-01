@@ -286,7 +286,7 @@ let FreeFrameRoutes<'State> =
                                      AppDb: IAppDb<'State>
                                      DefaultContent: ReactElement
                                  |}) ->
-
+        console.log ("FreeFrameRoutes initialized with appDB: %A", props.AppDb)
         // Create a subscription to watch router state changes
         let routerState = useView props.AppDb props.GetRouterState
 
