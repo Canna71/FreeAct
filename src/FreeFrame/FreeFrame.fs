@@ -59,9 +59,9 @@ type AppDb<'T>(initialState: 'T) =
         member _.Dispatch(action) =
             match action with
             | :? ('T -> 'T) as reducer ->
-                pendingReducers.Add(reducer)
+                pendingReducers.Add reducer
                 scheduleProcessing ()
-            | _ -> console.error ("Invalid action type dispatched to AppDb")
+            | _ -> console.error "Invalid action type dispatched to AppDb"
 
         member _.ForceRefresh() =
             for subscriber in subscribers do
