@@ -11,7 +11,7 @@ open Demo.FreeFrameDemo
 // Example component with Effects
 let EffectSimpleExample () =
     // Use the F# idiomatic hook for effects
-    let isLoading, result = useEffect fetchTodosEffect ()
+    let isLoading, result = useFreeFrameEffect fetchTodosEffect ()
     
     div {
         className "effect-example"

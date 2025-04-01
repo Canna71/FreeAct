@@ -666,7 +666,10 @@ let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (
     resultState.current
 
 // Original hook for handling effects in React components (maintained for backward compatibility)
-let useEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
+let useFreeFrameEffect<'Payload, 'Result>
+    (effectId: EffectId<'Payload, 'Result>)
+    (payload: 'Payload)
+    =
     let loadingState = Hooks.useState true
     let resultState = Hooks.useState<Result<'Result, exn> option> None
 
