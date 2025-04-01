@@ -298,23 +298,14 @@ let FreeFrameRoutes<'State> =
             [| box routerState.CurrentPath |]
         )
 
-        printfn "FreeFrameRoutes detected route change: %s" routerState.CurrentPath
-
         // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
-        | Some(_, handler) ->
+        | Some(result, handler) ->
             // Create a route match result to pass to the handler
-            let result =
-                {
-                    Pattern = routerState.CurrentRoute
-                    PathParams = routerState.PathParams
-                    QueryParams = routerState.QueryParams
-                    Fragment = routerState.Fragment
-                }
-
-            printfn "FreeFrameRoutes matched route: %s" routerState.CurrentRoute
             // Render the matched route
-            handler result
+            let res = handler result
+            console.log ("FreeFrameRoutes matched route result: ", res)
+            res
 
         | None -> props.DefaultContent
     )

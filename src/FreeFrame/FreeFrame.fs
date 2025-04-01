@@ -605,6 +605,7 @@ let useView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
     let subscriptionRef = Hooks.useRef (None)
 
     if subscriptionRef.current.IsNone then
+        console.log ("useView Creating subscription for ", appDb, selector)
         // Function to update the React state when subscription value changes
         // Create the subscription right away
         let subscription = createSubscription appDb selector
