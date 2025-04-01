@@ -15,7 +15,6 @@ open FreeAct.FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
-open FreeAct.FreeFrameSubscription
 
 // Define the application state that includes router state
 type AppState = {

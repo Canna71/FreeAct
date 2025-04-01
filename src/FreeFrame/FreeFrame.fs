@@ -21,11 +21,30 @@ type AppDb<'T>(initialState: 'T) =
     let mutable state = initialState
     let subscribers = ResizeArray<'T -> unit>()
     let mutable batchProcessing = false
+    let pendingReducers = ResizeArray<'T -> 'T>()
+    let mutable processingScheduled = false
 
-    let notifySubscribers () =
-        if not batchProcessing then
-            for subscriber in subscribers do
-                subscriber state
+    let processReducers () =
+        if pendingReducers.Count > 0 then
+            // Apply all pending reducers
+            let finalState = pendingReducers |> Seq.fold (fun s reducer -> reducer s) state
+
+            // Clear the queue
+            pendingReducers.Clear()
+            processingScheduled <- false
+
+            // Update state and notify if changed
+            if not (Object.Equals(state, finalState)) then
+                state <- finalState
+                // Notify subscribers only if not in batch mode
+                if not batchProcessing then
+                    for subscriber in subscribers do
+                        subscriber state
+
+    let scheduleProcessing () =
+        if not processingScheduled then
+            processingScheduled <- true
+            Browser.Dom.window.requestAnimationFrame (fun _ -> processReducers ()) |> ignore
 
     interface IAppDb<'T> with
         member _.GetState() = state
@@ -40,27 +59,23 @@ type AppDb<'T>(initialState: 'T) =
         member _.Dispatch(action) =
             match action with
             | :? ('T -> 'T) as reducer ->
-                state <- reducer state
-                notifySubscribers ()
-            | _ -> console.error ("Invalid action type dispatched to AppDb")
+                pendingReducers.Add reducer
+                scheduleProcessing ()
+            | _ -> console.error "Invalid action type dispatched to AppDb"
 
         member _.ForceRefresh() =
             for subscriber in subscribers do
                 subscriber state
 
         member _.BatchProcess(action) =
-            // Set batch processing flag to temporarily disable notifications
             batchProcessing <- true
 
             try
-                // Execute the batch action
                 action ()
+                // Schedule the processing of all accumulated reducers
+                scheduleProcessing ()
             finally
-                // Restore normal behavior and notify subscribers once
                 batchProcessing <- false
-
-                for subscriber in subscribers do
-                    subscriber state
 
 // Improved batch dispatch function
 let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) list) =
@@ -554,6 +569,7 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
 
     // If we don't have a subscription yet, create one immediately
     if subscriptionRef.current.IsNone then
+        console.log ("Creating subscriptionRef for ", subscription)
         // Function to update the React state when subscription value changes
         let setState = fun (newValue: 'V) -> state.update (newValue)
 
@@ -569,6 +585,8 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
             // Return the dispose function for cleanup
             { new IDisposable with
                 member _.Dispose() =
+                    console.log ("Disposing of subscriptionRef for ", subscription)
+
                     match subscriptionRef.current with
                     | Some dispose -> dispose.Dispose()
                     | None -> ()
