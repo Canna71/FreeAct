@@ -9,7 +9,8 @@ open FreeAct
 open Demo.FreeFrameDemo
 
 // Example component with Effects
-let EffectSimpleExample () =
+let EffectSimpleExample = ((fun () ->
+    // Define a simple effect to fetch todos
     // Use the F# idiomatic hook for effects
     let isLoading, result = useEffect fetchTodosEffect ()
     
@@ -46,10 +47,11 @@ let EffectSimpleExample () =
                 className "none"
                 str "No data loaded yet."
             }
-    }
+    })
+    |> FunctionComponent.Of) 
 
 // Example using the union-based loading state
-let EffectWithUnionStateExample () =
+let _EffectWithUnionStateExample () =
     // Define how to map the result to our union state
     let mapResultToState (result: Result<TodoItem list, exn>) =
         match result with
@@ -98,6 +100,9 @@ let EffectWithUnionStateExample () =
                 str (sprintf "Error: %s" errorMsg)
             }
     }
+
+let EffectWithUnionStateExample = FunctionComponent.Of(_EffectWithUnionStateExample)
+// Example using the composition of effects
 
 // Main Effects demo component
 let EffectsDemo () =    

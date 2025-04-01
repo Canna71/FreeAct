@@ -169,7 +169,7 @@ let ExampleComponent () =
     }
 
 // Main Todo demo component
-let TodoDemo () =
+let _TodoDemo () =
     // Initialize data when component mounts
     Hooks.useEffect((fun () ->
         initializeApp()
@@ -182,3 +182,4 @@ let TodoDemo () =
         TodoList()
         ExampleComponent()
     }
+let TodoDemo = FunctionComponent.Of(_TodoDemo)
