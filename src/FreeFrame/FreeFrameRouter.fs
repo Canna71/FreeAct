@@ -8,7 +8,6 @@ open FreeAct
 open FreeAct.Router
 open FreeAct.FreeFrame
 open System
-open FreeAct.Tokenizer
 
 // ==================================================
 //           FreeFrame Router Integration
@@ -298,16 +297,20 @@ let FreeFrameRoutes<'State> =
             [| box routerState.CurrentPath |]
         )
 
+        let h t = h1 { sprintf "FreeFrameRoutes %s" t }
+
         // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
         | Some(result, handler) ->
             // Create a route match result to pass to the handler
             // Render the matched route
             let res = handler result
+            // let res = h (DateTime.Now.ToString "yyyy-MM-dd HH:mm:ss")
             console.log ("FreeFrameRoutes matched route result: ", res)
-            res
+            fragment { res }
 
         | None -> props.DefaultContent
+    // For debugging - show current date and time
     )
 
 /// Utility function to navigate programmatically

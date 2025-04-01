@@ -57,7 +57,7 @@ let useCount () =
     useView appDb (fun state -> state.Count)
 
 // Route handlers
-let home route =
+let home  = FunctionComponent.Of(fun (route) ->
     let count = useCount()
     
     div {
@@ -85,9 +85,10 @@ let home route =
             |}
         }
     }
+)
 
 let about route =
-    div {
+    let ret = div {
         h1 { "About" }
         p { "This is the about page." }
         
@@ -101,6 +102,8 @@ let about route =
             |}
         }
     }
+    console.log("About page rendered with result: ", ret)
+    ret
 
 let users route =
     div {

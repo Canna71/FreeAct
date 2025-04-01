@@ -1,7 +1,7 @@
 module FreeAct.Router
 
 open Tokenizer
-
+type RouteMatchResult = Tokenizer.RouteMatchResult
 /// Represents a route handler
 type RouteHandler<'T> = RouteMatchResult -> 'T
 
