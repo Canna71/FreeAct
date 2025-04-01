@@ -116,7 +116,7 @@ let RouterProvider =
                 Navigate = navigate
             }
 
-        console.log props.Children
+        // console.log props.Children
         // Return the context provider with children
         // ofImport "Provider" "react" {| value = Some routerContext; children = props.Children |> List.toArray |} []
         contextProvider RouterContext (Some routerContext) (props.Children |> List.toArray)
@@ -125,6 +125,7 @@ let RouterProvider =
 /// Routes component that renders the matched route
 let Routes =
     FunctionComponent.Of(fun (props: {| DefaultContent: ReactElement |}) ->
+        console.log "Routes component rendering..."
         let routerContext = Hooks.useContext (RouterContext)
 
         match routerContext with
