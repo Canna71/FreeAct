@@ -20,7 +20,6 @@
         <Compile Include="Router/ReactRouter.fs" />
         <Compile Include="Router/Tests/TestRouter.fs" />
         <Compile Include="FreeFrame/FreeFrame.fs" />
-        <Compile Include="FreeFrame/FreeFrameSubscription.fs" />
         <Compile Include="FreeFrame/FreeFrameRouter.fs" />
     </ItemGroup>
     <ItemGroup>

@@ -9,7 +9,6 @@ open FreeAct.Router
 open FreeAct.FreeFrame
 open System
 open FreeAct.Tokenizer
-open FreeAct.FreeFrameSubscription
 
 // ==================================================
 //           FreeFrame Router Integration
