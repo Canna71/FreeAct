@@ -88,14 +88,18 @@ let home route =
     }
 
 let about route =
-    printfn "About page"
     div {
         h1 { "About" }
         p { "This is the about page." }
         
         // Example of using Link component
         div {
-            Link {| destination = "/users"; className = Some "nav-link"; children = [str "View Users"] |}
+            FreeFrameLink {| 
+                appDb = appDb
+                destination = "/users"
+                className = Some "nav-link"
+                children = [str "View Users"] 
+            |}
         }
     }
 
@@ -106,7 +110,12 @@ let users route =
         
         // Example of using Link component
         div {
-            Link {| destination = "/users/42"; className = Some "nav-link"; children = [str "View User 42"] |}
+            FreeFrameLink {| 
+                appDb = appDb
+                destination = "/users/42"
+                className = Some "nav-link"
+                children = [str "View User 42"] 
+            |}
         }
     }
 
