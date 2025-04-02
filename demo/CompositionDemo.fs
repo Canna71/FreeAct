@@ -9,7 +9,7 @@ open FreeAct
 open Demo.FreeFrameDemo
 
 // Subscription composition example
-let SubscriptionCompositionExample () =
+let _SubscriptionCompositionExample () =
     // Create two more specialized subscriptions from our existing ones
     let completedTodosSubscription = mapSubscription todosSubscription (fun todos -> 
         todos |> List.filter (fun t -> t.completed))
@@ -46,109 +46,111 @@ let SubscriptionCompositionExample () =
         }
     }
 
+let SubscriptionCompositionExample = FunctionComponent.Of _SubscriptionCompositionExample
+  
+
 // Combined effects example
-let EffectCompositionExample () =
+let _EffectCompositionExample (appDb: IAppDb<AppState>) =
+
     // Use combined effects to fetch todos and analyze them in parallel
-    let isLoading, resultOpt = 
-      useCombinedEffects
-        fetchTodosEffect
-        ()
-        analyzeTodosEffect
-        [{ id = 999; text = "Example task"; completed = false }] // Default analysis if fetch fails
-        (fun todos analysis -> {| todos = todos; analysis = analysis |})
+    let analysys = useSubscription todosAnalysisSubscription
     
+    console.log("EffectCompositionExample: ", analysys)
+
+    // todo: create and register a separate effect
+    let combined = chainEffect fetchTodosEffect () id analyzeTodosEffect
+    async {
+        let! analysis = combined
+        match analysis with
+        | Ok analysis ->
+          dispatch appDb setTodoAnalysisEvent (Loaded analysis)
+        | _ ->
+          dispatch appDb setTodoAnalysisEvent  (Failed "Failed to analyze todos")
+    } |> Async.StartImmediate |> ignore
+
     div {
         className "effect-composition-example"
         h3 { "Effect Composition Example" }
         
-        match isLoading, resultOpt with
-        | true, _ -> 
+        match analysys with
+        | Loading -> 
             div { 
                 className "loading"
                 str "Loading and analyzing data simultaneously..." 
             }
-        | false, Some (Ok combined) ->
-            div {
-                className "success"
-                h4 { "Fetched Todos" }
-                ul {
-                    combined.todos |> List.map (fun todo ->
-                        li {
-                            key (string todo.id)
-                            str todo.text
-                        }
-                    )
-                }
+        | Loaded analysis ->
                 
                 h4 { "Analysis Results" }
-                p { str (sprintf "Total todos: %d" combined.analysis.totalCount) }
-                p { str (sprintf "Completed: %d" combined.analysis.completedCount) }
-                p { str (sprintf "Active: %d" combined.analysis.activeCount) }
-                p { str (sprintf "Average text length: %.1f characters" combined.analysis.averageTextLength) }
-            }
-        | false, Some (Error err) ->
+                p { str (sprintf "Total todos: %d" analysis.totalCount) }
+                p { str (sprintf "Completed: %d" analysis.completedCount) }
+                p { str (sprintf "Active: %d" analysis.activeCount) }
+                p { str (sprintf "Average text length: %.1f characters" analysis.averageTextLength) }
+            
+        | Failed err ->
             div {
                 className "error"
-                str (sprintf "Error: %s" err.Message)
+                str (sprintf "Error: %s" err)
             }
-        | false, None ->
+        | NotStarted ->
             div {
                 className "none"
                 str "No data loaded yet."
             }
     }
+
+let EffectCompositionExample = FunctionComponent.Of _EffectCompositionExample
 
 // Chained effects example
-let ChainedEffectsExample () =
-    // Use chained effects: fetch todos, then prioritize them
-    let isLoading, resultOpt = 
-      useChainedEffect
-        fetchTodosEffect
-        ()
-        id  // Pass the result directly
-        prioritizeTodosEffect
+// let ChainedEffectsExample () =
+//     // Use chained effects: fetch todos, then prioritize them
+//     let isLoading, resultOpt = 
+//       useChainedEffect
+//         fetchTodosEffect
+//         ()
+//         id  // Pass the result directly
+//         prioritizeTodosEffect
     
-    div {
-        className "chained-effects-example"
-        h3 { "Chained Effects Example" }
+//     div {
+//         className "chained-effects-example"
+//         h3 { "Chained Effects Example" }
         
-        match isLoading, resultOpt with
-        | true, _ -> 
-            div { 
-                className "loading"
-                str "Loading todos, then prioritizing them..." 
-            }
-        | false, Some (Ok prioritizedTodos) ->
-              div {
-                  className "success"
-                  h4 { "Prioritized Todos" }
-                  ol {
-                      prioritizedTodos |> List.map (fun todo ->
-                          li {
-                              key (string todo.id)
-                              className (if todo.completed then "completed-todo" else "active-todo")
-                              str todo.text
-                          }
-                      )
-                  }
-                  p { 
-                      str "Todos are sorted with active ones first, then alphabetically." 
-                  }
-              }
-        | false, Some (Error err) ->
-            div {
-                className "error"
-                str (sprintf "Error: %s" err.Message)
-            }
-        | false, None ->
-            div {
-                className "none"
-                str "No data loaded yet."
-            }
-    }
+//         match isLoading, resultOpt with
+//         | true, _ -> 
+//             div { 
+//                 className "loading"
+//                 str "Loading todos, then prioritizing them..." 
+//             }
+//         | false, Some (Ok prioritizedTodos) ->
+//               div {
+//                   className "success"
+//                   h4 { "Prioritized Todos" }
+//                   ol {
+//                       prioritizedTodos |> List.map (fun todo ->
+//                           li {
+//                               key (string todo.id)
+//                               className (if todo.completed then "completed-todo" else "active-todo")
+//                               str todo.text
+//                           }
+//                       )
+//                   }
+//                   p { 
+//                       str "Todos are sorted with active ones first, then alphabetically." 
+//                   }
+//               }
+//         | false, Some (Error err) ->
+//             div {
+//                 className "error"
+//                 str (sprintf "Error: %s" err.Message)
+//             }
+//         | false, None ->
+//             div {
+//                 className "none"
+//                 str "No data loaded yet."
+//             }
+//     }
 
 // Main Composition demo component
-let CompositionDemo () =
+let _CompositionDemo () =
     // Initialize data when component mounts
     Hooks.useEffect((fun () ->
         initializeApp()
@@ -162,7 +164,9 @@ let CompositionDemo () =
         div {
             className "composition-examples"
             SubscriptionCompositionExample()
-            EffectCompositionExample()
-            ChainedEffectsExample()
+            EffectCompositionExample appDb
+            // ChainedEffectsExample()
         }
     }
+
+let CompositionDemo = FunctionComponent.Of _CompositionDemo

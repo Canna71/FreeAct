@@ -14,13 +14,6 @@ type TodoItem = {
     completed: bool
 }
 
-type AppState = {
-    todos: TodoItem list
-    filter: string  // "all" | "active" | "completed"
-    nextId: int
-    isLoading: bool // Track loading state in the app state
-}
-
 // Add a union type for loading state
 type LoadingState<'T> =
     | NotStarted
@@ -28,12 +21,32 @@ type LoadingState<'T> =
     | Loaded of 'T
     | Failed of string
 
+// Example of more complex combined effects
+// First, define a new effect for "analyzing" todos
+type TodoAnalysis = {
+    totalCount: int
+    completedCount: int
+    activeCount: int
+    averageTextLength: float
+}
+
+type AppState = {
+    todos: TodoItem list
+    filter: string  // "all" | "active" | "completed"
+    nextId: int
+    isLoading: bool // Track loading state in the app state
+    todoAnalysis: LoadingState<TodoAnalysis> // Track analysis state
+}
+
+
+
 // Create initial state
 let initialState = {
     todos = []
     filter = "all"
     nextId = 1
     isLoading = false
+    todoAnalysis = NotStarted // Initialize analysis state
 }
 
 // Create app-db instance with proper generic type parameters
@@ -69,6 +82,8 @@ let deleteTodoNamedEvent = EventId.named<int>("delete-todo")
 let setFilterNamedEvent = EventId.named<string>("set-filter")
 let setLoadingNamedEvent = EventId.named<bool>("set-loading")
 let setTodosNamedEvent = EventId.named<TodoItem list>("set-todos")
+
+let setTodoAnalysisEvent = EventId.named<LoadingState<TodoAnalysis>>("set-todo-analysis")
 
 // === Method 2: Using type-based events ===
 let todoEventId = EventId.ofType<TodoEvent>()
@@ -153,6 +168,11 @@ registerNamedEventHandler setTodosNamedEvent (fun todos state ->
             | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
         isLoading = false
     }
+)
+
+registerNamedEventHandler setTodoAnalysisEvent (fun (analysis) state ->
+    console.log("Setting todo analysis:", analysis)
+    { state with todoAnalysis = analysis }
 )
 
 // === Method 2: Using union-based event handling (safer approach) with manual case names ===
@@ -256,14 +276,7 @@ registerEffectHandler fetchTodosEffect (fun _ -> async {
     ]
 })
 
-// Example of more complex combined effects
-// First, define a new effect for "analyzing" todos
-type TodoAnalysis = {
-    totalCount: int
-    completedCount: int
-    activeCount: int
-    averageTextLength: float
-}
+
 
 let analyzeTodosEffect = EffectId.named<TodoItem list, TodoAnalysis>("analyze-todos")
 
@@ -288,6 +301,11 @@ registerEffectHandler analyzeTodosEffect (fun todos -> async {
         averageTextLength = avgLength
     }
 })
+
+// create a view for the analysis result
+let todosAnalysisSubscription = createSubscription appDb (fun state ->
+   state.todoAnalysis 
+)
 
 // Add a chained effects example
 // Define a second effect that depends on the result of the first

@@ -1,4 +1,5 @@
 
+TODO: Fix Named event handlers!!!
 TODO: syntactic sugar or other for FunctionComponent.Of
 TODO: find an alternative to FunctionComponent.Of (Elmish?)
 TODO: improve effects

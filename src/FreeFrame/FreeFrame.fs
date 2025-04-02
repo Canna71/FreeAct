@@ -126,6 +126,7 @@ let registerNamedEventHandler<'Payload, 'State>
         let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
         reducer
 
+    console.log ($"Registering event handler for {EventId.key eventId}")
     eventHandlers.[EventId.key eventId] <- wrappedHandler
 
 let inline registerTypedEventHandler<'EventType, 'State>
@@ -141,7 +142,7 @@ let internal dispatchInternal<'Payload, 'State>
     =
     match eventHandlers.TryGetValue(eventId) with
     | true, handler ->
-        console.log ($"Dispatching event {eventId} with payload {payload}")
+        console.log ($"Dispatching event {eventId} with payload {payload} to handler {handler}")
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
@@ -765,72 +766,72 @@ let useEffectWithDepsAndCustomState<'Payload, 'Result, 'LoadingState>
     resultState.current
 
 // React hook for chained effects
-let useChainedEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
-    (effect1: EffectId<'PayloadA, 'ResultA>)
-    (payload1: 'PayloadA)
-    (createPayload2: 'ResultA -> 'PayloadB)
-    (effect2: EffectId<'PayloadB, 'ResultB>)
-    =
+// let useChainedEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
+//     (effect1: EffectId<'PayloadA, 'ResultA>)
+//     (payload1: 'PayloadA)
+//     (createPayload2: 'ResultA -> 'PayloadB)
+//     (effect2: EffectId<'PayloadB, 'ResultB>)
+//     =
 
-    let loadingState = Hooks.useState true
-    let resultState = Hooks.useState<Result<'ResultB, exn> option> None
+//     let loadingState = Hooks.useState true
+//     let resultState = Hooks.useState<Result<'ResultB, exn> option> None
 
-    Hooks.useEffect (
-        (fun () ->
-            loadingState.update true
+//     Hooks.useEffect (
+//         (fun () ->
+//             loadingState.update true
 
-            async {
-                let! result = chainEffect effect1 payload1 createPayload2 effect2
+//             async {
+//                 let! result = chainEffect effect1 payload1 createPayload2 effect2
 
-                // Update state with the result
-                Browser.Dom.window.setTimeout (
-                    (fun () ->
-                        resultState.update (Some result)
-                        loadingState.update false
-                    ),
-                    0
-                )
-                |> ignore
-            }
-            |> Async.StartImmediate
-        ),
-        [| box payload1 |]
-    )
+//                 // Update state with the result
+//                 Browser.Dom.window.setTimeout (
+//                     (fun () ->
+//                         resultState.update (Some result)
+//                         loadingState.update false
+//                     ),
+//                     0
+//                 )
+//                 |> ignore
+//             }
+//             |> Async.StartImmediate
+//         ),
+//         [| box payload1 |]
+//     )
 
-    loadingState.current, resultState.current
+//     loadingState.current, resultState.current
 
 // React hook for combined effects
-let useCombinedEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
-    (effect1: EffectId<'PayloadA, 'ResultA>)
-    (payload1: 'PayloadA)
-    (effect2: EffectId<'PayloadB, 'ResultB>)
-    (payload2: 'PayloadB)
-    (combiner: 'ResultA -> 'ResultB -> 'Combined)
-    =
+// let useCombinedEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
+//     (effect1: EffectId<'PayloadA, 'ResultA>)
+//     (payload1: 'PayloadA)
+//     (effect2: EffectId<'PayloadB, 'ResultB>)
+//     (payload2: 'PayloadB)
+//     (combiner: 'ResultA -> 'ResultB -> 'Combined)
+//     =
 
-    let loadingState = Hooks.useState true
-    let resultState = Hooks.useState<Result<'Combined, exn> option> None
+//     let loadingState = Hooks.useState true
+//     let resultState = Hooks.useState<Result<'Combined, exn> option> None
 
-    Hooks.useEffect (
-        (fun () ->
-            loadingState.update true
+//     Hooks.useEffect (
+//         (fun () ->
+//             loadingState.update true
 
-            async {
-                let! result = combineEffects effect1 payload1 effect2 payload2 combiner
+//             async {
+//                 let! result = combineEffects effect1 payload1 effect2 payload2 combiner
 
-                // Update state with the result
-                Browser.Dom.window.setTimeout (
-                    (fun () ->
-                        resultState.update (Some result)
-                        loadingState.update false
-                    ),
-                    0
-                )
-                |> ignore
-            }
-            |> Async.StartImmediate
-        ),
-        [| box payload1; box payload2 |]
-    )
+//                 // Update state with the result
+//                 Browser.Dom.window.setTimeout (
+//                     (fun () ->
+//                         resultState.update (Some result)
+//                         loadingState.update false
+//                     ),
+//                     0
+//                 )
+//                 |> ignore
+//             }
+//             |> Async.StartImmediate
+//         ),
+//         [| box payload1; box payload2 |]
+//     )
 
-    loadingState.current, resultState.current
+//     loadingState.current, resultState.current
