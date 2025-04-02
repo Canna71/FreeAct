@@ -155,7 +155,7 @@ let _CompositionDemo () =
     Hooks.useEffect((fun () ->
         initializeApp()
     ), [| |])
-    
+    console.log("CompositionDemo: ", appDb)
     div {
         className "composition-demo"
         h1 { "Composition Demo" }

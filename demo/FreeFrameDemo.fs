@@ -50,7 +50,7 @@ let initialState = {
 }
 
 // Create app-db instance with proper generic type parameters
-let appDb : IAppDb<AppState> = AppDb<AppState>(initialState) :> IAppDb<AppState>
+let appDb : IAppDb<AppState> = AppDb<AppState> initialState :> IAppDb<AppState>
 
 // Define a discriminated union for all Todo events
 type TodoEvent = 
