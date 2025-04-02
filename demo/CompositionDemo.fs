@@ -50,7 +50,7 @@ let SubscriptionCompositionExample = FunctionComponent.Of _SubscriptionCompositi
   
 
 // Combined effects example
-let _EffectCompositionExample (appDb: IAppDb<AppState>) =
+let _EffectCompositionExample () =
 
     // Use combined effects to fetch todos and analyze them in parallel
     let analysys = useSubscription todosAnalysisSubscription
@@ -164,7 +164,7 @@ let _CompositionDemo () =
         div {
             className "composition-examples"
             SubscriptionCompositionExample()
-            EffectCompositionExample appDb
+            EffectCompositionExample()
             // ChainedEffectsExample()
         }
     }
