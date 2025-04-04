@@ -47,31 +47,45 @@ let _SubscriptionCompositionExample () =
     }
 
 let SubscriptionCompositionExample = FunctionComponent.Of _SubscriptionCompositionExample
-  
 
+let chainedEffectId = 
+  registerNamedEffectHandler
+    "ChainedEffect" 
+    (fun () -> 
+        printfn "Chained effect started"
+        let combined = chainEffect fetchTodosEffect () id analyzeTodosEffect
+        async {
+            let! analysis = combined
+            match analysis with
+            | Ok analysis ->
+              dispatch appDb setTodoAnalysisEvent (Loaded analysis)
+            | _ ->
+              dispatch appDb setTodoAnalysisEvent  (Failed "Failed to analyze todos")
+        }      
+    )
 // Combined effects example
-let _EffectCompositionExample () =
+let _EffectChainingExample () =
 
     // Use combined effects to fetch todos and analyze them in parallel
     let analysys = useSubscription todosAnalysisSubscription
     
     console.log("EffectCompositionExample: ", analysys)
 
-    // todo: create and register a separate effect
-    let combined = chainEffect fetchTodosEffect () id analyzeTodosEffect
-    async {
-        let! analysis = combined
-        match analysis with
-        | Ok analysis ->
-          dispatch appDb setTodoAnalysisEvent (Loaded analysis)
-        | _ ->
-          dispatch appDb setTodoAnalysisEvent  (Failed "Failed to analyze todos")
-    } |> Async.StartImmediate |> ignore
-
+    let onStart (_) = 
+      printfn "Starting effect chaining"
+      async {
+        let! _ = runEffectAsync chainedEffectId ()
+        return ()
+      } |> Async.StartImmediate
+    
     div {
-        className "effect-composition-example"
-        h3 { "Effect Composition Example" }
-        
+        className "effect-chaining-example"
+        h3 { "Effect chaining Example" }
+        button {
+            className "start-button"
+            onClick onStart
+            str "Start Loading and Analyzing"
+        }
         match analysys with
         | Loading -> 
             div { 
@@ -98,7 +112,7 @@ let _EffectCompositionExample () =
             }
     }
 
-let EffectCompositionExample = FunctionComponent.Of _EffectCompositionExample
+let EffectChainingExample = FunctionComponent.Of _EffectChainingExample
 
 // Chained effects example
 // let ChainedEffectsExample () =
@@ -164,7 +178,7 @@ let _CompositionDemo () =
         div {
             className "composition-examples"
             SubscriptionCompositionExample()
-            EffectCompositionExample()
+            EffectChainingExample()
             // ChainedEffectsExample()
         }
     }

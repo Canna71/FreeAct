@@ -404,6 +404,14 @@ let registerEffectHandler<'Payload, 'Result>
 
     effectHandlers.[EffectId.key effectId] <- wrappedHandler
 
+let registerNamedEffectHandler<'Payload, 'Result>
+    (effectName: string)
+    (handler: EffectHandler<'Payload, 'Result>)
+    =
+    let effectId = EffectId.named<'Payload, 'Result> effectName
+    registerEffectHandler effectId handler
+    effectId
+
 // Execute an effect - returns Result<'Success, exn> to be more F# idiomatic
 let runEffect<'Payload, 'Result>
     (effectId: EffectId<'Payload, 'Result>)
@@ -460,15 +468,48 @@ let runEffectAsync<'Payload, 'Result>
         try
             match effectHandlers.TryGetValue(EffectId.key effectId) with
             | true, handler ->
+                printfn "Running effect %s with payload %A" (EffectId.key effectId) payload
                 let! result = handler (payload :> obj)
                 return Ok(result :?> 'Result)
             | false, _ ->
+                printfn "No handler registered for effect %s" (EffectId.key effectId)
                 let error = Exception($"No handler registered for effect {EffectId.key effectId}")
                 console.error (error.Message)
                 return Error error
         with ex ->
             return Error ex
     }
+
+// Chain multiple async effects together
+let chainAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T list> =
+    async {
+        let mutable results = []
+
+        for effect in effects do
+            let! result = effect ()
+            results <- result :: results
+
+        return List.rev results
+    }
+
+// Chain multiple async effects sequentially and return the last result
+let chainAsyncEffectsSequential (effects: (unit -> Async<'T>) list) : Async<'T option> =
+    async {
+        match effects with
+        | [] -> return None
+        | _ ->
+            let mutable lastResult = None
+
+            for effect in effects do
+                let! result = effect ()
+                lastResult <- Some result
+
+            return lastResult
+    }
+
+// Run multiple async effects in parallel
+let runParallelAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T[]> =
+    effects |> List.map (fun effect -> effect ()) |> Async.Parallel
 
 // Chain multiple effects together - simplified without unnecessary appDb parameter
 let chainEffects (effects: (unit -> unit) list) =
@@ -627,34 +668,6 @@ let useCombinedSubscription<'A, 'B, 'C>
     let combinedSub = combineSubscriptions subA subB combiner
     useSubscription combinedSub
 
-// A more generic hook for effects that allows custom loading state handling
-let useEffectWithCustomState<'Payload, 'Result, 'LoadingState>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    (initialLoadingState: 'LoadingState)
-    (setLoading: 'LoadingState -> unit)
-    (updateLoadingOnResult: Result<'Result, exn> -> 'LoadingState)
-    =
-    let resultState = Hooks.useState<Result<'Result, exn> option> None
-
-    Hooks.useEffect (
-        (fun () ->
-            // Set initial loading state
-            setLoading initialLoadingState
-
-            runEffect
-                effectId
-                payload
-                (fun result ->
-                    resultState.update (Some result)
-                    setLoading (updateLoadingOnResult result)
-                )
-        ),
-        [| box payload |]
-    )
-
-    resultState.current
-
 // Simplified version that just passes through the result without managing loading state
 let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
     let resultState = Hooks.useState<Result<'Result, exn> option> None
@@ -709,61 +722,6 @@ let useEffectWithUnionState<'Payload, 'Result, 'LoadingState>
     )
 
     stateHook.current, resultState
-
-// Original hook for dependencies (maintained for backward compatibility)
-let useEffectWithDeps<'Payload, 'Result>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payloadFn: unit -> 'Payload)
-    (dependencies: obj array)
-    =
-    let loadingState = Hooks.useState true
-    let resultState = Hooks.useState<Result<'Result, exn> option> None
-
-    Hooks.useEffect (
-        (fun () ->
-            loadingState.update true
-
-            runEffect
-                effectId
-                (payloadFn ())
-                (fun result ->
-                    resultState.update (Some result)
-                    loadingState.update false
-                )
-        ),
-        dependencies
-    )
-
-    loadingState.current, resultState.current
-
-// A more generic hook with dependencies and custom loading state handling
-let useEffectWithDepsAndCustomState<'Payload, 'Result, 'LoadingState>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payloadFn: unit -> 'Payload)
-    (initialLoadingState: 'LoadingState)
-    (setLoading: 'LoadingState -> unit)
-    (updateLoadingOnResult: Result<'Result, exn> -> 'LoadingState)
-    (dependencies: obj array)
-    =
-    let resultState = Hooks.useState<Result<'Result, exn> option> None
-
-    Hooks.useEffect (
-        (fun () ->
-            // Set initial loading state
-            setLoading initialLoadingState
-
-            runEffect
-                effectId
-                (payloadFn ())
-                (fun result ->
-                    resultState.update (Some result)
-                    setLoading (updateLoadingOnResult result)
-                )
-        ),
-        dependencies
-    )
-
-    resultState.current
 
 // React hook for chained effects
 // let useChainedEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>

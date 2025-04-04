@@ -1,4 +1,6 @@
 
+TODO: use only runEffect without callback
+TODO: possibly allow synchronous effects
 TODO: Fix Named event handlers!!! => they should work similar to typed ones
 TODO: syntactic sugar or other for FunctionComponent.Of
 TODO: find an alternative to FunctionComponent.Of (Elmish?)
