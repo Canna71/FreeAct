@@ -119,3 +119,19 @@ module Builders =
     // Progress elements
     let progress = ProgressElementBuilder()
     let meter = MeterElementBuilder()
+
+    // Canvas element
+    let canvas = CanvasElementBuilder()
+
+    // Form related elements
+    let datalist = DataListElementBuilder()
+    let output = OutputElementBuilder()
+
+    // Ruby text elements
+    let ruby = HtmlElementBuilder("ruby")
+    let rb = RubyBaseBuilder()
+    let rt = RubyTextBuilder()
+    let rp = RubyParenthesisBuilder()
+
+    // Template element
+    let template = TemplateElementBuilder()

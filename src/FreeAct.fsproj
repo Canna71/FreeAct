@@ -11,6 +11,7 @@
         <Compile Include="HtmlTypes.fs" />
         <Compile Include="FreeAct.fs" />
         <Compile Include="CoreHtmlElements.fs" />
+        <Compile Include="SvgElements.fs" />
         <Compile Include="Styles.fs" />
         <Compile Include="ElementBuilders.fs" />
         <Compile Include="HtmlEvents.fs" />

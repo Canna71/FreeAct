@@ -606,3 +606,33 @@ module CoreElement =
         /// The value to be submitted with the form
         [<CustomOperation("value")>]
         member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props
+
+    type CanvasElementBuilder() =
+        inherit HtmlElementBuilder("canvas")
+
+        /// Context type for canvas
+        [<CustomOperation("contextType")>]
+        member inline _.ContextType(props, value: CanvasContextType) =
+            Prop("contextType", canvasContextTypeToString value :> obj) :: props
+
+    type DataListElementBuilder() =
+        inherit HtmlElementBuilder("datalist")
+
+    type OutputElementBuilder() =
+        inherit HtmlElementBuilder("output")
+
+        /// Form elements that contribute to the output's value
+        [<CustomOperation("for")>]
+        member inline _.For(props, value: string) = Prop("htmlFor", value :> obj) :: props
+
+    type RubyBaseBuilder() =
+        inherit HtmlElementBuilder("rb")
+
+    type RubyTextBuilder() =
+        inherit HtmlElementBuilder("rt")
+
+    type RubyParenthesisBuilder() =
+        inherit HtmlElementBuilder("rp")
+
+    type TemplateElementBuilder() =
+        inherit HtmlElementBuilder("template")

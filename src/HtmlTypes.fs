@@ -285,3 +285,43 @@ module HtmlTypes =
         | ImageDecoding.Sync -> "sync"
         | ImageDecoding.Async -> "async"
         | ImageDecoding.Auto -> "auto"
+
+    [<RequireQualifiedAccess>]
+    type CanvasContextType =
+        | TwoD
+        | ThreeD
+        | WebGL
+        | WebGL2
+
+    let canvasContextTypeToString =
+        function
+        | CanvasContextType.TwoD -> "2d"
+        | CanvasContextType.ThreeD -> "3d"
+        | CanvasContextType.WebGL -> "webgl"
+        | CanvasContextType.WebGL2 -> "webgl2"
+
+    [<RequireQualifiedAccess>]
+    type PreserveAspectRatio =
+        | None
+        | XMinYMin
+        | XMidYMin
+        | XMaxYMin
+        | XMinYMid
+        | XMidYMid
+        | XMaxYMid
+        | XMinYMax
+        | XMidYMax
+        | XMaxYMax
+
+    let preserveAspectRatioToString =
+        function
+        | PreserveAspectRatio.None -> "none"
+        | PreserveAspectRatio.XMinYMin -> "xMinYMin"
+        | PreserveAspectRatio.XMidYMin -> "xMidYMin"
+        | PreserveAspectRatio.XMaxYMin -> "xMaxYMin"
+        | PreserveAspectRatio.XMinYMid -> "xMinYMid"
+        | PreserveAspectRatio.XMidYMid -> "xMidYMid"
+        | PreserveAspectRatio.XMaxYMid -> "xMaxYMid"
+        | PreserveAspectRatio.XMinYMax -> "xMinYMax"
+        | PreserveAspectRatio.XMidYMax -> "xMidYMax"
+        | PreserveAspectRatio.XMaxYMax -> "xMaxYMax"
