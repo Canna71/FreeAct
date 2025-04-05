@@ -193,3 +193,57 @@ module HtmlTypes =
         | WrapMode.Soft -> "soft"
         | WrapMode.Hard -> "hard"
         | WrapMode.Off -> "off"
+
+    [<RequireQualifiedAccess>]
+    type HttpEquiv =
+        | ContentType
+        | DefaultStyle
+        | Refresh
+        | ContentSecurityPolicy
+        | XUACompatible
+
+    let httpEquivToString =
+        function
+        | HttpEquiv.ContentType -> "content-type"
+        | HttpEquiv.DefaultStyle -> "default-style"
+        | HttpEquiv.Refresh -> "refresh"
+        | HttpEquiv.ContentSecurityPolicy -> "content-security-policy"
+        | HttpEquiv.XUACompatible -> "x-ua-compatible"
+
+    [<RequireQualifiedAccess>]
+    type LinkRelationType =
+        | Stylesheet
+        | Icon
+        | Manifest
+        | Alternate
+        | Author
+        | Canonical
+        | DnsPrefetch
+        | Help
+        | License
+        | Next
+        | Pingback
+        | Preconnect
+        | Prefetch
+        | Preload
+        | Prev
+        | Search
+
+    let linkRelationTypeToString =
+        function
+        | LinkRelationType.Stylesheet -> "stylesheet"
+        | LinkRelationType.Icon -> "icon"
+        | LinkRelationType.Manifest -> "manifest"
+        | LinkRelationType.Alternate -> "alternate"
+        | LinkRelationType.Author -> "author"
+        | LinkRelationType.Canonical -> "canonical"
+        | LinkRelationType.DnsPrefetch -> "dns-prefetch"
+        | LinkRelationType.Help -> "help"
+        | LinkRelationType.License -> "license"
+        | LinkRelationType.Next -> "next"
+        | LinkRelationType.Pingback -> "pingback"
+        | LinkRelationType.Preconnect -> "preconnect"
+        | LinkRelationType.Prefetch -> "prefetch"
+        | LinkRelationType.Preload -> "preload"
+        | LinkRelationType.Prev -> "prev"
+        | LinkRelationType.Search -> "search"

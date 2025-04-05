@@ -81,11 +81,33 @@ module Builders =
     let th = HtmlElementBuilder("th")
 
     // Meta elements
-    let meta = HtmlElementBuilder("meta")
-    let link = HtmlElementBuilder("link")
+    let meta = MetaElementBuilder()
+    let link = LinkElementBuilder()
 
     // Semantic elements
     let article = HtmlElementBuilder("article")
     let aside = HtmlElementBuilder("aside")
     let footer = HtmlElementBuilder("footer")
     let header = HtmlElementBuilder("header")
+
+    // Additional semantic elements
+    let figure = HtmlElementBuilder("figure")
+    let figcaption = HtmlElementBuilder("figcaption")
+    let details = DetailsElementBuilder()
+    let summary = HtmlElementBuilder("summary")
+    let dialog = DialogElementBuilder()
+    let time = HtmlElementBuilder("time")
+    let mark = HtmlElementBuilder("mark")
+
+    // Additional structural elements
+    let address = HtmlElementBuilder("address")
+    let blockquote = HtmlElementBuilder("blockquote")
+    let cite = HtmlElementBuilder("cite")
+    let code = HtmlElementBuilder("code")
+    let pre = HtmlElementBuilder("pre")
+
+    // Additional inline elements
+    let em = HtmlElementBuilder("em")
+    let small = HtmlElementBuilder("small")
+    let sub = HtmlElementBuilder("sub")
+    let sup = HtmlElementBuilder("sup")

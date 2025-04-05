@@ -508,3 +508,20 @@ module HtmlEvents =
         [<CustomOperation("onEnded")>]
         member inline _.OnEnded(props, handler: MediaEventHandler) =
             Prop("onEnded", handler :> obj) :: props
+
+    type DetailsElementBuilder with
+        /// Fired when the details element is toggled
+        [<CustomOperation("onToggle")>]
+        member inline _.OnToggle(props, handler: EventHandler) =
+            Prop("onToggle", handler :> obj) :: props
+
+    type DialogElementBuilder with
+        /// Fired when the dialog is closed
+        [<CustomOperation("onClose")>]
+        member inline _.OnClose(props, handler: EventHandler) =
+            Prop("onClose", handler :> obj) :: props
+
+        /// Fired when the dialog is cancelled (e.g., by pressing Escape)
+        [<CustomOperation("onCancel")>]
+        member inline _.OnCancel(props, handler: EventHandler) =
+            Prop("onCancel", handler :> obj) :: props

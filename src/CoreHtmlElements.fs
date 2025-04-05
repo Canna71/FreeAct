@@ -469,3 +469,58 @@ module CoreElement =
         [<CustomOperation("cellPadding")>]
         member inline _.CellPadding(props, value: int) =
             Prop("cellPadding", value :> obj) :: props
+
+    type MetaElementBuilder() =
+        inherit HtmlElementBuilder("meta")
+
+        /// Name of the metadata
+        [<CustomOperation("name")>]
+        member inline _.Name(props, value: string) = Prop("name", value :> obj) :: props
+
+        /// Content of the metadata
+        [<CustomOperation("content")>]
+        member inline _.Content(props, value: string) = Prop("content", value :> obj) :: props
+
+        /// Character encoding
+        [<CustomOperation("charset")>]
+        member inline _.Charset(props, value: string) = Prop("charset", value :> obj) :: props
+
+        /// HTTP-equiv value
+        [<CustomOperation("httpEquiv")>]
+        member inline _.HttpEquiv(props, value: HttpEquiv) =
+            Prop("http-equiv", httpEquivToString value :> obj) :: props
+
+    type LinkElementBuilder() =
+        inherit HtmlElementBuilder("link")
+
+        /// Relationship between current document and linked resource
+        [<CustomOperation("rel")>]
+        member inline _.Rel(props, value: LinkRelationType) =
+            Prop("rel", linkRelationTypeToString value :> obj) :: props
+
+        /// Media type the resource applies to
+        [<CustomOperation("media")>]
+        member inline _.Media(props, value: string) = Prop("media", value :> obj) :: props
+
+        /// URL of the linked resource
+        [<CustomOperation("href")>]
+        member inline _.Href(props, value: string) = Prop("href", value :> obj) :: props
+
+    type DetailsElementBuilder() =
+        inherit HtmlElementBuilder("details")
+
+        /// Whether the details are visible
+        [<CustomOperation("open")>]
+        member inline _.Open(props, value: bool) = Prop("open", value :> obj) :: props
+
+    type DialogElementBuilder() =
+        inherit HtmlElementBuilder("dialog")
+
+        /// Whether the dialog is visible
+        [<CustomOperation("open")>]
+        member inline _.Open(props, value: bool) = Prop("open", value :> obj) :: props
+
+        /// Return value when dialog is closed
+        [<CustomOperation("returnValue")>]
+        member inline _.ReturnValue(props, value: string) =
+            Prop("returnValue", value :> obj) :: props
