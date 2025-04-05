@@ -451,33 +451,6 @@ let runEffectAsync<'Payload> (effectId: EffectId<'Payload, unit>) (payload: 'Pay
     with ex ->
         Error ex
 
-// Chain multiple async effects together
-let chainAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T list> =
-    async {
-        let mutable results = []
-
-        for effect in effects do
-            let! result = effect ()
-            results <- result :: results
-
-        return List.rev results
-    }
-
-// Chain multiple async effects sequentially and return the last result
-let chainAsyncEffectsSequential (effects: (unit -> Async<'T>) list) : Async<'T option> =
-    async {
-        match effects with
-        | [] -> return None
-        | _ ->
-            let mutable lastResult = None
-
-            for effect in effects do
-                let! result = effect ()
-                lastResult <- Some result
-
-            return lastResult
-    }
-
 // Run multiple async effects in parallel
 let runParallelAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T[]> =
     effects |> List.map (fun effect -> effect ()) |> Async.Parallel
@@ -544,31 +517,21 @@ let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
     =
 
     async {
-        // Create async computations that return boxed objects to allow different types
-        let task1 =
-            async {
-                let! result = runEffect effect1 payload1
-                return box result // Box the result to make it compatible with an array
-            }
+        // Create the async tasks but don't await them yet
+        let task1 = runEffect effect1 payload1
+        let task2 = runEffect effect2 payload2
 
-        let task2 =
-            async {
-                let! result = runEffect effect2 payload2
-                return box result // Box the result
-            }
+        let! childA = Async.StartChild task1
+        let! childB = Async.StartChild task2
 
-        // Run tasks in parallel
-        let! results = Async.Parallel [| task1; task2 |]
+        let! resultA = childA
+        let! resultB = childB
 
-        // Unbox and handle the results
-        let result1 = unbox<Result<'ResultA, exn>> results.[0]
-        let result2 = unbox<Result<'ResultB, exn>> results.[1]
-
-        // Combine the results if both succeed
-        match result1, result2 with
+        match resultA, resultB with
         | Ok r1, Ok r2 -> return Ok(combiner r1 r2)
         | Error e, _ -> return Error e
         | _, Error e -> return Error e
+
     }
 
 // ===== React Integration =====

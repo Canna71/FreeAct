@@ -6,6 +6,7 @@ TODO: find an alternative to FunctionComponent.Of (Elmish?)
 TODO: split project into multiple projects
 TODO: add computation expressions for routes
 TODO: complete the builders for elements
+TODO: fix naming to distinguish between definitions of effects and actually executing them
 
 Differences between subscribers and effects:
 
