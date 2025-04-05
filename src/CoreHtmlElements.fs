@@ -524,3 +524,85 @@ module CoreElement =
         [<CustomOperation("returnValue")>]
         member inline _.ReturnValue(props, value: string) =
             Prop("returnValue", value :> obj) :: props
+
+    type TableCellElementBuilder(tag: string) =
+        inherit HtmlElementBuilder(tag)
+
+        /// Number of columns this cell should span
+        [<CustomOperation("colSpan")>]
+        member inline _.ColSpan(props, value: int) = Prop("colSpan", value :> obj) :: props
+
+        /// Number of rows this cell should span
+        [<CustomOperation("rowSpan")>]
+        member inline _.RowSpan(props, value: int) = Prop("rowSpan", value :> obj) :: props
+
+        /// Defines the cells that the header cell relates to
+        [<CustomOperation("scope")>]
+        member inline _.Scope(props, value: TableCellScope) =
+            Prop("scope", tableCellScopeToString value :> obj) :: props
+
+    type ImageElementBuilder() =
+        inherit HtmlElementBuilder("img")
+
+        /// Alternative text description
+        [<CustomOperation("alt")>]
+        member inline _.Alt(props, value: string) = Prop("alt", value :> obj) :: props
+
+        /// Image loading strategy
+        [<CustomOperation("loading")>]
+        member inline _.Loading(props, value: LoadingStrategy) =
+            Prop("loading", loadingStrategyToString value :> obj) :: props
+
+        /// Image decoding hint
+        [<CustomOperation("decoding")>]
+        member inline _.Decoding(props, value: ImageDecoding) =
+            Prop("decoding", imageDecodingToString value :> obj) :: props
+
+    type ProgressElementBuilder() =
+        inherit HtmlElementBuilder("progress")
+
+        /// Current value
+        [<CustomOperation("value")>]
+        member inline _.Value(props, value: float) = Prop("value", value :> obj) :: props
+
+        /// Maximum value
+        [<CustomOperation("max")>]
+        member inline _.Max(props, value: float) = Prop("max", value :> obj) :: props
+
+    type MeterElementBuilder() =
+        inherit HtmlElementBuilder("meter")
+
+        /// Current value
+        [<CustomOperation("value")>]
+        member inline _.Value(props, value: float) = Prop("value", value :> obj) :: props
+
+        /// Minimum value
+        [<CustomOperation("min")>]
+        member inline _.Min(props, value: float) = Prop("min", value :> obj) :: props
+
+        /// Maximum value
+        [<CustomOperation("max")>]
+        member inline _.Max(props, value: float) = Prop("max", value :> obj) :: props
+
+        /// Low value range
+        [<CustomOperation("low")>]
+        member inline _.Low(props, value: float) = Prop("low", value :> obj) :: props
+
+        /// High value range
+        [<CustomOperation("high")>]
+        member inline _.High(props, value: float) = Prop("high", value :> obj) :: props
+
+        /// Optimal value
+        [<CustomOperation("optimum")>]
+        member inline _.Optimum(props, value: float) = Prop("optimum", value :> obj) :: props
+
+    type OptionElementBuilder() =
+        inherit InteractiveFormElement("option")
+
+        /// Whether the option is selected by default
+        [<CustomOperation("selected")>]
+        member inline _.Selected(props, value: bool) = Prop("selected", value :> obj) :: props
+
+        /// The value to be submitted with the form
+        [<CustomOperation("value")>]
+        member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props

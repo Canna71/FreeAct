@@ -247,3 +247,41 @@ module HtmlTypes =
         | LinkRelationType.Preload -> "preload"
         | LinkRelationType.Prev -> "prev"
         | LinkRelationType.Search -> "search"
+
+    [<RequireQualifiedAccess>]
+    type TableCellScope =
+        | Row
+        | Col
+        | RowGroup
+        | ColGroup
+        | Auto
+
+    let tableCellScopeToString =
+        function
+        | TableCellScope.Row -> "row"
+        | TableCellScope.Col -> "col"
+        | TableCellScope.RowGroup -> "rowgroup"
+        | TableCellScope.ColGroup -> "colgroup"
+        | TableCellScope.Auto -> "auto"
+
+    [<RequireQualifiedAccess>]
+    type LoadingStrategy =
+        | Eager
+        | Lazy
+
+    let loadingStrategyToString =
+        function
+        | LoadingStrategy.Eager -> "eager"
+        | LoadingStrategy.Lazy -> "lazy"
+
+    [<RequireQualifiedAccess>]
+    type ImageDecoding =
+        | Sync
+        | Async
+        | Auto
+
+    let imageDecodingToString =
+        function
+        | ImageDecoding.Sync -> "sync"
+        | ImageDecoding.Async -> "async"
+        | ImageDecoding.Auto -> "auto"

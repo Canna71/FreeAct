@@ -48,7 +48,7 @@ module Builders =
     let i = HtmlElementBuilder("i")
 
     let label = HtmlElementBuilder("label")
-    let img = HtmlElementBuilder("img")
+    let img = ImageElementBuilder()
 
     let input = HtmlElementBuilder("input")
     let strong = HtmlElementBuilder "strong"
@@ -77,8 +77,8 @@ module Builders =
     let tbody = HtmlElementBuilder("tbody")
     let tfoot = HtmlElementBuilder("tfoot")
     let tr = HtmlElementBuilder("tr")
-    let td = HtmlElementBuilder("td")
-    let th = HtmlElementBuilder("th")
+    let td = TableCellElementBuilder("td")
+    let th = TableCellElementBuilder("th")
 
     // Meta elements
     let meta = MetaElementBuilder()
@@ -111,3 +111,11 @@ module Builders =
     let small = HtmlElementBuilder("small")
     let sub = HtmlElementBuilder("sub")
     let sup = HtmlElementBuilder("sup")
+
+    // Form-related elements
+    let option = OptionElementBuilder()
+    let optgroup = HtmlElementBuilder("optgroup")
+
+    // Progress elements
+    let progress = ProgressElementBuilder()
+    let meter = MeterElementBuilder()
