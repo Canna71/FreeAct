@@ -980,16 +980,26 @@ module Styles =
 
         member inline _.Zero() = []
         // Color
-        /// Sets the text color
-        /// Example: color Color.red
-        /// Example: color (Color.rgba(255, 0, 0, 0.5))
+        /// <summary>Sets color for text content</summary>
+        /// <param name="c">Color value (e.g. Color.red, Color.rgba(255,0,0,0.5))</param>
+        /// <example>
+        /// style {
+        ///     color Color.red
+        ///     color (Color.rgba(255, 0, 0, 0.5))
+        /// }
+        /// </example>
         [<CustomOperation("color")>]
         member inline _.Color(props, c: string) = ("color", c :> obj) :: props
 
         // Background color
-        /// Sets the background color
-        /// Example: backgroundColor Color.blue
-        /// Example: backgroundColor (Color.hex "#ff0000")
+        /// <summary>Sets background color for an element</summary>
+        /// <param name="c">Background color value</param>
+        /// <example>
+        /// style {
+        ///     backgroundColor Color.blue
+        ///     backgroundColor (Color.hex "#ff0000")
+        /// }
+        /// </example>
         [<CustomOperation("backgroundColor")>]
         member inline _.BackgroundColor(props, c: string) = ("backgroundColor", c :> obj) :: props
 
@@ -1055,16 +1065,26 @@ module Styles =
         member inline _.FontFamily(props, family: string) = ("fontFamily", family :> obj) :: props
 
         // Display properties
-        /// Sets the display property
-        /// Example: display Display.Flex
-        /// Example: display Display.Grid
+        /// <summary>Sets display mode for element layout</summary>
+        /// <param name="value">Display type (Block, Flex, Grid etc)</param>
+        /// <example>
+        /// style {
+        ///     display Display.Flex
+        ///     display Display.Grid
+        /// }
+        /// </example>
         [<CustomOperation("display")>]
         member inline _.Display(props, value: Display) =
             ("display", displayToString value :> obj) :: props
 
-        /// Sets positioning behavior
-        /// Example: position Position.Absolute
-        /// Example: position Position.Sticky
+        /// <summary>Sets positioning mode for element</summary>
+        /// <param name="value">Position type (Relative, Absolute etc)</param>
+        /// <example>
+        /// style {
+        ///     position Position.Absolute
+        ///     position Position.Fixed
+        /// }
+        /// </example>
         [<CustomOperation("position")>]
         member inline _.Position(props, value: Position) =
             ("position", positionToString value :> obj) :: props
@@ -1094,9 +1114,14 @@ module Styles =
             ("borderRadius", lengthToString value :> obj) :: props
 
         // Flex properties
-        /// Sets flex container direction
-        /// Example: flexDirection FlexDirection.Row
-        /// Example: flexDirection FlexDirection.Column
+        /// <summary>Sets flex container direction</summary>
+        /// <param name="value">Direction (Row, Column etc)</param>
+        /// <example>
+        /// style {
+        ///     flexDirection FlexDirection.Column
+        ///     flexDirection FlexDirection.RowReverse
+        /// }
+        /// </example>
         [<CustomOperation("flexDirection")>]
         member inline _.FlexDirection(props, value: FlexDirection) =
             ("flexDirection", flexDirectionToString value :> obj) :: props
@@ -1990,6 +2015,12 @@ module Styles =
         member inline _.FontBold(props) = ("fontWeight", "bold" :> obj) :: props
 
         // Common combinations
+        /// <summary>Centers content both horizontally and vertically using flexbox</summary>
+        /// <example>
+        /// style {
+        ///     centerContent
+        /// }
+        /// </example>
         [<CustomOperation("centerContent")>]
         member inline _.CenterContent(props) =
             [
@@ -1999,6 +2030,12 @@ module Styles =
             ]
             @ props
 
+        /// <summary>Makes element take up full viewport dimensions</summary>
+        /// <example>
+        /// style {
+        ///     fullScreen
+        /// }
+        /// </example>
         [<CustomOperation("fullScreen")>]
         member inline _.FullScreen(props) =
             [
@@ -2035,6 +2072,16 @@ module Styles =
             @ props
 
         // Transition shortcuts
+        /// <summary>Applies transition to all properties</summary>
+        /// <example>
+        /// style {
+        ///     transitionAll
+        /// }
+        /// </example>
+        [<CustomOperation("transitionAll")>]
+        member inline _.TransitionAll(props) =
+            ("transition", "all 0.2s ease-in-out" :> obj) :: props
+
         [<CustomOperation("fadeIn")>]
         member inline _.FadeIn(props) =
             [ "opacity", 1 :> obj; "transition", "opacity 0.2s ease-in-out" :> obj ] @ props
@@ -2044,15 +2091,17 @@ module Styles =
             [ "opacity", 0 :> obj; "transition", "opacity 0.2s ease-in-out" :> obj ] @ props
 
         // Quick transitions
-        [<CustomOperation("transitionAll")>]
-        member inline _.TransitionAll(props) =
-            ("transition", "all 0.2s ease-in-out" :> obj) :: props
-
         [<CustomOperation("transitionColors")>]
         member inline _.TransitionColors(props) =
             ("transition", "background-color 0.2s ease, color 0.2s ease" :> obj) :: props
 
         // Text shortcuts
+        /// <summary>Applies text truncation with ellipsis</summary>
+        /// <example>
+        /// style {
+        ///     ellipsis
+        /// }
+        /// </example>
         [<CustomOperation("ellipsis")>]
         member inline _.Ellipsis(props) =
             [
