@@ -55,31 +55,30 @@ module Builders =
     /// <summary>Creates italic text</summary>
     let i = ItalicBuilder()
 
-    // Form elements - use specialized builders with proper attributes/events
-    let button = ButtonElement() // Use ButtonElement for button-specific attributes
-    let input = InputElementBuilder()
-    let form = FormElement() // Use FormElement instead of FormBuilder for form-specific events
-    let select = SelectElementBuilder()
-    let textarea = TextAreaElementBuilder()
-    let fieldset = FieldsetElement() // Use FieldsetElement for fieldset-specific attributes
-    let legend = LegendElement() // Use LegendElement for legend-specific attributes
-    let option = OptionBuilder()
-    let optgroup = OptionGroupBuilder()
-    let datalist = DataListElementBuilder()
-    let output = OutputElementBuilder()
+    // Form elements - Fix form-related elements to use correct builders
+    let button = ButtonElement() // Correct - has button type and form attributes
+    let input = InputElementBuilder() // Correct - has input specific attributes
+    let form = FormElement() // Correct - has form events and attributes
+    let select = SelectElementBuilder() // Correct - has multiple/size attributes
+    let textarea = TextAreaElementBuilder() // Correct - has rows/cols attributes
+    let fieldset = FieldsetElement() // Correct
+    let legend = LegendElement() // Correct
+    let option = OptionElementBuilder() // Correct - has selected attribute
+    let optgroup = OptionGroupBuilder() // Correct
+    let datalist = DataListElementBuilder() // Correct
+    let output = OutputElementBuilder() // Correct - has htmlFor attribute
 
-    // Media elements
-    let img = ImageBuilder()
-    let audio = AudioBuilder()
-    let video = VideoBuilder()
-    let source = SourceBuilder()
-    let track = TrackBuilder()
-    let picture = PictureElementBuilder()
+    // Media elements - All need MediaElementBuilder base
+    let img = ImageElementBuilder() // Correct - has image specific attributes
+    let audio = AudioBuilder() // Correct - inherits from MediaElementBuilder
+    let video = VideoBuilder() // Correct - inherits from MediaElementBuilder
+    let source = SourceElementBuilder() // Correct - has media attributes
+    let track = TrackElementBuilder() // Correct - has track attributes
 
     // Container and semantic elements
     let fragment = FragmentBuilder()
-    let dialog = DialogElementBuilder() // Use the proper builder with dialog-specific attributes/events
-    let details = DetailsBuilder()
+    let dialog = DialogElementBuilder() // Correct - has dialog specific events
+    let details = DetailsElementBuilder() // Correct - has toggle event
     let summary = SummaryBuilder()
 
     // Table elements
@@ -101,7 +100,7 @@ module Builders =
 
     // Metadata and script elements
     let meta = MetaElementBuilder()
-    let link = LinkBuilder()
+    let link = LinkElementBuilder() // Correct - has rel/href attributes
     let script = ScriptBuilder()
 
     // Specialized elements
@@ -121,4 +120,4 @@ module Builders =
     let none: ReactElement = null
 
     // Core elements
-    let a = AnchorElement() // Not AnchorBuilder
+    let a = AnchorElement() // Correct - has href/target attributes
