@@ -413,26 +413,21 @@ let registerNamedEffectHandler<'Payload, 'Result>
     effectId
 
 // Execute an effect - returns Result<'Success, exn> to be more F# idiomatic
-let runEffect<'Payload, 'Result>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    (callback: Result<'Result, exn> -> unit)
-    =
+let runEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
     async {
         match effectHandlers.TryGetValue(EffectId.key effectId) with
         | true, handler ->
             try
                 let! result = handler (payload :> obj)
                 let typedResult = result :?> 'Result
-                callback (Ok typedResult)
+                return Ok typedResult
             with ex ->
-                callback (Error ex)
+                return Error ex
         | false, _ ->
             let error = Exception($"No handler registered for effect {EffectId.key effectId}")
             console.error (error.Message)
-            callback (Error error)
+            return Error error
     }
-    |> Async.StartImmediate
 
 // Version that returns a promise with Result
 let runEffectAsPromise<'Payload, 'Result>
@@ -459,26 +454,30 @@ let runEffectAsPromise<'Payload, 'Result>
     )
 
 // Async version - more F# idiomatic
-let runEffectAsync<'Payload, 'Result>
-    (effectId: EffectId<'Payload, 'Result>)
+let runEffectAsync<'Payload>
+    (effectId: EffectId<'Payload, unit>)
     (payload: 'Payload)
-    : Async<Result<'Result, exn>>
+    : Result<unit, exn>
     =
-    async {
-        try
-            match effectHandlers.TryGetValue(EffectId.key effectId) with
-            | true, handler ->
-                printfn "Running effect %s with payload %A" (EffectId.key effectId) payload
-                let! result = handler (payload :> obj)
-                return Ok(result :?> 'Result)
-            | false, _ ->
-                printfn "No handler registered for effect %s" (EffectId.key effectId)
-                let error = Exception($"No handler registered for effect {EffectId.key effectId}")
-                console.error (error.Message)
-                return Error error
-        with ex ->
-            return Error ex
-    }
+    try
+        match effectHandlers.TryGetValue(EffectId.key effectId) with
+        | true, handler ->
+            printfn "Running effect %s with payload %A" (EffectId.key effectId) payload
+
+            async {
+                let! _ = handler (payload :> obj)
+                return ()
+            }
+            |> Async.StartImmediate
+
+            Ok(())
+        | false, _ ->
+            printfn "No handler registered for effect %s" (EffectId.key effectId)
+            let error = Exception($"No handler registered for effect {EffectId.key effectId}")
+            console.error (error.Message)
+            Error error
+    with ex ->
+        Error ex
 
 // Chain multiple async effects together
 let chainAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T list> =
@@ -523,16 +522,23 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
     (payload: 'Payload)
     (onResult: Result<'Result, exn> -> EventId<'EventPayload> option * 'EventPayload option)
     =
-    runEffect
-        effectId
-        payload
-        (fun result ->
-            let (eventIdOpt, eventPayloadOpt) = onResult result
+    async {
+        let! result = runEffect effectId payload
+
+        match result with
+        | Ok _ ->
+            // Dispatch the event if the effect was successful
+            let eventIdOpt, eventPayloadOpt = onResult result
 
             match eventIdOpt, eventPayloadOpt with
             | Some eventId, Some eventPayload -> dispatch appDb eventId eventPayload
             | _ -> () // No event to dispatch
-        )
+        | Error ex ->
+            // Handle the error case if needed
+            console.error (sprintf "Effect failed: %s" ex.Message)
+    // Optionally dispatch an error event or handle it in some way
+
+    }
 
 // =====================================================
 //             Effect Composition
@@ -549,13 +555,13 @@ let chainEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
 
     async {
         // Run the first effect
-        let! result1 = runEffectAsync effect1 payload1
+        let! result1 = runEffect effect1 payload1
 
         // If the first effect succeeds, run the second
         match result1 with
         | Ok resultA ->
             let payload2 = createPayload2 resultA
-            return! runEffectAsync effect2 payload2
+            return! runEffect effect2 payload2
         | Error e -> return Error e
     }
 
@@ -573,13 +579,13 @@ let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
         // Create async computations that return boxed objects to allow different types
         let task1 =
             async {
-                let! result = runEffectAsync effect1 payload1
+                let! result = runEffect effect1 payload1
                 return box result // Box the result to make it compatible with an array
             }
 
         let task2 =
             async {
-                let! result = runEffectAsync effect2 payload2
+                let! result = runEffect effect2 payload2
                 return box result // Box the result
             }
 
@@ -669,59 +675,61 @@ let useCombinedSubscription<'A, 'B, 'C>
     useSubscription combinedSub
 
 // Simplified version that just passes through the result without managing loading state
-let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
-    let resultState = Hooks.useState<Result<'Result, exn> option> None
+// let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
+//     let resultState = Hooks.useState<Result<'Result, exn> option> None
 
-    Hooks.useEffect (
-        (fun () -> runEffect effectId payload (fun result -> resultState.update (Some result))),
-        [| box payload |]
-    )
+//     Hooks.useEffect (
+//         (fun () ->
+//           runEffect effectId payload (fun result -> resultState.update (Some result))
+//         ),
+//         [| box payload |]
+//     )
 
-    resultState.current
+//     resultState.current
 
 // Original hook for handling effects in React components (maintained for backward compatibility)
-let useFreeFrameEffect<'Payload, 'Result>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    =
-    let loadingState = Hooks.useState true
-    let resultState = Hooks.useState<Result<'Result, exn> option> None
+// let useFreeFrameEffect<'Payload, 'Result>
+//     (effectId: EffectId<'Payload, 'Result>)
+//     (payload: 'Payload)
+//     =
+//     let loadingState = Hooks.useState true
+//     let resultState = Hooks.useState<Result<'Result, exn> option> None
 
-    Hooks.useEffect (
-        (fun () ->
-            runEffect
-                effectId
-                payload
-                (fun result ->
-                    resultState.update (Some result)
-                    loadingState.update false
-                )
-        ),
-        [| box payload |]
-    )
+//     Hooks.useEffect (
+//         (fun () ->
+//             runEffect
+//                 effectId
+//                 payload
+//                 (fun result ->
+//                     resultState.update (Some result)
+//                     loadingState.update false
+//                 )
+//         ),
+//         [| box payload |]
+//     )
 
-    loadingState.current, resultState.current
+//     loadingState.current, resultState.current
 
 // Custom version for discriminated union loading state
-let useEffectWithUnionState<'Payload, 'Result, 'LoadingState>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    (initialState: 'LoadingState)
-    (onResult: Result<'Result, exn> -> 'LoadingState)
-    =
-    let stateHook = Hooks.useState initialState
-    let resultState = useEffectSimple effectId payload
+// let useEffectWithUnionState<'Payload, 'Result, 'LoadingState>
+//     (effectId: EffectId<'Payload, 'Result>)
+//     (payload: 'Payload)
+//     (initialState: 'LoadingState)
+//     (onResult: Result<'Result, exn> -> 'LoadingState)
+//     =
+//     let stateHook = Hooks.useState initialState
+//     let resultState = useEffectSimple effectId payload
 
-    Hooks.useEffect (
-        (fun () ->
-            match resultState with
-            | Some result -> stateHook.update (onResult result)
-            | None -> stateHook.update initialState
-        ),
-        [| box resultState |]
-    )
+//     Hooks.useEffect (
+//         (fun () ->
+//             match resultState with
+//             | Some result -> stateHook.update (onResult result)
+//             | None -> stateHook.update initialState
+//         ),
+//         [| box resultState |]
+//     )
 
-    stateHook.current, resultState
+//     stateHook.current, resultState
 
 // React hook for chained effects
 // let useChainedEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>

@@ -73,10 +73,8 @@ let _EffectChainingExample () =
 
     let onStart (_) = 
       printfn "Starting effect chaining"
-      async {
-        let! _ = runEffectAsync chainedEffectId ()
-        return ()
-      } |> Async.StartImmediate
+      runEffectAsync chainedEffectId () |> ignore
+     
     
     div {
         className "effect-chaining-example"
