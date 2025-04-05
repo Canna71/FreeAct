@@ -7,16 +7,16 @@ module ElementTypes =
     /// Basic HTML element builders - enforce consistent naming
 
     // Change from Element to Builder suffix for consistency
-    type DivBuilder() =
+    type DivElements() =
         inherit HtmlElementBuilder("div")
 
     type NavBuilder() =
         inherit HtmlElementBuilder("nav")
 
-    type MainBuilder() =
+    type MainElement() =
         inherit HtmlElementBuilder("main")
 
-    type SectionBuilder() =
+    type SectionElement() =
         inherit HtmlElementBuilder("section")
 
     type ArticleBuilder() =
@@ -41,92 +41,92 @@ module ElementTypes =
     type EmphasisBuilder() =
         inherit HtmlElementBuilder("em")
 
-    type StrongBuilder() =
+    type StrongElement() =
         inherit HtmlElementBuilder("strong")
 
-    type CodeBuilder() =
+    type CodeElement() =
         inherit HtmlElementBuilder("code")
 
-    type PreBuilder() =
+    type PreElement() =
         inherit HtmlElementBuilder("pre")
 
-    type BlockquoteBuilder() =
+    type BlockquoteElement() =
         inherit HtmlElementBuilder("blockquote")
 
     // List elements
-    type OrderedListBuilder() =
+    type OrderedListElement() =
         inherit HtmlElementBuilder("ol")
 
-    type UnorderedListBuilder() =
+    type UnorderedListElement() =
         inherit HtmlElementBuilder("ul")
 
-    type ListItemBuilder() =
+    type ListItemElement() =
         inherit HtmlElementBuilder("li")
 
     // Text formatting elements
-    type CitationBuilder() =
+    type CitationElement() =
         inherit HtmlElementBuilder("cite")
 
-    type SmallBuilder() =
+    type SmallElement() =
         inherit HtmlElementBuilder("small")
 
-    type SubscriptBuilder() =
+    type SubscriptElement() =
         inherit HtmlElementBuilder("sub")
 
-    type SuperscriptBuilder() =
+    type SuperscriptElement() =
         inherit HtmlElementBuilder("sup")
 
-    type AddressBuilder() =
+    type AddressElement() =
         inherit HtmlElementBuilder("address")
 
-    type RubyBuilder() =
+    type RubyElement() =
         inherit HtmlElementBuilder("ruby")
 
     // Form and input elements
-    type OptionGroupBuilder() =
+    type OptionGroupElement() =
         inherit HtmlElementBuilder("optgroup")
 
-    type FieldsetBuilder() = // Was FieldsetElement
+    type FieldsetElement() = // Was FieldsetElement
         inherit HtmlElementBuilder("fieldset")
 
-    type LegendBuilder() = // Was LegendElement
+    type LegendElement() = // Was LegendElement
         inherit HtmlElementBuilder("legend")
 
-    type FormBuilder() = // Was FormElement
+    type FormElement() = // Was FormElement
         inherit HtmlElementBuilder("form")
 
     // Additional HTML elements
-    type TableHeaderBuilder() =
+    type TableHeaderElement() =
         inherit HtmlElementBuilder("thead")
 
-    type TableBodyBuilder() =
+    type TableBodyElement() =
         inherit HtmlElementBuilder("tbody")
 
-    type TableFooterBuilder() =
+    type TableFooterElement() =
         inherit HtmlElementBuilder("tfoot")
 
-    type TableRowBuilder() =
+    type TableRowElement() =
         inherit HtmlElementBuilder("tr")
 
-    type FigureBuilder() =
+    type FigureElement() =
         inherit HtmlElementBuilder("figure")
 
-    type FigCaptionBuilder() =
+    type FigCaptionElement() =
         inherit HtmlElementBuilder("figcaption")
 
-    type TimeBuilder() =
+    type TimeElement() =
         inherit HtmlElementBuilder("time")
 
-    type MarkBuilder() =
+    type MarkElement() =
         inherit HtmlElementBuilder("mark")
 
-    type SummaryBuilder() =
+    type SummaryElement() =
         inherit HtmlElementBuilder("summary")
 
-    type DialogBuilder() = // Was DialogElementBuilder
+    type DialogElement() = // Was DialogElementBuilder
         inherit HtmlElementBuilder("dialog")
 
-    type DetailsBuilder() = // Was DetailsElementBuilder
+    type DetailsElement() = // Was DetailsElementBuilder
         inherit HtmlElementBuilder("details")
 
     /// Basic HTML document structure elements

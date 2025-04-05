@@ -6,13 +6,13 @@ module Builders =
 
     // Core structure elements
     /// <summary>Creates a div element for grouping content</summary>
-    let div = DivBuilder()
+    let div = DivElements()
     /// <summary>Creates a navigation section</summary>
     let nav = NavBuilder()
     /// <summary>Creates the main content section</summary>
-    let main = MainBuilder()
+    let main = MainElement()
     /// <summary>Creates a standalone section</summary>
-    let section = SectionBuilder()
+    let section = SectionElement()
     /// <summary>Creates an article section</summary>
     let article = ArticleBuilder()
     /// <summary>Creates an aside section for related content</summary>
@@ -24,11 +24,11 @@ module Builders =
 
     // List elements
     /// <summary>Creates an ordered list</summary>
-    let ol = OrderedListBuilder()
+    let ol = OrderedListElement()
     /// <summary>Creates an unordered list</summary>
-    let ul = UnorderedListBuilder()
+    let ul = UnorderedListElement()
     /// <summary>Creates a list item</summary>
-    let li = ListItemBuilder()
+    let li = ListItemElement()
 
     // Heading elements
     /// <summary>Creates a top-level heading (h1) for page or section titles</summary>
@@ -73,23 +73,23 @@ module Builders =
     /// <summary>Creates emphasized text</summary>
     let em = EmphasisBuilder()
     /// <summary>Creates strongly emphasized text</summary>
-    let strong = StrongBuilder()
+    let strong = StrongElement()
     /// <summary>Creates inline code text</summary>
-    let code = CodeBuilder()
+    let code = CodeElement()
     /// <summary>Creates preformatted text block</summary>
-    let pre = PreBuilder()
+    let pre = PreElement()
     /// <summary>Creates a block quotation</summary>
-    let blockquote = BlockquoteBuilder()
+    let blockquote = BlockquoteElement()
     /// <summary>Creates contact information section</summary>
-    let address = AddressBuilder()
+    let address = AddressElement()
     /// <summary>Creates small print text</summary>
-    let small = SmallBuilder()
+    let small = SmallElement()
     /// <summary>Creates subscript text</summary>
-    let sub = SubscriptBuilder()
+    let sub = SubscriptElement()
     /// <summary>Creates superscript text</summary>
-    let sup = SuperscriptBuilder()
+    let sup = SuperscriptElement()
     /// <summary>Creates a citation</summary>
-    let cite = CitationBuilder()
+    let cite = CitationElement()
     /// <summary>Creates italic text</summary>
     let i = ItalicBuilder()
 
@@ -111,7 +111,7 @@ module Builders =
     /// <summary>Creates an option for select elements</summary>
     let option = OptionElement() // Correct - has selected attribute
     /// <summary>Creates a group of related options</summary>
-    let optgroup = OptionGroupBuilder() // Correct
+    let optgroup = OptionGroupElement() // Correct
 
     // Media elements - All need MediaElementBuilder base
     /// <summary>Creates an image element with loading and accessibility options</summary>
@@ -128,7 +128,7 @@ module Builders =
     /// <summary>Creates an expandable details section</summary>
     let details = DetailsElement() // Correct - has toggle event
     /// <summary>Creates a summary for a details element</summary>
-    let summary = SummaryBuilder()
+    let summary = SummaryElement()
 
     // Table elements with documentation
     /// <summary>Creates a table element for structured data presentation</summary>
@@ -143,16 +143,16 @@ module Builders =
     let table = TableElement()
 
     /// <summary>Creates a table header section</summary>
-    let thead = TableHeaderBuilder()
+    let thead = TableHeaderElement()
 
     /// <summary>Creates a table body section</summary>
-    let tbody = TableBodyBuilder()
+    let tbody = TableBodyElement()
 
     /// <summary>Creates a table footer section</summary>
-    let tfoot = TableFooterBuilder()
+    let tfoot = TableFooterElement()
 
     /// <summary>Creates a table row</summary>
-    let tr = TableRowBuilder()
+    let tr = TableRowElement()
 
     /// <summary>Creates a table data cell</summary>
     let td = TableDataCellBuilder()
@@ -242,7 +242,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let figure = FigureBuilder()
+    let figure = FigureElement()
 
     /// <summary>Creates a caption for a figure element</summary>
     /// <example>
@@ -253,7 +253,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let figcaption = FigCaptionBuilder()
+    let figcaption = FigCaptionElement()
 
     /// <summary>Creates a time element for dates and timestamps</summary>
     /// <example>
@@ -264,7 +264,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let time = TimeBuilder()
+    let time = TimeElement()
 
     /// <summary>Creates a mark element for highlighting text</summary>
     /// <example>
@@ -276,7 +276,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let mark = MarkBuilder()
+    let mark = MarkElement()
 
     /// <summary>Creates a ruby container for East Asian typography annotations</summary>
     /// <example>
@@ -287,7 +287,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let ruby = RubyBuilder()
+    let ruby = RubyElement()
 
     /// <summary>Creates a ruby base text element</summary>
     let rb = RubyBase()
