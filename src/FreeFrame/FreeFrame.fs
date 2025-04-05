@@ -534,6 +534,7 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
     // Optionally dispatch an error event or handle it in some way
 
     }
+    |> Async.StartImmediate
 
 // =====================================================
 //             Effect Composition

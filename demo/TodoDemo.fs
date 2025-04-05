@@ -85,10 +85,11 @@ let LoadTodosButton () =
             onClick (fun _ -> 
                 // Set loading state
                 dispatch appDb setLoadingEvent true
-                
+                console.log("Loading todos...")
                 // Run the effect and handle the result with the specialized result type
                 dispatchAfterEffect appDb fetchTodosEffect () (fun result ->
                     // Transform the raw effect result into our domain-specific result type
+                    console.log("Effect result: ", result)
                     let resultValue = 
                         match result with
                         | Ok todos -> TodosLoaded todos
@@ -96,7 +97,7 @@ let LoadTodosButton () =
                     
                     // Return the single event type with the domain result
                     Some fetchTodosResultEvent, Some resultValue
-                )
+                ) |> ignore // Ignore the result of dispatchAfterEffect
             )
             
             if isLoading then
