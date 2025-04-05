@@ -65,6 +65,10 @@ module Builders =
     let audio = MediaElementBuilder("audio")
     let video = MediaElementBuilder("video")
 
+    // Media-related elements
+    let source = SourceElementBuilder()
+    let track = TrackElementBuilder()
+
     // Form elements
     let select = SelectElementBuilder()
     let textarea = TextAreaElementBuilder()
@@ -79,6 +83,10 @@ module Builders =
     let tr = HtmlElementBuilder("tr")
     let td = TableCellElementBuilder("td")
     let th = TableCellElementBuilder("th")
+
+    // Table-related elements
+    let colgroup = ColGroupBuilder()
+    let col = ColBuilder()
 
     // Meta elements
     let meta = MetaElementBuilder()
@@ -135,3 +143,6 @@ module Builders =
 
     // Template element
     let template = TemplateElementBuilder()
+
+    // Image-related elements
+    let picture = PictureElementBuilder()

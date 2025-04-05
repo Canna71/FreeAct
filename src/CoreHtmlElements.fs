@@ -636,3 +636,52 @@ module CoreElement =
 
     type TemplateElementBuilder() =
         inherit HtmlElementBuilder("template")
+
+    type SourceElementBuilder() =
+        inherit HtmlElementBuilder("source")
+
+        [<CustomOperation("type")>]
+        member inline _.Type(props, value: string) = Prop("type", value :> obj) :: props
+
+        [<CustomOperation("srcset")>]
+        member inline _.SrcSet(props, value: string) = Prop("srcset", value :> obj) :: props
+
+        [<CustomOperation("sizes")>]
+        member inline _.Sizes(props, value: string) = Prop("sizes", value :> obj) :: props
+
+        [<CustomOperation("media")>]
+        member inline _.Media(props, value: string) = Prop("media", value :> obj) :: props
+
+    type TrackElementBuilder() =
+        inherit HtmlElementBuilder("track")
+
+        [<CustomOperation("kind")>]
+        member inline _.Kind(props, value: TrackKind) =
+            Prop("kind", trackKindToString value :> obj) :: props
+
+        [<CustomOperation("src")>]
+        member inline _.Src(props, value: string) = Prop("src", value :> obj) :: props
+
+        [<CustomOperation("srclang")>]
+        member inline _.SrcLang(props, value: string) = Prop("srclang", value :> obj) :: props
+
+        [<CustomOperation("label")>]
+        member inline _.Label(props, value: string) = Prop("label", value :> obj) :: props
+
+        [<CustomOperation("default")>]
+        member inline _.Default(props, value: bool) = Prop("default", value :> obj) :: props
+
+    type ColGroupBuilder() =
+        inherit HtmlElementBuilder("colgroup")
+
+        [<CustomOperation("span")>]
+        member inline _.Span(props, value: int) = Prop("span", value :> obj) :: props
+
+    type ColBuilder() =
+        inherit HtmlElementBuilder("col")
+
+        [<CustomOperation("span")>]
+        member inline _.Span(props, value: int) = Prop("span", value :> obj) :: props
+
+    type PictureElementBuilder() =
+        inherit HtmlElementBuilder("picture")

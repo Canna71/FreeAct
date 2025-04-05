@@ -325,3 +325,51 @@ module HtmlTypes =
         | PreserveAspectRatio.XMinYMax -> "xMinYMax"
         | PreserveAspectRatio.XMidYMax -> "xMidYMax"
         | PreserveAspectRatio.XMaxYMax -> "xMaxYMax"
+
+    [<RequireQualifiedAccess>]
+    type LengthAdjust =
+        | Spacing
+        | SpacingAndGlyphs
+
+    let lengthAdjustToString =
+        function
+        | LengthAdjust.Spacing -> "spacing"
+        | LengthAdjust.SpacingAndGlyphs -> "spacingAndGlyphs"
+
+    [<RequireQualifiedAccess>]
+    type GradientUnits =
+        | UserSpaceOnUse
+        | ObjectBoundingBox
+
+    let gradientUnitsToString =
+        function
+        | GradientUnits.UserSpaceOnUse -> "userSpaceOnUse"
+        | GradientUnits.ObjectBoundingBox -> "objectBoundingBox"
+
+    [<RequireQualifiedAccess>]
+    type SpreadMethod =
+        | Pad
+        | Reflect
+        | Repeat
+
+    let spreadMethodToString =
+        function
+        | SpreadMethod.Pad -> "pad"
+        | SpreadMethod.Reflect -> "reflect"
+        | SpreadMethod.Repeat -> "repeat"
+
+    [<RequireQualifiedAccess>]
+    type TrackKind =
+        | Subtitles
+        | Captions
+        | Descriptions
+        | Chapters
+        | Metadata
+
+    let trackKindToString =
+        function
+        | TrackKind.Subtitles -> "subtitles"
+        | TrackKind.Captions -> "captions"
+        | TrackKind.Descriptions -> "descriptions"
+        | TrackKind.Chapters -> "chapters"
+        | TrackKind.Metadata -> "metadata"
