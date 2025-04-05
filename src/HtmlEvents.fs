@@ -16,7 +16,8 @@ type WheelEventHandler = WheelEvent -> unit
 type ClipboardEventHandler = ClipboardEvent -> unit
 type AnimationEventHandler = AnimationEvent -> unit
 type TransitionEventHandler = TransitionEvent -> unit
-// TODO: specialize InpitEvent
+type MediaEventHandler = Event -> unit
+// TODO: specialize InputEvent
 type InputEventHandler = Event -> unit
 
 [<AutoOpen>]
@@ -491,3 +492,19 @@ module HtmlEvents =
 
         [<CustomOperation("onReset")>]
         member inline _.OnReset(props, value: EventHandler) = Prop("onReset", value :> obj) :: props
+
+    type MediaElementBuilder with
+        /// Fired when media can start playing
+        [<CustomOperation("onCanPlay")>]
+        member inline _.OnCanPlay(props, handler: MediaEventHandler) =
+            Prop("onCanPlay", handler :> obj) :: props
+
+        /// Fired when media has finished loading
+        [<CustomOperation("onLoadedData")>]
+        member inline _.OnLoadedData(props, handler: MediaEventHandler) =
+            Prop("onLoadedData", handler :> obj) :: props
+
+        /// Fired when media playback ends
+        [<CustomOperation("onEnded")>]
+        member inline _.OnEnded(props, handler: MediaEventHandler) =
+            Prop("onEnded", handler :> obj) :: props

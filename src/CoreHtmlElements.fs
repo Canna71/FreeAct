@@ -367,3 +367,105 @@ module CoreElement =
 
         [<CustomOperation("value")>]
         member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props
+
+    /// Media element builder with common media properties
+    type MediaElementBuilder(tag: string) =
+        inherit HtmlElementBuilder(tag)
+
+        /// Source URL for media content
+        [<CustomOperation("src")>]
+        member inline _.Src(props, value: string) = Prop("src", value :> obj) :: props
+
+        /// Whether media should play automatically
+        [<CustomOperation("autoPlay")>]
+        member inline _.AutoPlay(props, value: bool) = Prop("autoPlay", value :> obj) :: props
+
+        /// Whether media controls should be displayed
+        [<CustomOperation("controls")>]
+        member inline _.Controls(props, value: bool) = Prop("controls", value :> obj) :: props
+
+        /// Whether media should loop
+        [<CustomOperation("loop")>]
+        member inline _.Loop(props, value: bool) = Prop("loop", value :> obj) :: props
+
+        /// Whether media should be muted initially
+        [<CustomOperation("muted")>]
+        member inline _.Muted(props, value: bool) = Prop("muted", value :> obj) :: props
+
+        /// Media preload strategy
+        [<CustomOperation("preload")>]
+        member inline _.Preload(props, value: PreloadStrategy) =
+            Prop("preload", preloadStrategyToString value :> obj) :: props
+
+    type InputElementBuilder() =
+        inherit InteractiveFormElement("input")
+
+        /// Input type
+        [<CustomOperation("type'")>]
+        member inline _.Type(props, value: InputType) =
+            Prop("type", value.ToString :> obj) :: props
+
+        /// Input mode
+        [<CustomOperation("inputMode")>]
+        member inline _.InputMode(props, value: InputMode) =
+            Prop("inputMode", inputModeToString value :> obj) :: props
+
+        /// Pattern for validation
+        [<CustomOperation("pattern")>]
+        member inline _.Pattern(props, value: string) = Prop("pattern", value :> obj) :: props
+
+        /// Maximum value
+        [<CustomOperation("max")>]
+        member inline _.Max(props, value: string) = Prop("max", value :> obj) :: props
+
+        /// Minimum value
+        [<CustomOperation("min")>]
+        member inline _.Min(props, value: string) = Prop("min", value :> obj) :: props
+
+        /// Step value
+        [<CustomOperation("step")>]
+        member inline _.Step(props, value: string) = Prop("step", value :> obj) :: props
+
+    type SelectElementBuilder() =
+        inherit InteractiveFormElement("select")
+
+        /// Whether multiple selection is allowed
+        [<CustomOperation("multiple")>]
+        member inline _.Multiple(props, value: bool) = Prop("multiple", value :> obj) :: props
+
+        /// Size of the visible options
+        [<CustomOperation("size")>]
+        member inline _.Size(props, value: int) = Prop("size", value :> obj) :: props
+
+    type TextAreaElementBuilder() =
+        inherit InteractiveFormElement("textarea")
+
+        /// Number of rows
+        [<CustomOperation("rows")>]
+        member inline _.Rows(props, value: int) = Prop("rows", value :> obj) :: props
+
+        /// Number of columns
+        [<CustomOperation("cols")>]
+        member inline _.Cols(props, value: int) = Prop("cols", value :> obj) :: props
+
+        /// Whether to wrap text
+        [<CustomOperation("wrap")>]
+        member inline _.Wrap(props, value: WrapMode) =
+            Prop("wrap", wrapModeToString value :> obj) :: props
+
+    type TableElementBuilder() =
+        inherit HtmlElementBuilder("table")
+
+        /// Border width
+        [<CustomOperation("border")>]
+        member inline _.Border(props, value: int) = Prop("border", value :> obj) :: props
+
+        /// Cell spacing
+        [<CustomOperation("cellSpacing")>]
+        member inline _.CellSpacing(props, value: int) =
+            Prop("cellSpacing", value :> obj) :: props
+
+        /// Cell padding
+        [<CustomOperation("cellPadding")>]
+        member inline _.CellPadding(props, value: int) =
+            Prop("cellPadding", value :> obj) :: props

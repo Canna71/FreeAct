@@ -60,3 +60,32 @@ module Builders =
     let fragment = FragmentElement()
 
     let none: ReactElement = null
+
+    // Media elements
+    let audio = MediaElementBuilder("audio")
+    let video = MediaElementBuilder("video")
+
+    // Form elements
+    let select = SelectElementBuilder()
+    let textarea = TextAreaElementBuilder()
+    let fieldset = HtmlElementBuilder("fieldset")
+    let legend = HtmlElementBuilder("legend")
+
+    // Table elements
+    let table = TableElementBuilder()
+    let thead = HtmlElementBuilder("thead")
+    let tbody = HtmlElementBuilder("tbody")
+    let tfoot = HtmlElementBuilder("tfoot")
+    let tr = HtmlElementBuilder("tr")
+    let td = HtmlElementBuilder("td")
+    let th = HtmlElementBuilder("th")
+
+    // Meta elements
+    let meta = HtmlElementBuilder("meta")
+    let link = HtmlElementBuilder("link")
+
+    // Semantic elements
+    let article = HtmlElementBuilder("article")
+    let aside = HtmlElementBuilder("aside")
+    let footer = HtmlElementBuilder("footer")
+    let header = HtmlElementBuilder("header")

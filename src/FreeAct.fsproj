@@ -9,7 +9,6 @@
         <Compile Include="FreeAct.Interop.fs" />
         
         <Compile Include="HtmlTypes.fs" />
-        <Compile Include="InputTypes.fs" />
         <Compile Include="FreeAct.fs" />
         <Compile Include="CoreHtmlElements.fs" />
         <Compile Include="Styles.fs" />
