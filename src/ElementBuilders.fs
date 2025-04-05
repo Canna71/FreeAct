@@ -36,7 +36,6 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type NavElement = HtmlElementBuilder
     let nav = NavigationElement()
 
     /// <summary>
@@ -294,7 +293,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let audio = MediaElementBuilder("audio")
+    let audio = AudioElementBuilder()
 
     /// <summary>
     /// Creates a video element (&lt;video&gt;) for playing video content
@@ -311,7 +310,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let video = MediaElementBuilder("video")
+    let video = VideoElementBuilder()
 
     // Media-related elements
     /// <summary>
@@ -503,7 +502,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let td = TableCellElementBuilder("td")
+    let td = TableDataCellElementBuilder()
 
     /// <summary>
     /// Creates a table header cell (&lt;th&gt;) with optional scope and spanning
@@ -517,7 +516,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let th = TableCellElementBuilder("th")
+    let th = TableHeaderCellElementBuilder()
 
     // Table-related elements
     /// <summary>

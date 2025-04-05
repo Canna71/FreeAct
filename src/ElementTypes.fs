@@ -141,3 +141,17 @@ module ElementTypes =
 
     type ListItemElement() =
         inherit HtmlElementBuilder("li")
+
+    // Add proper media element builders
+    type AudioElementBuilder() =
+        inherit MediaElementBuilder("audio")
+
+    type VideoElementBuilder() =
+        inherit MediaElementBuilder("video")
+
+    // Add specific table cell builders
+    type TableDataCellElementBuilder() =
+        inherit TableCellElementBuilder("td")
+
+    type TableHeaderCellElementBuilder() =
+        inherit TableCellElementBuilder("th")
