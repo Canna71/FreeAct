@@ -1089,10 +1089,26 @@ module Styles =
         member inline _.Position(props, value: Position) =
             ("position", positionToString value :> obj) :: props
 
+        /// <summary>Sets top position for positioned elements</summary>
+        /// <param name="value">Distance from the top edge</param>
+        /// <example>
+        /// style {
+        ///     position Position.Relative
+        ///     top (Length.Px 10)     // 10px from top
+        /// }
+        /// </example>
         [<CustomOperation("top")>]
         member inline _.Top(props, value: Length) =
             ("top", lengthToString value :> obj) :: props
 
+        /// <summary>Sets left position for positioned elements</summary>
+        /// <param name="value">Distance from the left edge</param>
+        /// <example>
+        /// style {
+        ///     position Position.Absolute
+        ///     left (Length.Px 20)    // 20px from left
+        /// }
+        /// </example>
         [<CustomOperation("left")>]
         member inline _.Left(props, value: Length) =
             ("left", lengthToString value :> obj) :: props
@@ -1105,10 +1121,25 @@ module Styles =
         member inline _.Bottom(props, value: Length) =
             ("bottom", lengthToString value :> obj) :: props
 
-        // Border properties
+        /// <summary>Sets border width, style and color in one declaration</summary>
+        /// <param name="value">Single string containing all border properties</param>
+        /// <example>
+        /// style {
+        ///     border "1px solid red"
+        ///     border "2px dashed #ccc"
+        /// }
+        /// </example>
         [<CustomOperation("border")>]
         member inline _.Border(props, value: string) = ("border", value :> obj) :: props
 
+        /// <summary>Sets border radius for rounded corners</summary>
+        /// <param name="value">Radius size</param>
+        /// <example>
+        /// style {
+        ///     borderRadius (Length.Px 4)     // round all corners
+        ///     borderRadius (Length.Percent 50) // make circular
+        /// }
+        /// </example>
         [<CustomOperation("borderRadius")>]
         member inline _.BorderRadius(props, value: Length) =
             ("borderRadius", lengthToString value :> obj) :: props
