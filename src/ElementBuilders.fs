@@ -112,20 +112,11 @@ module Builders =
     let option = OptionElementBuilder() // Correct - has selected attribute
     /// <summary>Creates a group of related options</summary>
     let optgroup = OptionGroupBuilder() // Correct
-    /// <summary>Creates a list of predefined options for input fields</summary>
-    let datalist = DataListElementBuilder() // Correct
-    /// <summary>Creates an output element for calculation results</summary>
-    let output = OutputElementBuilder() // Correct - has htmlFor attribute
 
     // Media elements - All need MediaElementBuilder base
     /// <summary>Creates an image element with loading and accessibility options</summary>
     let img = ImageElementBuilder() // Correct - has image specific attributes
-    /// <summary>Creates an audio player element</summary>
-    let audio = AudioBuilder() // Correct - inherits from MediaElementBuilder
-    /// <summary>Creates a video player element</summary>
-    let video = VideoBuilder() // Correct - inherits from MediaElementBuilder
-    /// <summary>Creates a source element for media resources</summary>
-    let source = SourceElementBuilder() // Correct - has media attributes
+
     /// <summary>Creates a text track for media elements</summary>
     let track = TrackElementBuilder() // Correct - has track attributes
 
@@ -238,18 +229,126 @@ module Builders =
     /// </example>
     let script = ScriptBuilder()
 
-    // Specialized elements
+    // Specialized elements with documentation and examples
+    /// <summary>Creates a figure container for self-contained content like images or diagrams</summary>
+    /// <example>
+    /// <code>
+    /// figure {
+    ///     img {
+    ///         src "diagram.png"
+    ///         alt "Architecture diagram"
+    ///     }
+    ///     figcaption { text "Figure 1: System Architecture" }
+    /// }
+    /// </code>
+    /// </example>
     let figure = FigureBuilder()
+
+    /// <summary>Creates a caption for a figure element</summary>
+    /// <example>
+    /// <code>
+    /// figcaption {
+    ///     className "caption"
+    ///     text "Description of the above figure"
+    /// }
+    /// </code>
+    /// </example>
     let figcaption = FigCaptionBuilder()
+
+    /// <summary>Creates a time element for dates and timestamps</summary>
+    /// <example>
+    /// <code>
+    /// time {
+    ///     datetime "2024-01-01T12:00:00"
+    ///     text "January 1st at noon"
+    /// }
+    /// </code>
+    /// </example>
     let time = TimeBuilder()
+
+    /// <summary>Creates a mark element for highlighting text</summary>
+    /// <example>
+    /// <code>
+    /// p {
+    ///     text "This is "
+    ///     mark { text "highlighted" }
+    ///     text " text"
+    /// }
+    /// </code>
+    /// </example>
     let mark = MarkBuilder()
+
+    /// <summary>Creates a ruby container for East Asian typography annotations</summary>
+    /// <example>
+    /// <code>
+    /// ruby {
+    ///     rb { text "漢" }
+    ///     rt { text "かん" }
+    /// }
+    /// </code>
+    /// </example>
     let ruby = RubyBuilder()
+
+    /// <summary>Creates a ruby base text element</summary>
     let rb = RubyBaseBuilder()
+
+    /// <summary>Creates a ruby text annotation element</summary>
     let rt = RubyTextBuilder()
+
+    /// <summary>Creates a ruby fallback parenthesis element</summary>
     let rp = RubyParenthesisBuilder()
+
+    /// <summary>Creates a template element for holding client-side content templates</summary>
+    /// <example>
+    /// <code>
+    /// template {
+    ///     id "my-template"
+    ///     div {
+    ///         className "template-content"
+    ///         text "Template content here"
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     let template = TemplateElementBuilder()
+
+    /// <summary>Creates a progress element for task completion indication</summary>
+    /// <example>
+    /// <code>
+    /// progress {
+    ///     value 75.0
+    ///     max 100.0
+    ///     text "75%"
+    /// }
+    /// </code>
+    /// </example>
     let progress = ProgressElementBuilder()
+
+    /// <summary>Creates a meter element for gauge visualization</summary>
+    /// <example>
+    /// <code>
+    /// meter {
+    ///     value 0.6
+    ///     min 0.0
+    ///     max 1.0
+    ///     low 0.2
+    ///     high 0.8
+    ///     optimum 0.5
+    /// }
+    /// </code>
+    /// </example>
     let meter = MeterElementBuilder()
+
+    /// <summary>Creates a canvas element for drawing graphics</summary>
+    /// <example>
+    /// <code>
+    /// canvas {
+    ///     width 800
+    ///     height 600
+    ///     contextType CanvasContextType.TwoD
+    /// }
+    /// </code>
+    /// </example>
     let canvas = CanvasElementBuilder()
 
     let none: ReactElement = null
@@ -257,3 +356,66 @@ module Builders =
     // Core elements
     /// <summary>Creates an anchor element for navigation links</summary>
     let a = AnchorElement() // Correct - has href/target attributes
+
+    // Specialized elements with documentation and examples
+    /// <summary>Creates an audio player element with media controls</summary>
+    /// <example>
+    /// <code>
+    /// audio {
+    ///     src "music.mp3"
+    ///     controls true
+    ///     autoPlay false
+    ///     onCanPlay (fun _ -> console.log "Audio ready")
+    /// }
+    /// </code>
+    /// </example>
+    let audio = AudioBuilder()
+
+    /// <summary>Creates a video player element with playback controls</summary>
+    /// <example>
+    /// <code>
+    /// video {
+    ///     src "video.mp4"
+    ///     width 640
+    ///     height 480
+    ///     controls true
+    ///     muted true
+    /// }
+    /// </code>
+    /// </example>
+    let video = VideoBuilder()
+
+    /// <summary>Creates a source element for specifying multiple media formats</summary>
+    /// <example>
+    /// <code>
+    /// source {
+    ///     src "video.webm"
+    ///     type' "video/webm"
+    ///     media "(min-width: 1200px)"
+    /// }
+    /// </code>
+    /// </example>
+    let source = SourceBuilder()
+
+    /// <summary>Creates a datalist element for input suggestions</summary>
+    /// <example>
+    /// <code>
+    /// datalist {
+    ///     id "browsers"
+    ///     option { value "Chrome" }
+    ///     option { value "Firefox" }
+    /// }
+    /// </code>
+    /// </example>
+    let datalist = DataListElementBuilder()
+
+    /// <summary>Creates an output element to display calculation results</summary>
+    /// <example>
+    /// <code>
+    /// output {
+    ///     htmlFor "calc"
+    ///     text "Result: 42"
+    /// }
+    /// </code>
+    /// </example>
+    let output = OutputElementBuilder()
