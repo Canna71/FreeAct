@@ -110,56 +110,59 @@ let _EffectChainingExample () =
             }
     }
 
+
 let EffectChainingExample = FunctionComponent.Of _EffectChainingExample
 
-// Chained effects example
-// let ChainedEffectsExample () =
-//     // Use chained effects: fetch todos, then prioritize them
-//     let isLoading, resultOpt = 
-//       useChainedEffect
-//         fetchTodosEffect
-//         ()
-//         id  // Pass the result directly
-//         prioritizeTodosEffect
+let combiningEffectId = 
+  registerNamedEffectHandler
+    "CombiningEffect" 
+    (fun () -> 
+        let merged = 
+            combineEffects fetchTodosEffect () fetchTodosEffect () 
+             (fun todos1 todos2 ->
+                  todos1 @ todos2
+              )
+        async {
+            let! result = merged
+            match result with
+            | Ok (todos) ->
+                // Dispatch the results to the app state
+                dispatch appDb setTodosEvent todos
+            | Error err ->
+                // Handle error
+                console.error("Error fetching todos: ", err) 
+            // batchDispatch appDb [
+            //     setTodosEvent, todos
+            //     setTodoAnalysisEvent, analysis
+            // ]
+          }
+      )
+
+
+let _EffectCombiningExample () =
+
+    // Use combined effects to fetch todos and analyze them in parallel
+    let todos = useSubscription todosSubscription
+    let isLoading = useSubscription isLoadingSubscription
+    console.log("EffectCompositionExample: ", todos)
+
+    let onStart (_) = 
+      printfn "Starting effect combining"
+      runEffectAsync combiningEffectId () |> ignore
+      dispatch appDb setLoadingEvent true
     
-//     div {
-//         className "chained-effects-example"
-//         h3 { "Chained Effects Example" }
+    div {
+        className "effect-combining-example"
+        h3 { "Effect combining Example" }
+        button {
+            className "start-button"
+            onClick onStart
+            str "Start Loading and Appending"
+        }
+        TodoDemo.TodoList (todos, isLoading)
         
-//         match isLoading, resultOpt with
-//         | true, _ -> 
-//             div { 
-//                 className "loading"
-//                 str "Loading todos, then prioritizing them..." 
-//             }
-//         | false, Some (Ok prioritizedTodos) ->
-//               div {
-//                   className "success"
-//                   h4 { "Prioritized Todos" }
-//                   ol {
-//                       prioritizedTodos |> List.map (fun todo ->
-//                           li {
-//                               key (string todo.id)
-//                               className (if todo.completed then "completed-todo" else "active-todo")
-//                               str todo.text
-//                           }
-//                       )
-//                   }
-//                   p { 
-//                       str "Todos are sorted with active ones first, then alphabetically." 
-//                   }
-//               }
-//         | false, Some (Error err) ->
-//             div {
-//                 className "error"
-//                 str (sprintf "Error: %s" err.Message)
-//             }
-//         | false, None ->
-//             div {
-//                 className "none"
-//                 str "No data loaded yet."
-//             }
-//     }
+    }
+
 
 // Main Composition demo component
 let _CompositionDemo () =
@@ -177,7 +180,7 @@ let _CompositionDemo () =
             className "composition-examples"
             SubscriptionCompositionExample()
             EffectChainingExample()
-            // ChainedEffectsExample()
+            _EffectCombiningExample()
         }
     }
 

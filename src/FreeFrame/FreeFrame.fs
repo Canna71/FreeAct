@@ -77,13 +77,6 @@ type AppDb<'T>(initialState: 'T) =
             finally
                 batchProcessing <- false
 
-// Improved batch dispatch function
-let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches: (unit -> unit) list) =
-    appDb.BatchProcess(fun () ->
-        // Execute all dispatches without triggering notifications
-        for dispatchFn in dispatches do
-            dispatchFn ()
-    )
 // A single notification will be sent after all dispatches
 
 // =================================================
@@ -154,6 +147,14 @@ let dispatch<'Payload, 'State>
     (payload: 'Payload)
     =
     dispatchInternal appDb (EventId.key eventId) payload
+
+// Improved batch dispatch function
+let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches) =
+    appDb.BatchProcess(fun () ->
+        // Execute all dispatches without triggering notifications
+        for (eventId, payload) in dispatches do
+            dispatch appDb (unbox eventId) payload
+    )
 
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
     dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload

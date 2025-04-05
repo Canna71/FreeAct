@@ -323,8 +323,13 @@ registerEffectHandler prioritizeTodosEffect (fun todos -> async {
 
 // Initialize the application with some test data
 let initializeApp() =
+    // batchDispatch appDb [
+    //     fun () -> dispatch appDb addTodoEvent "Learn F#"
+    //     fun () -> dispatch appDb addTodoEvent "Build a FreeFrame app"
+    //     fun () -> dispatch appDb addTodoEvent "Share with the community"
+    // ]
     batchDispatch appDb [
-        fun () -> dispatch appDb addTodoEvent "Learn F#"
-        fun () -> dispatch appDb addTodoEvent "Build a FreeFrame app"
-        fun () -> dispatch appDb addTodoEvent "Share with the community"
+        box addTodoEvent, "Learn F#"
+        box addTodoEvent, "Build a FreeFrame app"
+        box addTodoEvent, "Share with the community"
     ]
