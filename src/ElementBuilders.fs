@@ -20,7 +20,7 @@ module Builders =
     /// </code>
     /// </example>
     type DivElement = HtmlElementBuilder
-    let div = DivElement "div"
+    let div = DivisionElement()
 
     /// <summary>
     /// Creates a navigation section (&lt;nav&gt;) containing navigation links
@@ -37,7 +37,7 @@ module Builders =
     /// </code>
     /// </example>
     type NavElement = HtmlElementBuilder
-    let nav = NavElement "nav"
+    let nav = NavigationElement()
 
     /// <summary>
     /// Creates a main content section (&lt;main&gt;). There should be only one per page
@@ -52,7 +52,7 @@ module Builders =
     /// </code>
     /// </example>
     type MainElement = HtmlElementBuilder
-    let main = MainElement "main"
+    let main = MainContentElement()
 
     /// <summary>
     /// Creates an ordered list element (&lt;ol&gt;) for numbered lists
@@ -66,7 +66,7 @@ module Builders =
     /// </code>
     /// </example>
     type OrderedListElement = HtmlElementBuilder
-    let ol = OrderedListElement "ol"
+    let ol = OrderedListElement("ol")
 
     /// <summary>
     /// Creates an unordered list element (&lt;ul&gt;) for bulleted lists
@@ -81,7 +81,7 @@ module Builders =
     /// </code>
     /// </example>
     type UnorderedListElement = HtmlElementBuilder
-    let ul = UnorderedListElement "ul"
+    let ul = UnorderedListElement("ul")
 
     /// <summary>
     /// Creates a list item element (&lt;li&gt;) for ordered and unordered lists
@@ -95,7 +95,7 @@ module Builders =
     /// </code>
     /// </example>
     type ListItemElement = HtmlElementBuilder
-    let li = ListItemElement "li" // Changed from direct HtmlElementBuilder to typed builder
+    let li = ListItemElement("li") // Changed from direct HtmlElementBuilder to typed builder
 
     /// <summary>
     /// Creates a header element (&lt;h1&gt;) for top-level headings
@@ -109,19 +109,19 @@ module Builders =
     /// </code>
     /// </example>
     type Header1Element = HtmlElementBuilder
-    let h1 = Header1Element "h1"
+    let h1 = HeadingElement(1)
 
     type Header2Element = HtmlElementBuilder
-    let h2 = Header2Element "h2"
+    let h2 = HeadingElement(2)
 
     type Header3Element = HtmlElementBuilder
-    let h3 = Header3Element "h3"
+    let h3 = HeadingElement(3)
 
     type Header4Element = HtmlElementBuilder
-    let h4 = Header4Element "h4"
+    let h4 = HeadingElement(4)
 
     type Header5Element = HtmlElementBuilder
-    let h5 = Header5Element "h5"
+    let h5 = HeadingElement(5)
 
     let button = ButtonElement()
 
@@ -137,7 +137,7 @@ module Builders =
     /// </code>
     /// </example>
     type ParagraphElement = HtmlElementBuilder
-    let p = ParagraphElement "p"
+    let p = ParagraphElement("p")
 
     /// <summary>
     /// Creates an anchor element (&lt;a&gt;) for links
@@ -166,7 +166,7 @@ module Builders =
     /// </code>
     /// </example>
     type SectionElement = HtmlElementBuilder
-    let section = SectionElement "section"
+    let section = SectionElement("section")
 
     /// <summary>
     /// Creates a span element (&lt;span&gt;) for inline content grouping
@@ -184,7 +184,7 @@ module Builders =
     /// </code>
     /// </example>
     type SpanElement = HtmlElementBuilder
-    let span = SpanElement "span"
+    let span = SpanElement("span")
 
     /// <summary>
     /// Creates an i element (&lt;i&gt;) typically used for icons or italic text
@@ -198,7 +198,7 @@ module Builders =
     /// </code>
     /// </example>
     type ItalicElement = HtmlElementBuilder
-    let i = ItalicElement "i"
+    let i = ItalicElement("i")
 
     /// <summary>
     /// Creates a label element (&lt;label&gt;) to define a label for a form control
@@ -212,7 +212,7 @@ module Builders =
     /// </code>
     /// </example>
     type LabelElement = HtmlElementBuilder
-    let label = LabelElement "label"
+    let label = LabelElement("label")
 
     let img = ImageElementBuilder()
 
@@ -447,8 +447,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type TableHeadElement = HtmlElementBuilder
-    let thead = TableHeadElement "thead"
+    let thead = TableHeaderElement()
 
     /// <summary>
     /// Creates a table body section (&lt;tbody&gt;) for grouping body content
@@ -463,8 +462,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type TableBodyElement = HtmlElementBuilder
-    let tbody = TableBodyElement "tbody"
+    let tbody = TableBodyElement()
 
     /// <summary>
     /// Creates a table footer section (&lt;tfoot&gt;) for summary rows
@@ -479,8 +477,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type TableFootElement = HtmlElementBuilder
-    let tfoot = TableFootElement "tfoot"
+    let tfoot = TableFooterElement()
 
     /// <summary>
     /// Creates a table row (&lt;tr&gt;) to contain cells
@@ -493,8 +490,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type TableRowElement = HtmlElementBuilder
-    let tr = TableRowElement "tr"
+    let tr = TableRowElement()
 
     /// <summary>
     /// Creates a table data cell (&lt;td&gt;) for regular content
@@ -596,8 +592,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type ArticleElement = HtmlElementBuilder
-    let article = ArticleElement "article"
+    let article = ArticleElement()
 
     /// <summary>
     /// Creates an aside element (&lt;aside&gt;) for related content
@@ -614,8 +609,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type AsideElement = HtmlElementBuilder
-    let aside = AsideElement "aside"
+    let aside = AsideElement()
 
     /// <summary>
     /// Creates a header element (&lt;header&gt;) for introductory content
@@ -633,8 +627,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type HeaderElement = HtmlElementBuilder
-    let header = HeaderElement "header"
+    let header = HeaderElement()
 
     /// <summary>
     /// Creates a footer element (&lt;footer&gt;) for content that concludes a section
@@ -650,8 +643,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type FooterElement = HtmlElementBuilder
-    let footer = FooterElement "footer"
+    let footer = FooterElement()
 
     /// <summary>
     /// Creates a figure element (&lt;figure&gt;) for self-contained content like images, diagrams
@@ -667,14 +659,12 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type FigureElement = HtmlElementBuilder
-    let figure = FigureElement "figure"
+    let figure = FigureElement()
 
     /// <summary>
     /// Creates a figure caption (&lt;figcaption&gt;) to describe a figure element
     /// </summary>
-    type FigCaptionElement = HtmlElementBuilder
-    let figcaption = FigCaptionElement "figcaption"
+    let figcaption = FigCaptionElement()
 
     /// <summary>
     /// Creates a time element (&lt;time&gt;) for dates and times
@@ -687,8 +677,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type TimeElement = HtmlElementBuilder
-    let time = TimeElement "time"
+    let time = TimeElement()
 
     /// <summary>
     /// Creates a mark element (&lt;mark&gt;) for highlighted text
@@ -702,8 +691,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type MarkElement = HtmlElementBuilder
-    let mark = MarkElement "mark"
+    let mark = MarkElement()
 
     /// <summary>
     /// Creates a dialog element (&lt;dialog&gt;) for modal or non-modal interactions
@@ -755,8 +743,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    type SummaryElement = HtmlElementBuilder
-    let summary = SummaryElement "summary"
+    let summary = SummaryElement()
 
     /// <summary>
     /// Creates a small element (&lt;small&gt;) for side-comments and fine print
@@ -769,7 +756,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let small = SmallElement
+    let small = SmallElement()
 
     /// <summary>
     /// Creates a subscript element (&lt;sub&gt;) for subscript text
@@ -783,7 +770,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let sub = SubscriptElement
+    let sub = SubscriptElement()
 
     /// <summary>
     /// Creates a superscript element (&lt;sup&gt;) for superscript text
@@ -797,7 +784,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let sup = SuperscriptElement
+    let sup = SuperscriptElement()
 
     /// <summary>
     /// Creates a cite element (&lt;cite&gt;) for citation or reference
@@ -810,7 +797,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let cite = CitationElement
+    let cite = CitationElement()
 
     // Form-related elements
     /// <summary>
@@ -825,7 +812,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let option = OptionElementBuilder
+    let option = OptionElementBuilder()
 
     /// <summary>
     /// Creates an option group element (&lt;optgroup&gt;) to group related options
@@ -841,7 +828,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let optgroup = OptionGroupElement
+    let optgroup = OptionGroupElement()
 
     /// <summary>
     /// Creates a datalist element (&lt;datalist&gt;) for input suggestions
@@ -930,7 +917,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let ruby = RubyElement
+    let ruby = RubyElement()
 
     /// <summary>
     /// Creates a ruby base element (&lt;rb&gt;) for containing the base text in ruby annotations
