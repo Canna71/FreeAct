@@ -58,7 +58,7 @@ module Builders =
     // Form elements
     let button = ButtonBuilder()
     let input = InputElementBuilder()
-    let form = FormBuilder()
+    let form = FormElement()
     let label = LabelBuilder()
     let select = SelectElementBuilder()
     let option = OptionBuilder()
@@ -122,4 +122,4 @@ module Builders =
     let none: ReactElement = null
 
     // Core elements
-    let a = AnchorBuilder()
+    let a = AnchorElement()

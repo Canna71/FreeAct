@@ -169,8 +169,6 @@ module ElementTypes =
         inherit HtmlElementBuilder("label")
 
     // Form elements
-    type FormBuilder() =
-        inherit HtmlElementBuilder("form")
 
     type OptionBuilder() =
         inherit HtmlElementBuilder("option")
