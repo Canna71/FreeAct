@@ -7,6 +7,7 @@ TODO: find an alternative to FunctionComponent.Of (Elmish?)
 TODO: improve effects
 TODO: implement subscriptions operators
 TODO: implement effects operators
+TODO: split project into multiple projects
 
 Differences between subscribers and effects:
 

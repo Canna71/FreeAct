@@ -172,14 +172,6 @@ let Navigation () =
                 li { 
                     FreeFrameLink {| 
                         appDb = appDb
-                        destination = "/freeframeeffects"
-                        className = None
-                        children = [str "FreeFrame Demo"] 
-                    |} 
-                }
-                li { 
-                    FreeFrameLink {| 
-                        appDb = appDb
                         destination = "/freeframecomposition"
                         className = None
                         children = [str "FreeFrame Composition"] 
@@ -246,16 +238,6 @@ let App () =
                 div {
                     h1 { sprintf "Search results for: %s" query }
                     p { "Search results go here." }
-                }
-          )
-          .Route(
-            "/freeframeeffects", 
-            fun _ -> 
-                div {
-                    h1 { "FreeFrame Effects Demo" }
-                    // Render the component directly
-                    // FreeFrameDemo()
-                    EffectsDemo.EffectsDemo()
                 }
           )
           .Route(

@@ -453,7 +453,7 @@ let runEffectAsPromise<'Payload, 'Result>
         }
     )
 
-// Async version - more F# idiomatic
+// Async version - ignores the result
 let runEffectAsync<'Payload>
     (effectId: EffectId<'Payload, unit>)
     (payload: 'Payload)
@@ -510,17 +510,12 @@ let chainAsyncEffectsSequential (effects: (unit -> Async<'T>) list) : Async<'T o
 let runParallelAsyncEffects (effects: (unit -> Async<'T>) list) : Async<'T[]> =
     effects |> List.map (fun effect -> effect ()) |> Async.Parallel
 
-// Chain multiple effects together - simplified without unnecessary appDb parameter
-let chainEffects (effects: (unit -> unit) list) =
-    for effect in effects do
-        effect ()
-
 // Helper to dispatch an event after an effect completes - using Result
 let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
     (appDb: IAppDb<'State>)
     (effectId: EffectId<'Payload, 'Result>)
     (payload: 'Payload)
-    (onResult: Result<'Result, exn> -> EventId<'EventPayload> option * 'EventPayload option)
+    (mapToEvent: Result<'Result, exn> -> EventId<'EventPayload> option * 'EventPayload option)
     =
     async {
         let! result = runEffect effectId payload
@@ -528,7 +523,7 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
         match result with
         | Ok _ ->
             // Dispatch the event if the effect was successful
-            let eventIdOpt, eventPayloadOpt = onResult result
+            let eventIdOpt, eventPayloadOpt = mapToEvent result
 
             match eventIdOpt, eventPayloadOpt with
             | Some eventId, Some eventPayload -> dispatch appDb eventId eventPayload
@@ -545,10 +540,10 @@ let dispatchAfterEffect<'Payload, 'Result, 'EventPayload, 'State>
 // =====================================================
 
 // Chain two effects where the second effect depends on the result of the first
-let chainEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
+let chainEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
     (effect1: EffectId<'PayloadA, 'ResultA>)
     (payload1: 'PayloadA)
-    (createPayload2: 'ResultA -> 'PayloadB)
+    (mapResult: 'ResultA -> 'PayloadB)
     (effect2: EffectId<'PayloadB, 'ResultB>)
     : Async<Result<'ResultB, exn>>
     =
@@ -560,7 +555,7 @@ let chainEffect<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
         // If the first effect succeeds, run the second
         match result1 with
         | Ok resultA ->
-            let payload2 = createPayload2 resultA
+            let payload2 = mapResult resultA
             return! runEffect effect2 payload2
         | Error e -> return Error e
     }

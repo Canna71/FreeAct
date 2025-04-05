@@ -53,7 +53,7 @@ let chainedEffectId =
     "ChainedEffect" 
     (fun () -> 
         printfn "Chained effect started"
-        let combined = chainEffect fetchTodosEffect () id analyzeTodosEffect
+        let combined = chainEffects fetchTodosEffect () id analyzeTodosEffect
         async {
             let! analysis = combined
             match analysis with
@@ -74,7 +74,7 @@ let _EffectChainingExample () =
     let onStart (_) = 
       printfn "Starting effect chaining"
       runEffectAsync chainedEffectId () |> ignore
-     
+      dispatch appDb setTodoAnalysisEvent Loading
     
     div {
         className "effect-chaining-example"
@@ -88,7 +88,7 @@ let _EffectChainingExample () =
         | Loading -> 
             div { 
                 className "loading"
-                str "Loading and analyzing data simultaneously..." 
+                str "Loading and then analyzing data ..." 
             }
         | Loaded analysis ->
                 
