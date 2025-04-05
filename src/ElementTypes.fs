@@ -148,17 +148,17 @@ module ElementTypes =
 
     // Add proper media element builders
     type AudioBuilder() =
-        inherit MediaElementBuilder("audio")
+        inherit MediaElement("audio")
 
     type VideoBuilder() =
-        inherit MediaElementBuilder("video")
+        inherit MediaElement("video")
 
     // Add specific table cell builders
     type TableDataCellBuilder() =
-        inherit TableCellElementBuilder("td")
+        inherit TableCellElement("td")
 
     type TableHeaderCellBuilder() =
-        inherit TableCellElementBuilder("th")
+        inherit TableCellElement("th")
 
     // Core document elements
     type DocumentBuilder() =

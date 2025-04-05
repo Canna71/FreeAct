@@ -493,7 +493,7 @@ module HtmlEvents =
         [<CustomOperation("onReset")>]
         member inline _.OnReset(props, value: EventHandler) = Prop("onReset", value :> obj) :: props
 
-    type MediaElementBuilder with
+    type MediaElement with
         /// Fired when media can start playing
         [<CustomOperation("onCanPlay")>]
         member inline _.OnCanPlay(props, handler: MediaEventHandler) =
@@ -509,13 +509,13 @@ module HtmlEvents =
         member inline _.OnEnded(props, handler: MediaEventHandler) =
             Prop("onEnded", handler :> obj) :: props
 
-    type DetailsElementBuilder with
+    type DetailsElement with
         /// Fired when the details element is toggled
         [<CustomOperation("onToggle")>]
         member inline _.OnToggle(props, handler: EventHandler) =
             Prop("onToggle", handler :> obj) :: props
 
-    type DialogElementBuilder with
+    type DialogElement with
         /// Fired when the dialog is closed
         [<CustomOperation("onClose")>]
         member inline _.OnClose(props, handler: EventHandler) =

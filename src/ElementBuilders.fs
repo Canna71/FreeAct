@@ -97,36 +97,36 @@ module Builders =
     /// <summary>Creates a button with form submission capabilities</summary>
     let button = ButtonElement() // Correct - has button type and form attributes
     /// <summary>Creates an input field with various input types</summary>
-    let input = InputElementBuilder() // Correct - has input specific attributes
+    let input = InputElement() // Correct - has input specific attributes
     /// <summary>Creates a form element for data submission</summary>
     let form = FormElement() // Correct - has form events and attributes
     /// <summary>Creates a select dropdown element</summary>
-    let select = SelectElementBuilder() // Correct - has multiple/size attributes
+    let select = SelectElement() // Correct - has multiple/size attributes
     /// <summary>Creates a multi-line text input area</summary>
-    let textarea = TextAreaElementBuilder() // Correct - has rows/cols attributes
+    let textarea = TextAreaElement() // Correct - has rows/cols attributes
     /// <summary>Creates a fieldset to group form controls</summary>
     let fieldset = FieldsetElement() // Correct
     /// <summary>Creates a caption for a fieldset</summary>
     let legend = LegendElement() // Correct
     /// <summary>Creates an option for select elements</summary>
-    let option = OptionElementBuilder() // Correct - has selected attribute
+    let option = OptionElement() // Correct - has selected attribute
     /// <summary>Creates a group of related options</summary>
     let optgroup = OptionGroupBuilder() // Correct
 
     // Media elements - All need MediaElementBuilder base
     /// <summary>Creates an image element with loading and accessibility options</summary>
-    let img = ImageElementBuilder() // Correct - has image specific attributes
+    let img = ImageElement() // Correct - has image specific attributes
 
     /// <summary>Creates a text track for media elements</summary>
-    let track = TrackElementBuilder() // Correct - has track attributes
+    let track = TrackElement() // Correct - has track attributes
 
     // Container and semantic elements
     /// <summary>Creates a fragment for grouping elements without a container</summary>
     let fragment = FragmentBuilder()
     /// <summary>Creates a modal dialog element</summary>
-    let dialog = DialogElementBuilder() // Correct - has dialog specific events
+    let dialog = DialogElement() // Correct - has dialog specific events
     /// <summary>Creates an expandable details section</summary>
-    let details = DetailsElementBuilder() // Correct - has toggle event
+    let details = DetailsElement() // Correct - has toggle event
     /// <summary>Creates a summary for a details element</summary>
     let summary = SummaryBuilder()
 
@@ -140,7 +140,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let table = TableElementBuilder()
+    let table = TableElement()
 
     /// <summary>Creates a table header section</summary>
     let thead = TableHeaderBuilder()
@@ -177,10 +177,10 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let colgroup = ColGroupBuilder()
+    let colgroup = ColGroup()
 
     /// <summary>Creates a column definition</summary>
-    let col = ColBuilder()
+    let col = ColElement()
 
     // Document elements with documentation
     /// <summary>Creates the root HTML element</summary>
@@ -205,7 +205,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let meta = MetaElementBuilder()
+    let meta = MetaElement()
 
     /// <summary>Creates a link element for external resources</summary>
     /// <example>
@@ -216,7 +216,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let link = LinkElementBuilder()
+    let link = LinkElement()
 
     /// <summary>Creates a script element for JavaScript</summary>
     /// <example>
@@ -290,13 +290,13 @@ module Builders =
     let ruby = RubyBuilder()
 
     /// <summary>Creates a ruby base text element</summary>
-    let rb = RubyBaseBuilder()
+    let rb = RubyBase()
 
     /// <summary>Creates a ruby text annotation element</summary>
-    let rt = RubyTextBuilder()
+    let rt = RubyText()
 
     /// <summary>Creates a ruby fallback parenthesis element</summary>
-    let rp = RubyParenthesisBuilder()
+    let rp = RubyParenthesis()
 
     /// <summary>Creates a template element for holding client-side content templates</summary>
     /// <example>
@@ -310,7 +310,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let template = TemplateElementBuilder()
+    let template = TemplateElement()
 
     /// <summary>Creates a progress element for task completion indication</summary>
     /// <example>
@@ -322,7 +322,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let progress = ProgressElementBuilder()
+    let progress = ProgressElement()
 
     /// <summary>Creates a meter element for gauge visualization</summary>
     /// <example>
@@ -337,7 +337,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let meter = MeterElementBuilder()
+    let meter = MeterElement()
 
     /// <summary>Creates a canvas element for drawing graphics</summary>
     /// <example>
@@ -349,7 +349,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let canvas = CanvasElementBuilder()
+    let canvas = CanvasElement()
 
     let none: ReactElement = null
 
@@ -407,7 +407,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let datalist = DataListElementBuilder()
+    let datalist = DataListElement()
 
     /// <summary>Creates an output element to display calculation results</summary>
     /// <example>
@@ -418,4 +418,4 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let output = OutputElementBuilder()
+    let output = OutputElement()

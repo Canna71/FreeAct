@@ -395,7 +395,7 @@ module CoreElement =
         member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props
 
     /// Media element builder with common media properties
-    type MediaElementBuilder(tag: string) =
+    type MediaElement(tag: string) =
         inherit HtmlElementBuilder(tag)
 
         /// Source URL for media content
@@ -423,8 +423,8 @@ module CoreElement =
         member inline _.Preload(props, value: PreloadStrategy) =
             Prop("preload", preloadStrategyToString value :> obj) :: props
 
-    type InputElementBuilder() =
-        inherit InteractiveFormElement("input")
+    type InputElement() =
+        inherit InteractiveFormElement "input"
 
         /// Input type
         [<CustomOperation("type'")>]
@@ -452,7 +452,7 @@ module CoreElement =
         [<CustomOperation("step")>]
         member inline _.Step(props, value: string) = Prop("step", value :> obj) :: props
 
-    type SelectElementBuilder() =
+    type SelectElement() =
         inherit InteractiveFormElement("select")
 
         /// Whether multiple selection is allowed
@@ -463,7 +463,7 @@ module CoreElement =
         [<CustomOperation("size")>]
         member inline _.Size(props, value: int) = Prop("size", value :> obj) :: props
 
-    type TextAreaElementBuilder() =
+    type TextAreaElement() =
         inherit InteractiveFormElement("textarea")
 
         /// Number of rows
@@ -479,7 +479,7 @@ module CoreElement =
         member inline _.Wrap(props, value: WrapMode) =
             Prop("wrap", wrapModeToString value :> obj) :: props
 
-    type TableElementBuilder() =
+    type TableElement() =
         inherit HtmlElementBuilder("table")
 
         /// Border width
@@ -496,7 +496,7 @@ module CoreElement =
         member inline _.CellPadding(props, value: int) =
             Prop("cellPadding", value :> obj) :: props
 
-    type MetaElementBuilder() =
+    type MetaElement() =
         inherit HtmlElementBuilder("meta")
 
         /// Name of the metadata
@@ -516,7 +516,7 @@ module CoreElement =
         member inline _.HttpEquiv(props, value: HttpEquiv) =
             Prop("http-equiv", httpEquivToString value :> obj) :: props
 
-    type LinkElementBuilder() =
+    type LinkElement() =
         inherit HtmlElementBuilder("link")
 
         /// Relationship between current document and linked resource
@@ -532,14 +532,14 @@ module CoreElement =
         [<CustomOperation("href")>]
         member inline _.Href(props, value: string) = Prop("href", value :> obj) :: props
 
-    type DetailsElementBuilder() =
+    type DetailsElement() =
         inherit HtmlElementBuilder("details")
 
         /// Whether the details are visible
         [<CustomOperation("open")>]
         member inline _.Open(props, value: bool) = Prop("open", value :> obj) :: props
 
-    type DialogElementBuilder() =
+    type DialogElement() =
         inherit HtmlElementBuilder("dialog")
 
         /// Whether the dialog is visible
@@ -551,7 +551,7 @@ module CoreElement =
         member inline _.ReturnValue(props, value: string) =
             Prop("returnValue", value :> obj) :: props
 
-    type TableCellElementBuilder(tag: string) =
+    type TableCellElement(tag: string) =
         inherit HtmlElementBuilder(tag)
 
         /// Number of columns this cell should span
@@ -580,7 +580,7 @@ module CoreElement =
     /// }
     /// </code>
     /// </example>
-    type ImageElementBuilder() =
+    type ImageElement() =
         inherit HtmlElementBuilder("img")
 
         /// Alternative text description
@@ -597,7 +597,7 @@ module CoreElement =
         member inline _.Decoding(props, value: ImageDecoding) =
             Prop("decoding", imageDecodingToString value :> obj) :: props
 
-    type ProgressElementBuilder() =
+    type ProgressElement() =
         inherit HtmlElementBuilder("progress")
 
         /// Current value
@@ -608,7 +608,7 @@ module CoreElement =
         [<CustomOperation("max")>]
         member inline _.Max(props, value: float) = Prop("max", value :> obj) :: props
 
-    type MeterElementBuilder() =
+    type MeterElement() =
         inherit HtmlElementBuilder("meter")
 
         /// Current value
@@ -635,7 +635,7 @@ module CoreElement =
         [<CustomOperation("optimum")>]
         member inline _.Optimum(props, value: float) = Prop("optimum", value :> obj) :: props
 
-    type OptionElementBuilder() =
+    type OptionElement() =
         inherit InteractiveFormElement("option")
 
         /// Whether the option is selected by default
@@ -646,7 +646,7 @@ module CoreElement =
         [<CustomOperation("value")>]
         member inline _.Value(props, value: string) = Prop("value", value :> obj) :: props
 
-    type CanvasElementBuilder() =
+    type CanvasElement() =
         inherit HtmlElementBuilder("canvas")
 
         /// Context type for canvas
@@ -654,29 +654,29 @@ module CoreElement =
         member inline _.ContextType(props, value: CanvasContextType) =
             Prop("contextType", canvasContextTypeToString value :> obj) :: props
 
-    type DataListElementBuilder() =
+    type DataListElement() =
         inherit HtmlElementBuilder("datalist")
 
-    type OutputElementBuilder() =
+    type OutputElement() =
         inherit HtmlElementBuilder("output")
 
         /// Form elements that contribute to the output's value
         [<CustomOperation("for")>]
         member inline _.For(props, value: string) = Prop("htmlFor", value :> obj) :: props
 
-    type RubyBaseBuilder() =
+    type RubyBase() =
         inherit HtmlElementBuilder("rb")
 
-    type RubyTextBuilder() =
+    type RubyText() =
         inherit HtmlElementBuilder("rt")
 
-    type RubyParenthesisBuilder() =
+    type RubyParenthesis() =
         inherit HtmlElementBuilder("rp")
 
-    type TemplateElementBuilder() =
+    type TemplateElement() =
         inherit HtmlElementBuilder("template")
 
-    type SourceElementBuilder() =
+    type SourceElement() =
         inherit HtmlElementBuilder("source")
 
         [<CustomOperation("type")>]
@@ -691,7 +691,7 @@ module CoreElement =
         [<CustomOperation("media")>]
         member inline _.Media(props, value: string) = Prop("media", value :> obj) :: props
 
-    type TrackElementBuilder() =
+    type TrackElement() =
         inherit HtmlElementBuilder("track")
 
         [<CustomOperation("kind")>]
@@ -710,19 +710,19 @@ module CoreElement =
         [<CustomOperation("default")>]
         member inline _.Default(props, value: bool) = Prop("default", value :> obj) :: props
 
-    type ColGroupBuilder() =
+    type ColGroup() =
         inherit HtmlElementBuilder("colgroup")
 
         [<CustomOperation("span")>]
         member inline _.Span(props, value: int) = Prop("span", value :> obj) :: props
 
-    type ColBuilder() =
+    type ColElement() =
         inherit HtmlElementBuilder("col")
 
         [<CustomOperation("span")>]
         member inline _.Span(props, value: int) = Prop("span", value :> obj) :: props
 
-    type PictureElementBuilder() =
+    type PictureElement() =
         inherit HtmlElementBuilder("picture")
 
     type FieldsetElement() =
