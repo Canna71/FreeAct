@@ -724,3 +724,9 @@ module CoreElement =
 
     type PictureElementBuilder() =
         inherit HtmlElementBuilder("picture")
+
+    type FieldsetElement() =
+        inherit HtmlElementBuilder("fieldset")
+
+    type LegendElement() =
+        inherit HtmlElementBuilder("legend")

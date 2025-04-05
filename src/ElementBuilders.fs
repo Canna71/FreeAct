@@ -83,8 +83,19 @@ module Builders =
     type UnorderedListElement = HtmlElementBuilder
     let ul = UnorderedListElement "ul"
 
+    /// <summary>
+    /// Creates a list item element (&lt;li&gt;) for ordered and unordered lists
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// li {
+    ///     value 1
+    ///     text "List item"
+    /// }
+    /// </code>
+    /// </example>
     type ListItemElement = HtmlElementBuilder
-    let li = ListItemElement "li"
+    let li = ListItemElement "li" // Changed from direct HtmlElementBuilder to typed builder
 
     /// <summary>
     /// Creates a header element (&lt;h1&gt;) for top-level headings
@@ -125,7 +136,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let p = HtmlElementBuilder("p")
+    type ParagraphElement = HtmlElementBuilder
+    let p = ParagraphElement "p"
 
     /// <summary>
     /// Creates an anchor element (&lt;a&gt;) for links
@@ -153,7 +165,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let section = HtmlElementBuilder("section")
+    type SectionElement = HtmlElementBuilder
+    let section = SectionElement "section"
 
     /// <summary>
     /// Creates a span element (&lt;span&gt;) for inline content grouping
@@ -170,7 +183,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let span = HtmlElementBuilder("span")
+    type SpanElement = HtmlElementBuilder
+    let span = SpanElement "span"
 
     /// <summary>
     /// Creates an i element (&lt;i&gt;) typically used for icons or italic text
@@ -183,7 +197,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let i = HtmlElementBuilder("i")
+    type ItalicElement = HtmlElementBuilder
+    let i = ItalicElement "i"
 
     /// <summary>
     /// Creates a label element (&lt;label&gt;) to define a label for a form control
@@ -196,7 +211,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let label = HtmlElementBuilder("label")
+    type LabelElement = HtmlElementBuilder
+    let label = LabelElement "label"
 
     let img = ImageElementBuilder()
 
@@ -215,6 +231,18 @@ module Builders =
     /// </example>
     let input = InputElementBuilder()
 
+    /// <summary>
+    /// Creates a script element (&lt;script&gt;) for JavaScript code or external scripts
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// script {
+    ///     src "app.js"
+    ///     defer true
+    ///     type "text/javascript"
+    /// }
+    /// </code>
+    /// </example>
     let script = ScriptElement()
 
     /// <summary>
@@ -237,6 +265,17 @@ module Builders =
     /// </example>
     let form = FormElement()
 
+    /// <summary>
+    /// Creates a fragment to group elements without adding a DOM container
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// fragment {
+    ///     div { text "First" }
+    ///     div { text "Second" }
+    /// }
+    /// </code>
+    /// </example>
     let fragment = FragmentElement()
 
     let none: ReactElement = null
@@ -357,7 +396,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let fieldset = HtmlElementBuilder("fieldset")
+    let fieldset = FieldsetElement() // Change from HtmlElementBuilder to FieldsetElement
 
     /// <summary>
     /// Creates a legend element (&lt;legend&gt;) to define a caption for a fieldset
@@ -369,7 +408,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let legend = HtmlElementBuilder("legend")
+    let legend = LegendElement() // Change from HtmlElementBuilder to LegendElement
 
     /// <summary>
     /// Creates a table element (&lt;table&gt;) for data presentation
@@ -394,10 +433,80 @@ module Builders =
     /// </code>
     /// </example>
     let table = TableElementBuilder()
-    let thead = HtmlElementBuilder("thead")
-    let tbody = HtmlElementBuilder("tbody")
-    let tfoot = HtmlElementBuilder("tfoot")
-    let tr = HtmlElementBuilder("tr")
+
+    /// <summary>
+    /// Creates a table header section (&lt;thead&gt;) for grouping header content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// thead {
+    ///     tr {
+    ///         th { text "Column 1" }
+    ///         th { text "Column 2" }
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    type TableHeadElement = HtmlElementBuilder
+    let thead = TableHeadElement "thead"
+
+    /// <summary>
+    /// Creates a table body section (&lt;tbody&gt;) for grouping body content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// tbody {
+    ///     tr {
+    ///         td { text "Data 1" }
+    ///         td { text "Data 2" }
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    type TableBodyElement = HtmlElementBuilder
+    let tbody = TableBodyElement "tbody"
+
+    /// <summary>
+    /// Creates a table footer section (&lt;tfoot&gt;) for summary rows
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// tfoot {
+    ///     tr {
+    ///         td { text "Total:" }
+    ///         td { text "100" }
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    type TableFootElement = HtmlElementBuilder
+    let tfoot = TableFootElement "tfoot"
+
+    /// <summary>
+    /// Creates a table row (&lt;tr&gt;) to contain cells
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// tr {
+    ///     td { text "Cell 1" }
+    ///     td { text "Cell 2" }
+    /// }
+    /// </code>
+    /// </example>
+    type TableRowElement = HtmlElementBuilder
+    let tr = TableRowElement "tr"
+
+    /// <summary>
+    /// Creates a table data cell (&lt;td&gt;) for regular content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// td {
+    ///     colSpan 2
+    ///     text "Spans two columns"
+    /// }
+    /// </code>
+    /// </example>
     let td = TableCellElementBuilder("td")
 
     /// <summary>
@@ -415,11 +524,58 @@ module Builders =
     let th = TableCellElementBuilder("th")
 
     // Table-related elements
+    /// <summary>
+    /// Creates a column group (&lt;colgroup&gt;) to define column properties
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// colgroup {
+    ///     span 2
+    ///     col { className "narrow" }
+    ///     col { className "wide" }
+    /// }
+    /// </code>
+    /// </example>
     let colgroup = ColGroupBuilder()
+
+    /// <summary>
+    /// Creates a column (&lt;col&gt;) to specify properties for table columns
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// col {
+    ///     span 3
+    ///     className "highlight"
+    /// }
+    /// </code>
+    /// </example>
     let col = ColBuilder()
 
     // Meta elements
+    /// <summary>
+    /// Creates a meta element (&lt;meta&gt;) for document metadata
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// meta {
+    ///     name "description"
+    ///     content "Page description"
+    /// }
+    /// </code>
+    /// </example>
     let meta = MetaElementBuilder()
+
+    /// <summary>
+    /// Creates a link element (&lt;link&gt;) for external resources
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// link {
+    ///     rel LinkRelationType.Stylesheet
+    ///     href "styles.css"
+    /// }
+    /// </code>
+    /// </example>
     let link = LinkElementBuilder()
 
     // Semantic elements
@@ -440,7 +596,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let article = HtmlElementBuilder("article")
+    type ArticleElement = HtmlElementBuilder
+    let article = ArticleElement "article"
 
     /// <summary>
     /// Creates an aside element (&lt;aside&gt;) for related content
@@ -457,7 +614,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let aside = HtmlElementBuilder("aside")
+    type AsideElement = HtmlElementBuilder
+    let aside = AsideElement "aside"
 
     /// <summary>
     /// Creates a header element (&lt;header&gt;) for introductory content
@@ -475,7 +633,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let header = HtmlElementBuilder("header")
+    type HeaderElement = HtmlElementBuilder
+    let header = HeaderElement "header"
 
     /// <summary>
     /// Creates a footer element (&lt;footer&gt;) for content that concludes a section
@@ -491,7 +650,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let footer = HtmlElementBuilder("footer")
+    type FooterElement = HtmlElementBuilder
+    let footer = FooterElement "footer"
 
     /// <summary>
     /// Creates a figure element (&lt;figure&gt;) for self-contained content like images, diagrams
@@ -507,12 +667,14 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let figure = HtmlElementBuilder("figure")
+    type FigureElement = HtmlElementBuilder
+    let figure = FigureElement "figure"
 
     /// <summary>
     /// Creates a figure caption (&lt;figcaption&gt;) to describe a figure element
     /// </summary>
-    let figcaption = HtmlElementBuilder("figcaption")
+    type FigCaptionElement = HtmlElementBuilder
+    let figcaption = FigCaptionElement "figcaption"
 
     /// <summary>
     /// Creates a time element (&lt;time&gt;) for dates and times
@@ -525,7 +687,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let time = HtmlElementBuilder("time")
+    type TimeElement = HtmlElementBuilder
+    let time = TimeElement "time"
 
     /// <summary>
     /// Creates a mark element (&lt;mark&gt;) for highlighted text
@@ -539,128 +702,8 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let mark = HtmlElementBuilder("mark")
-
-    // Additional structural elements
-    /// <summary>
-    /// Creates an address element (&lt;address&gt;) for contact information
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// address {
-    ///     text "Contact us at: "
-    ///     a {
-    ///         href "mailto:example@example.com"
-    ///         text "example@example.com"
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    let address = HtmlElementBuilder("address")
-
-    /// <summary>
-    /// Creates a blockquote element (&lt;blockquote&gt;) for quoted content
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// blockquote {
-    ///     cite "https://example.com/quote"
-    ///     p { text "The quoted text goes here" }
-    ///     footer {
-    ///         text "— Author Name"
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    let blockquote = HtmlElementBuilder("blockquote")
-
-    /// <summary>
-    /// Creates a code element (&lt;code&gt;) for inline code
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// p {
-    ///     text "Use the "
-    ///     code { text "console.log()" }
-    ///     text " function to debug."
-    /// }
-    /// </code>
-    /// </example>
-    let code = HtmlElementBuilder("code")
-
-    /// <summary>
-    /// Creates a pre element (&lt;pre&gt;) for preformatted text
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// pre {
-    ///     code {
-    ///         text "let x = 42
-    ///               printfn \"%d\" x"
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    let pre = HtmlElementBuilder("pre")
-
-    // Text formatting elements
-    /// <summary>
-    /// Creates an em element (&lt;em&gt;) for emphasized text
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// p {
-    ///     text "This is "
-    ///     em { text "emphasized" }
-    ///     text " text"
-    /// }
-    /// </code>
-    /// </example>
-    let em = HtmlElementBuilder("em")
-
-    /// <summary>
-    /// Creates a strong element (&lt;strong&gt;) for strongly emphasized text
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// p {
-    ///     text "This is "
-    ///     strong { text "important" }
-    ///     text " text"
-    /// }
-    /// </code>
-    /// </example>
-    let strong = HtmlElementBuilder("strong")
-
-    // Additional semantic elements
-    /// <summary>
-    /// Creates a details element (&lt;details&gt;) with expandable content
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// details {
-    ///     open' true
-    ///     summary { text "Click to expand" }
-    ///     div { text "Expanded content" }
-    /// }
-    /// </code>
-    /// </example>
-    let details = DetailsElementBuilder()
-
-    /// <summary>
-    /// Creates a summary element (&lt;summary&gt;) as a heading for details element
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// details {
-    ///     summary {
-    ///         className "details-header"
-    ///         text "Click here"
-    ///     }
-    /// }
-    /// </code>
-    /// </example>
-    let summary = HtmlElementBuilder("summary")
+    type MarkElement = HtmlElementBuilder
+    let mark = MarkElement "mark"
 
     /// <summary>
     /// Creates a dialog element (&lt;dialog&gt;) for modal or non-modal interactions
@@ -681,7 +724,39 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let dialog = DialogElementBuilder()
+    type DialogElement = DialogElementBuilder
+    let dialog = DialogElement()
+
+    /// <summary>
+    /// Creates a details element (&lt;details&gt;) with expandable content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// details {
+    ///     open' true
+    ///     summary { text "Click to expand" }
+    ///     div { text "Expanded content" }
+    /// }
+    /// </code>
+    /// </example>
+    type DetailsElement = DetailsElementBuilder
+    let details = DetailsElement()
+
+    /// <summary>
+    /// Creates a summary element (&lt;summary&gt;) as a heading for details element
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// details {
+    ///     summary {
+    ///         className "details-header"
+    ///         text "Click here"
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    type SummaryElement = HtmlElementBuilder
+    let summary = SummaryElement "summary"
 
     /// <summary>
     /// Creates a small element (&lt;small&gt;) for side-comments and fine print
@@ -694,7 +769,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let small = HtmlElementBuilder("small")
+    let small = SmallElement
 
     /// <summary>
     /// Creates a subscript element (&lt;sub&gt;) for subscript text
@@ -708,7 +783,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let sub = HtmlElementBuilder("sub")
+    let sub = SubscriptElement
 
     /// <summary>
     /// Creates a superscript element (&lt;sup&gt;) for superscript text
@@ -722,7 +797,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let sup = HtmlElementBuilder("sup")
+    let sup = SuperscriptElement
 
     /// <summary>
     /// Creates a cite element (&lt;cite&gt;) for citation or reference
@@ -735,10 +810,22 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let cite = HtmlElementBuilder("cite")
+    let cite = CitationElement
 
     // Form-related elements
-    let option = OptionElementBuilder()
+    /// <summary>
+    /// Creates an option element (&lt;option&gt;) for select elements
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// option {
+    ///     value "1"
+    ///     selected true
+    ///     text "Option 1"
+    /// }
+    /// </code>
+    /// </example>
+    let option = OptionElementBuilder
 
     /// <summary>
     /// Creates an option group element (&lt;optgroup&gt;) to group related options
@@ -754,7 +841,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let optgroup = HtmlElementBuilder("optgroup")
+    let optgroup = OptionGroupElement
 
     /// <summary>
     /// Creates a datalist element (&lt;datalist&gt;) for input suggestions
@@ -843,7 +930,7 @@ module Builders =
     /// }
     /// </code>
     /// </example>
-    let ruby = HtmlElementBuilder("ruby")
+    let ruby = RubyElement
 
     /// <summary>
     /// Creates a ruby base element (&lt;rb&gt;) for containing the base text in ruby annotations
@@ -901,3 +988,11 @@ module Builders =
     /// </code>
     /// </example>
     let picture = PictureElementBuilder()
+
+    // Text formatting elements
+    let em = EmphasisElement()
+    let strong = StrongElement()
+    let code = CodeElement()
+    let pre = PreformattedElement()
+    let blockquote = BlockquoteElement()
+    let address = AddressElement()
