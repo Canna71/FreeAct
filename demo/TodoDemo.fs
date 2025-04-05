@@ -97,7 +97,7 @@ let LoadTodosButton () =
                     
                     // Return the single event type with the domain result
                     Some fetchTodosResultEvent, Some resultValue
-                ) |> ignore // Ignore the result of dispatchAfterEffect
+                ) |> ignore // Ignore the result of dispatchAfterEffect to make onClick happy
             )
             
             if isLoading then

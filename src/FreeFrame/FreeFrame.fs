@@ -429,36 +429,8 @@ let runEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payloa
             return Error error
     }
 
-// Version that returns a promise with Result
-let runEffectAsPromise<'Payload, 'Result>
-    (effectId: EffectId<'Payload, 'Result>)
-    (payload: 'Payload)
-    : JS.Promise<Result<'Result, exn>>
-    =
-    Async.StartAsPromise(
-        async {
-            try
-                match effectHandlers.TryGetValue(EffectId.key effectId) with
-                | true, handler ->
-                    let! result = handler (payload :> obj)
-                    return Ok(result :?> 'Result)
-                | false, _ ->
-                    let error =
-                        Exception($"No handler registered for effect {EffectId.key effectId}")
-
-                    console.error (error.Message)
-                    return Error error
-            with ex ->
-                return Error ex
-        }
-    )
-
 // Async version - ignores the result
-let runEffectAsync<'Payload>
-    (effectId: EffectId<'Payload, unit>)
-    (payload: 'Payload)
-    : Result<unit, exn>
-    =
+let runEffectAsync<'Payload> (effectId: EffectId<'Payload, unit>) (payload: 'Payload) =
     try
         match effectHandlers.TryGetValue(EffectId.key effectId) with
         | true, handler ->
