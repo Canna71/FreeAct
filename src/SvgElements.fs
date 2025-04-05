@@ -4,6 +4,19 @@ open FreeAct
 
 [<AutoOpen>]
 module SvgElements =
+    /// <summary>
+    /// Base builder for SVG elements with common SVG attributes
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// svg {
+    ///     viewBox "0 0 100 100"
+    ///     preserveAspectRatio PreserveAspectRatio.XMidYMid
+    ///     fill "none"
+    ///     stroke "black"
+    /// }
+    /// </code>
+    /// </example>
     type SvgElementBuilder(tag: string) =
         inherit ElementWithChildrenBuilder(tag)
 
@@ -37,6 +50,19 @@ module SvgElements =
         [<CustomOperation("y")>]
         member inline _.Y(props, value: float) = Prop("y", value :> obj) :: props
 
+    /// <summary>
+    /// Builds an SVG circle element with center coordinates and radius
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// circle {
+    ///     cx 50.0
+    ///     cy 50.0
+    ///     r 25.0
+    ///     fill "red"
+    /// }
+    /// </code>
+    /// </example>
     type SvgCircleBuilder() =
         inherit SvgShapeBuilder("circle")
 
@@ -79,6 +105,18 @@ module SvgElements =
         [<CustomOperation("y2")>]
         member inline _.Y2(props, value: float) = Prop("y2", value :> obj) :: props
 
+    /// <summary>
+    /// Builds an SVG path element with path data commands
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// path {
+    ///     d "M10 10 L90 90"
+    ///     stroke "black"
+    ///     strokeWidth 2.0
+    /// }
+    /// </code>
+    /// </example>
     type SvgPathBuilder() =
         inherit SvgElementBuilder("path")
 

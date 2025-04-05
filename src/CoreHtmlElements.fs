@@ -321,6 +321,19 @@ module CoreElement =
         member inline _.ReferrerPolicy(props, value: ReferrerPolicy) =
             Prop("referrerPolicy", referrerPolicyToString value :> obj) :: props
 
+    /// <summary>
+    /// Builds a form element (&lt;form&gt;) with submission and validation capabilities
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// form {
+    ///     action "/submit"
+    ///     method "post"
+    ///     onSubmit (fun ev -> ev.preventDefault())
+    ///     novalidate true
+    /// }
+    /// </code>
+    /// </example>
     type FormElement() =
         inherit HtmlElementBuilder("form")
 
@@ -358,6 +371,19 @@ module CoreElement =
         [<CustomOperation("required")>]
         member inline _.Required(props, value: bool) = Prop("required", value :> obj) :: props
 
+    /// <summary>
+    /// Builds a button element (&lt;button&gt;) with form submission capabilities
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// button {
+    ///     type' ButtonType.Submit
+    ///     disabled false
+    ///     onClick (fun _ -> ())
+    ///     text "Submit"
+    /// }
+    /// </code>
+    /// </example>
     type ButtonElement() =
         inherit InteractiveFormElement "button"
 
@@ -541,6 +567,19 @@ module CoreElement =
         member inline _.Scope(props, value: TableCellScope) =
             Prop("scope", tableCellScopeToString value :> obj) :: props
 
+    /// <summary>
+    /// Builds an image element (&lt;img&gt;) with accessibility and loading options
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// img {
+    ///     src "image.jpg"
+    ///     alt "Descriptive text"
+    ///     loading LoadingStrategy.Lazy
+    ///     decoding ImageDecoding.Async
+    /// }
+    /// </code>
+    /// </example>
     type ImageElementBuilder() =
         inherit HtmlElementBuilder("img")
 
