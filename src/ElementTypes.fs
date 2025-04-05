@@ -2,156 +2,205 @@ namespace FreeAct
 
 open FreeAct
 
-/// Basic HTML element builders
 [<AutoOpen>]
 module ElementTypes =
-    // Text formatting elements
-    type EmphasisElement() =
+    /// Basic HTML element builders - enforce consistent naming
+
+    // Change from Element to Builder suffix for consistency
+    type DivBuilder() =
+        inherit HtmlElementBuilder("div")
+
+    type NavBuilder() =
+        inherit HtmlElementBuilder("nav")
+
+    type MainBuilder() =
+        inherit HtmlElementBuilder("main")
+
+    type SectionBuilder() =
+        inherit HtmlElementBuilder("section")
+
+    type ArticleBuilder() =
+        inherit HtmlElementBuilder("article")
+
+    type AsideBuilder() =
+        inherit HtmlElementBuilder("aside")
+
+    type HeaderBuilder() =
+        inherit HtmlElementBuilder("header")
+
+    type FooterBuilder() =
+        inherit HtmlElementBuilder("footer")
+
+    // Text elements
+    type ParagraphBuilder() =
+        inherit HtmlElementBuilder("p")
+
+    type SpanBuilder() =
+        inherit HtmlElementBuilder("span")
+
+    type EmphasisBuilder() =
         inherit HtmlElementBuilder("em")
 
-    type StrongElement() =
+    type StrongBuilder() =
         inherit HtmlElementBuilder("strong")
 
-    type CitationElement() =
-        inherit HtmlElementBuilder("cite")
-
-    type SmallElement() =
-        inherit HtmlElementBuilder("small")
-
-    type SubscriptElement() =
-        inherit HtmlElementBuilder("sub")
-
-    type SuperscriptElement() =
-        inherit HtmlElementBuilder("sup")
-
-    type CodeElement() =
+    type CodeBuilder() =
         inherit HtmlElementBuilder("code")
 
-    type PreformattedElement() =
+    type PreBuilder() =
         inherit HtmlElementBuilder("pre")
 
-    type BlockquoteElement() =
+    type BlockquoteBuilder() =
         inherit HtmlElementBuilder("blockquote")
 
-    type AddressElement() =
+    // List elements
+    type OrderedListBuilder() =
+        inherit HtmlElementBuilder("ol")
+
+    type UnorderedListBuilder() =
+        inherit HtmlElementBuilder("ul")
+
+    type ListItemBuilder() =
+        inherit HtmlElementBuilder("li")
+
+    // Text formatting elements
+    type CitationBuilder() =
+        inherit HtmlElementBuilder("cite")
+
+    type SmallBuilder() =
+        inherit HtmlElementBuilder("small")
+
+    type SubscriptBuilder() =
+        inherit HtmlElementBuilder("sub")
+
+    type SuperscriptBuilder() =
+        inherit HtmlElementBuilder("sup")
+
+    type AddressBuilder() =
         inherit HtmlElementBuilder("address")
 
-    type RubyElement() =
+    type RubyBuilder() =
         inherit HtmlElementBuilder("ruby")
 
     // Form and input elements
-    type OptionGroupElement() =
+    type OptionGroupBuilder() =
         inherit HtmlElementBuilder("optgroup")
 
-    type FieldsetElement() =
+    type FieldsetBuilder() =
         inherit HtmlElementBuilder("fieldset")
 
-    type LegendElement() =
+    type LegendBuilder() =
         inherit HtmlElementBuilder("legend")
 
     // Additional HTML elements
-    type TableHeaderElement() =
+    type TableHeaderBuilder() =
         inherit HtmlElementBuilder("thead")
 
-    type TableBodyElement() =
+    type TableBodyBuilder() =
         inherit HtmlElementBuilder("tbody")
 
-    type TableFooterElement() =
+    type TableFooterBuilder() =
         inherit HtmlElementBuilder("tfoot")
 
-    type TableRowElement() =
+    type TableRowBuilder() =
         inherit HtmlElementBuilder("tr")
 
-    type ArticleElement() =
-        inherit HtmlElementBuilder("article")
-
-    type AsideElement() =
-        inherit HtmlElementBuilder("aside")
-
-    type HeaderElement() =
-        inherit HtmlElementBuilder("header")
-
-    type FooterElement() =
-        inherit HtmlElementBuilder("footer")
-
-    type FigureElement() =
+    type FigureBuilder() =
         inherit HtmlElementBuilder("figure")
 
-    type FigCaptionElement() =
+    type FigCaptionBuilder() =
         inherit HtmlElementBuilder("figcaption")
 
-    type TimeElement() =
+    type TimeBuilder() =
         inherit HtmlElementBuilder("time")
 
-    type MarkElement() =
+    type MarkBuilder() =
         inherit HtmlElementBuilder("mark")
 
-    type SummaryElement() =
+    type SummaryBuilder() =
         inherit HtmlElementBuilder("summary")
 
     /// Basic HTML document structure elements
-    type DocumentTitleElement() =
+    type DocumentTitleBuilder() =
         inherit HtmlElementBuilder("title")
 
-    type DocumentHeadElement() =
+    type DocumentHeadBuilder() =
         inherit HtmlElementBuilder("head")
 
-    type DocumentBodyElement() =
+    type DocumentBodyBuilder() =
         inherit HtmlElementBuilder("body")
 
-    type DocumentHtmlElement() =
+    type DocumentHtmlBuilder() =
         inherit HtmlElementBuilder("html")
 
     /// Heading elements
-    type HeadingElement(level: int) =
+    type HeadingBuilder(level: int) =
         inherit HtmlElementBuilder($"h{level}")
 
-    /// Division and structural elements
-    type DivisionElement() =
-        inherit HtmlElementBuilder("div")
-
-    type NavigationElement() =
-        inherit HtmlElementBuilder("nav")
-
-    type MainContentElement() =
-        inherit HtmlElementBuilder("main")
-
-    type SectionElement() =
-        inherit HtmlElementBuilder("section")
-
-    /// Text and inline elements
-    type ParagraphElement() =
-        inherit HtmlElementBuilder("p")
-
-    type SpanElement() =
-        inherit HtmlElementBuilder("span")
-
-    type BoldElement() =
-        inherit HtmlElementBuilder("b")
-
-    type ItalicElement() =
-        inherit HtmlElementBuilder("i")
-
-    /// List elements
-    type OrderedListElement() =
-        inherit HtmlElementBuilder("ol")
-
-    type UnorderedListElement() =
-        inherit HtmlElementBuilder("ul")
-
-    type ListItemElement() =
-        inherit HtmlElementBuilder("li")
-
     // Add proper media element builders
-    type AudioElementBuilder() =
+    type AudioBuilder() =
         inherit MediaElementBuilder("audio")
 
-    type VideoElementBuilder() =
+    type VideoBuilder() =
         inherit MediaElementBuilder("video")
 
     // Add specific table cell builders
-    type TableDataCellElementBuilder() =
+    type TableDataCellBuilder() =
         inherit TableCellElementBuilder("td")
 
-    type TableHeaderCellElementBuilder() =
+    type TableHeaderCellBuilder() =
         inherit TableCellElementBuilder("th")
+
+    // Core document elements
+    type DocumentBuilder() =
+        inherit HtmlElementBuilder("html")
+
+    type HeadBuilder() =
+        inherit HtmlElementBuilder("head")
+
+    type BodyBuilder() =
+        inherit HtmlElementBuilder("body")
+
+    type TitleBuilder() =
+        inherit HtmlElementBuilder("title")
+
+    // Text and paragraph elements
+    type LabelBuilder() =
+        inherit HtmlElementBuilder("label")
+
+    // Form elements
+    type FormBuilder() =
+        inherit HtmlElementBuilder("form")
+
+    type OptionBuilder() =
+        inherit HtmlElementBuilder("option")
+
+    // Media elements
+    type SourceBuilder() =
+        inherit HtmlElementBuilder("source")
+
+    type TrackBuilder() =
+        inherit HtmlElementBuilder("track")
+
+    // Additional builders needed
+    type ButtonBuilder() =
+        inherit InteractiveFormElement("button")
+
+    type FragmentBuilder() =
+        inherit ElementWithChildrenBuilder(Fable.React.ReactBindings.React.Fragment)
+
+    type ScriptBuilder() =
+        inherit CoreElementBuilder("script")
+
+    type ItalicBuilder() =
+        inherit HtmlElementBuilder("i")
+
+    type AnchorBuilder() =
+        inherit HtmlElementBuilder("a")
+
+    // Additional elements that were missing
+    type ImageBuilder() =
+        inherit HtmlElementBuilder("img")
+
+    type LinkBuilder() =
+        inherit HtmlElementBuilder("link")
