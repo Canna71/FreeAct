@@ -140,24 +140,64 @@ module Builders =
     /// </code>
     /// </example>
     let a = AnchorElement()
-    let section = HtmlElementBuilder("section")
-    let span = HtmlElementBuilder("span")
-    let i = HtmlElementBuilder("i")
-
-    let label = HtmlElementBuilder("label")
 
     /// <summary>
-    /// Creates an image element (&lt;img&gt;) with required accessibility attributes
+    /// Creates a section element (&lt;section&gt;) to define a generic section of content
     /// </summary>
     /// <example>
     /// <code>
-    /// img {
-    ///     src "image.jpg"
-    ///     alt "Descriptive text"
-    ///     loading LoadingStrategy.Lazy
+    /// section {
+    ///     className "content-section"
+    ///     h2 { text "Section Title" }
+    ///     p { text "Section content" }
     /// }
     /// </code>
     /// </example>
+    let section = HtmlElementBuilder("section")
+
+    /// <summary>
+    /// Creates a span element (&lt;span&gt;) for inline content grouping
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// p {
+    ///     text "This is "
+    ///     span {
+    ///         className "highlight"
+    ///         text "highlighted"
+    ///     }
+    ///     text " text"
+    /// }
+    /// </code>
+    /// </example>
+    let span = HtmlElementBuilder("span")
+
+    /// <summary>
+    /// Creates an i element (&lt;i&gt;) typically used for icons or italic text
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// i {
+    ///     className "fas fa-star"
+    ///     aria "hidden" "true"
+    /// }
+    /// </code>
+    /// </example>
+    let i = HtmlElementBuilder("i")
+
+    /// <summary>
+    /// Creates a label element (&lt;label&gt;) to define a label for a form control
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// label {
+    ///     htmlFor "username"
+    ///     text "Username:"
+    /// }
+    /// </code>
+    /// </example>
+    let label = HtmlElementBuilder("label")
+
     let img = ImageElementBuilder()
 
     /// <summary>
@@ -318,6 +358,17 @@ module Builders =
     /// </code>
     /// </example>
     let fieldset = HtmlElementBuilder("fieldset")
+
+    /// <summary>
+    /// Creates a legend element (&lt;legend&gt;) to define a caption for a fieldset
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// fieldset {
+    ///     legend { text "Personal Information" }
+    /// }
+    /// </code>
+    /// </example>
     let legend = HtmlElementBuilder("legend")
 
     /// <summary>
@@ -582,7 +633,33 @@ module Builders =
     let strong = HtmlElementBuilder("strong")
 
     // Additional semantic elements
+    /// <summary>
+    /// Creates a details element (&lt;details&gt;) with expandable content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// details {
+    ///     open' true
+    ///     summary { text "Click to expand" }
+    ///     div { text "Expanded content" }
+    /// }
+    /// </code>
+    /// </example>
     let details = DetailsElementBuilder()
+
+    /// <summary>
+    /// Creates a summary element (&lt;summary&gt;) as a heading for details element
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// details {
+    ///     summary {
+    ///         className "details-header"
+    ///         text "Click here"
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     let summary = HtmlElementBuilder("summary")
 
     /// <summary>
@@ -662,27 +739,165 @@ module Builders =
 
     // Form-related elements
     let option = OptionElementBuilder()
+
+    /// <summary>
+    /// Creates an option group element (&lt;optgroup&gt;) to group related options
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// select {
+    ///     optgroup {
+    ///         label "Group 1"
+    ///         option { value "1"; text "Option 1" }
+    ///         option { value "2"; text "Option 2" }
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     let optgroup = HtmlElementBuilder("optgroup")
 
+    /// <summary>
+    /// Creates a datalist element (&lt;datalist&gt;) for input suggestions
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// datalist {
+    ///     id "browsers"
+    ///     option { value "Chrome" }
+    ///     option { value "Firefox" }
+    ///     option { value "Safari" }
+    /// }
+    /// </code>
+    /// </example>
+    let datalist = DataListElementBuilder()
+
+    /// <summary>
+    /// Creates an output element (&lt;output&gt;) for calculation results
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// output {
+    ///     htmlFor "calculation"
+    ///     text "Result: 42"
+    /// }
+    /// </code>
+    /// </example>
+    let output = OutputElementBuilder()
+
     // Progress elements
+    /// <summary>
+    /// Creates a progress element (&lt;progress&gt;) to show completion progress
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// progress {
+    ///     value 70.0
+    ///     max 100.0
+    ///     text "70%"
+    /// }
+    /// </code>
+    /// </example>
     let progress = ProgressElementBuilder()
+
+    /// <summary>
+    /// Creates a meter element (&lt;meter&gt;) to represent a scalar value within a range
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// meter {
+    ///     value 0.6
+    ///     min 0.0
+    ///     max 1.0
+    ///     low 0.2
+    ///     high 0.8
+    ///     optimum 0.5
+    /// }
+    /// </code>
+    /// </example>
     let meter = MeterElementBuilder()
 
     // Canvas element
+    /// <summary>
+    /// Creates a canvas element (&lt;canvas&gt;) for drawing graphics
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// canvas {
+    ///     width 800
+    ///     height 600
+    ///     contextType CanvasContextType.TwoD
+    /// }
+    /// </code>
+    /// </example>
     let canvas = CanvasElementBuilder()
 
-    // Form related elements
-    let datalist = DataListElementBuilder()
-    let output = OutputElementBuilder()
-
     // Ruby text elements
+    /// <summary>
+    /// Creates a ruby element (&lt;ruby&gt;) for East Asian typography
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// ruby {
+    ///     text "漢"
+    ///     rt { text "かん" }
+    /// }
+    /// </code>
+    /// </example>
     let ruby = HtmlElementBuilder("ruby")
+
+    /// <summary>
+    /// Creates a ruby base element (&lt;rb&gt;) for containing the base text in ruby annotations
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// ruby {
+    ///     rb { text "漢" }
+    ///     rt { text "かん" }
+    /// }
+    /// </code>
+    /// </example>
     let rb = RubyBaseBuilder()
+
+    /// <summary>
+    /// Creates a ruby text element (&lt;rt&gt;) for containing the pronunciation in ruby annotations
+    /// </summary>
     let rt = RubyTextBuilder()
+
+    /// <summary>
+    /// Creates a ruby parenthesis element (&lt;rp&gt;) for containing fallback parentheses
+    /// </summary>
     let rp = RubyParenthesisBuilder()
 
     // Template element
+    /// <summary>
+    /// Creates a template element (&lt;template&gt;) for holding client-side content
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// template {
+    ///     id "template-id"
+    ///     div { text "Template content" }
+    /// }
+    /// </code>
+    /// </example>
     let template = TemplateElementBuilder()
 
     // Image-related elements
+    /// <summary>
+    /// Creates a picture element (&lt;picture&gt;) for responsive images
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// picture {
+    ///     source {
+    ///         media "(min-width: 800px)"
+    ///         srcset "large.jpg"
+    ///     }
+    ///     img {
+    ///         src "small.jpg"
+    ///         alt "Responsive image"
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
     let picture = PictureElementBuilder()
