@@ -1844,3 +1844,257 @@ module Styles =
                  (lengthToString bottomLeft)
              :> obj)
             :: props
+
+        // Margin shorthands
+        [<CustomOperation("mt")>]
+        member inline _.MarginTop(props, value: Length) =
+            ("marginTop", lengthToString value :> obj) :: props
+
+        [<CustomOperation("mr")>]
+        member inline _.MarginRight(props, value: Length) =
+            ("marginRight", lengthToString value :> obj) :: props
+
+        [<CustomOperation("mb")>]
+        member inline _.MarginBottom(props, value: Length) =
+            ("marginBottom", lengthToString value :> obj) :: props
+
+        [<CustomOperation("ml")>]
+        member inline _.MarginLeft(props, value: Length) =
+            ("marginLeft", lengthToString value :> obj) :: props
+
+        // Padding shorthands
+        [<CustomOperation("pt")>]
+        member inline _.PaddingTop(props, value: Length) =
+            ("paddingTop", lengthToString value :> obj) :: props
+
+        [<CustomOperation("pr")>]
+        member inline _.PaddingRight(props, value: Length) =
+            ("paddingRight", lengthToString value :> obj) :: props
+
+        [<CustomOperation("pb")>]
+        member inline _.PaddingBottom(props, value: Length) =
+            ("paddingBottom", lengthToString value :> obj) :: props
+
+        [<CustomOperation("pl")>]
+        member inline _.PaddingLeft(props, value: Length) =
+            ("paddingLeft", lengthToString value :> obj) :: props
+
+        // Border radius shorthands
+        [<CustomOperation("roundedTop")>]
+        member inline _.RoundedTop(props, value: Length) =
+            [
+                "borderTopLeftRadius", lengthToString value :> obj
+                "borderTopRightRadius", lengthToString value :> obj
+            ]
+            @ props
+
+        [<CustomOperation("roundedBottom")>]
+        member inline _.RoundedBottom(props, value: Length) =
+            [
+                "borderBottomLeftRadius", lengthToString value :> obj
+                "borderBottomRightRadius", lengthToString value :> obj
+            ]
+            @ props
+
+        [<CustomOperation("rounded")>]
+        member inline _.Rounded(props, value: Length) =
+            ("borderRadius", lengthToString value :> obj) :: props
+
+        // Common border shorthands
+        [<CustomOperation("border1px")>]
+        member inline _.Border1px(props, style: BorderStyle, color: string) =
+            ("border", sprintf "1px %s %s" (borderStyleToString style) color :> obj)
+            :: props
+
+        [<CustomOperation("borderTop1px")>]
+        member inline _.BorderTop1px(props, style: BorderStyle, color: string) =
+            ("borderTop", sprintf "1px %s %s" (borderStyleToString style) color :> obj)
+            :: props
+
+        // Width/Height shorthands
+        [<CustomOperation("w")>]
+        member inline _.ShortWidth(props, value: Length) =
+            ("width", lengthToString value :> obj) :: props
+
+        [<CustomOperation("h")>]
+        member inline _.ShortHeight(props, value: Length) =
+            ("height", lengthToString value :> obj) :: props
+
+        [<CustomOperation("wh")>]
+        member inline _.WidthHeight(props, w: Length, h: Length) =
+            [ "width", lengthToString w :> obj; "height", lengthToString h :> obj ] @ props
+
+        // Display shorthands
+        [<CustomOperation("block")>]
+        member inline _.DisplayBlock(props) = ("display", "block" :> obj) :: props
+
+        [<CustomOperation("flex")>]
+        member inline _.DisplayFlex(props) = ("display", "flex" :> obj) :: props
+
+        [<CustomOperation("grid")>]
+        member inline _.DisplayGrid(props) = ("display", "grid" :> obj) :: props
+
+        [<CustomOperation("hidden")>]
+        member inline _.DisplayNone(props) = ("display", "none" :> obj) :: props
+
+        // Flexbox shorthands
+        [<CustomOperation("row")>]
+        member inline _.FlexRow(props) =
+            ("flexDirection", "row" :> obj) :: props
+
+        [<CustomOperation("col")>]
+        member inline _.FlexColumn(props) =
+            ("flexDirection", "column" :> obj) :: props
+
+        [<CustomOperation("center")>]
+        member inline _.FlexCenter(props) =
+            [ "justifyContent", "center" :> obj; "alignItems", "center" :> obj ] @ props
+
+        [<CustomOperation("between")>]
+        member inline _.SpaceBetween(props) =
+            ("justifyContent", "space-between" :> obj) :: props
+
+        // Position shorthands
+        [<CustomOperation("absolute")>]
+        member inline _.PositionAbsolute(props) =
+            ("position", "absolute" :> obj) :: props
+
+        [<CustomOperation("relative")>]
+        member inline _.PositionRelative(props) =
+            ("position", "relative" :> obj) :: props
+
+        [<CustomOperation("fixed")>]
+        member inline _.PositionFixed(props) = ("position", "fixed" :> obj) :: props
+
+        [<CustomOperation("sticky")>]
+        member inline _.PositionSticky(props) = ("position", "sticky" :> obj) :: props
+
+        // Background shorthands
+        [<CustomOperation("bg")>]
+        member inline _.Background(props, color: string) =
+            ("backgroundColor", color :> obj) :: props
+
+        [<CustomOperation("bgCover")>]
+        member inline _.BackgroundCover(props) =
+            ("backgroundSize", "cover" :> obj) :: props
+
+        // Font shorthands
+        [<CustomOperation("text")>]
+        member inline _.TextColor(props, color: string) = ("color", color :> obj) :: props
+
+        [<CustomOperation("fontSize")>]
+        member inline _.FontSizeShort(props, size: int) =
+            ("fontSize", sprintf "%dpx" size :> obj) :: props
+
+        [<CustomOperation("bold")>]
+        member inline _.FontBold(props) = ("fontWeight", "bold" :> obj) :: props
+
+        // Common combinations
+        [<CustomOperation("centerContent")>]
+        member inline _.CenterContent(props) =
+            [
+                "display", "flex" :> obj
+                "justifyContent", "center" :> obj
+                "alignItems", "center" :> obj
+            ]
+            @ props
+
+        [<CustomOperation("fullScreen")>]
+        member inline _.FullScreen(props) =
+            [
+                "width", "100vw" :> obj
+                "height", "100vh" :> obj
+                "position", "fixed" :> obj
+                "top", "0" :> obj
+                "left", "0" :> obj
+            ]
+            @ props
+
+        [<CustomOperation("pointer")>]
+        member inline _.Pointer(props) = ("cursor", "pointer" :> obj) :: props
+
+        // Z-index layer shortcuts
+        [<CustomOperation("layer")>]
+        member inline _.Layer(props, value: int) = ("zIndex", value :> obj) :: props
+
+        [<CustomOperation("front")>]
+        member inline _.Front(props) = ("zIndex", 999999 :> obj) :: props
+
+        [<CustomOperation("back")>]
+        member inline _.Back(props) = ("zIndex", -1 :> obj) :: props
+
+        // Position shortcuts with coordinates
+        [<CustomOperation("inset")>]
+        member inline _.Inset(props, value: Length) =
+            [
+                "top", lengthToString value :> obj
+                "right", lengthToString value :> obj
+                "bottom", lengthToString value :> obj
+                "left", lengthToString value :> obj
+            ]
+            @ props
+
+        // Transition shortcuts
+        [<CustomOperation("fadeIn")>]
+        member inline _.FadeIn(props) =
+            [ "opacity", 1 :> obj; "transition", "opacity 0.2s ease-in-out" :> obj ] @ props
+
+        [<CustomOperation("fadeOut")>]
+        member inline _.FadeOut(props) =
+            [ "opacity", 0 :> obj; "transition", "opacity 0.2s ease-in-out" :> obj ] @ props
+
+        // Quick transitions
+        [<CustomOperation("transitionAll")>]
+        member inline _.TransitionAll(props) =
+            ("transition", "all 0.2s ease-in-out" :> obj) :: props
+
+        [<CustomOperation("transitionColors")>]
+        member inline _.TransitionColors(props) =
+            ("transition", "background-color 0.2s ease, color 0.2s ease" :> obj) :: props
+
+        // Text shortcuts
+        [<CustomOperation("ellipsis")>]
+        member inline _.Ellipsis(props) =
+            [
+                "overflow", "hidden" :> obj
+                "textOverflow", "ellipsis" :> obj
+                "whiteSpace", "nowrap" :> obj
+            ]
+            @ props
+
+        [<CustomOperation("noSelect")>]
+        member inline _.NoSelect(props) =
+            [ "userSelect", "none" :> obj; "webkitUserSelect", "none" :> obj ] @ props
+
+        // Layout helpers
+        [<CustomOperation("fullWidth")>]
+        member inline _.FullWidth(props) = ("width", "100%" :> obj) :: props
+
+        [<CustomOperation("fullHeight")>]
+        member inline _.FullHeight(props) = ("height", "100%" :> obj) :: props
+
+        [<CustomOperation("square")>]
+        member inline _.Square(props, size: Length) =
+            [ "width", lengthToString size :> obj; "height", lengthToString size :> obj ]
+            @ props
+
+        // Box model shortcuts
+        [<CustomOperation("content")>]
+        member inline _.ContentBox(props) =
+            ("boxSizing", "content-box" :> obj) :: props
+
+        [<CustomOperation("borderBox")>]
+        member inline _.BorderBox(props) =
+            ("boxSizing", "border-box" :> obj) :: props
+
+        // Overflow shortcuts
+        [<CustomOperation("scroll")>]
+        member inline _.Scroll(props) = ("overflow", "auto" :> obj) :: props
+
+        [<CustomOperation("scrollX")>]
+        member inline _.ScrollX(props) =
+            [ "overflowX", "auto" :> obj; "overflowY", "hidden" :> obj ] @ props
+
+        [<CustomOperation("scrollY")>]
+        member inline _.ScrollY(props) =
+            [ "overflowX", "hidden" :> obj; "overflowY", "auto" :> obj ] @ props
