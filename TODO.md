@@ -7,6 +7,7 @@ TODO: split project into multiple projects
 TODO: add computation expressions for routes
 TODO: complete the builders for elements
 TODO: fix naming to distinguish between definitions of effects and actually executing them
+TODO: improve demo, avoid errors for duplicate Keys
 
 Differences between subscribers and effects:
 
