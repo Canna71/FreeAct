@@ -55,17 +55,16 @@ module Builders =
     /// <summary>Creates italic text</summary>
     let i = ItalicBuilder()
 
-    // Form elements
-    let button = ButtonBuilder()
+    // Form elements - use specialized builders with proper attributes/events
+    let button = ButtonElement() // Use ButtonElement for button-specific attributes
     let input = InputElementBuilder()
-    let form = FormElement()
-    let label = LabelBuilder()
+    let form = FormElement() // Use FormElement instead of FormBuilder for form-specific events
     let select = SelectElementBuilder()
+    let textarea = TextAreaElementBuilder()
+    let fieldset = FieldsetElement() // Use FieldsetElement for fieldset-specific attributes
+    let legend = LegendElement() // Use LegendElement for legend-specific attributes
     let option = OptionBuilder()
     let optgroup = OptionGroupBuilder()
-    let fieldset = FieldsetBuilder()
-    let legend = LegendBuilder()
-    let textarea = TextAreaElementBuilder()
     let datalist = DataListElementBuilder()
     let output = OutputElementBuilder()
 
@@ -79,8 +78,8 @@ module Builders =
 
     // Container and semantic elements
     let fragment = FragmentBuilder()
-    let dialog = DialogElementBuilder()
-    let details = DetailsElementBuilder()
+    let dialog = DialogElementBuilder() // Use the proper builder with dialog-specific attributes/events
+    let details = DetailsBuilder()
     let summary = SummaryBuilder()
 
     // Table elements
@@ -122,4 +121,4 @@ module Builders =
     let none: ReactElement = null
 
     // Core elements
-    let a = AnchorElement()
+    let a = AnchorElement() // Not AnchorBuilder
