@@ -1230,12 +1230,45 @@ module Styles =
         [<CustomOperation("transition")>]
         member inline _.Transition(props, value: string) = ("transition", value :> obj) :: props
 
-        /// Sets transform
-        /// Example: transform (Transform.Scale 1.1)
-        /// Example: transform (Transform.Multiple [Transform.Scale 1.1; Transform.Rotate 45])
+        /// <summary>Applies transform effects with type-safe Transform values</summary>
+        /// <param name="value">Transform operation(s) to apply</param>
+        /// <example>
+        /// style {
+        ///     transform (Transform.Scale 1.1)                     // scale up
+        ///     transform (Transform.Translate(Length.Px 10, Length.Px 0))  // move right
+        ///     transform (Transform.Multiple [                     // multiple transforms
+        ///         Transform.Scale 1.1
+        ///         Transform.Rotate 45
+        ///     ])
+        /// }
+        /// </example>
         [<CustomOperation("transform")>]
         member inline _.Transform(props, value: Transform) =
             ("transform", transformToString value :> obj) :: props
+
+        /// <summary>Sets timing and effects for animations</summary>
+        /// <param name="value">Duration in seconds or milliseconds</param>
+        /// <example>
+        /// style {
+        ///     animationDurationTyped (Duration.Ms 300)    // 300 milliseconds
+        ///     animationDurationTyped (Duration.Sec 0.5)   // 0.5 seconds
+        /// }
+        /// </example>
+        [<CustomOperation("animationDurationTyped")>]
+        member inline _.AnimationDurationTyped(props, value: Duration) =
+            ("animationDuration", durationToString value :> obj) :: props
+
+        /// <summary>Defines how elements transition between states</summary>
+        /// <param name="value">Timing function type</param>
+        /// <example>
+        /// style {
+        ///     timingFunction TimingFunction.EaseInOut     // smooth acceleration and deceleration
+        ///     timingFunction TimingFunction.Linear        // constant speed
+        /// }
+        /// </example>
+        [<CustomOperation("timingFunction")>]
+        member inline _.TimingFunction(props, value: TimingFunction) =
+            ("transitionTimingFunction", timingFunctionToString value :> obj) :: props
 
         /// Sets grid template columns
         /// Example: gridTemplateColumns "1fr 1fr 1fr"
@@ -1587,13 +1620,6 @@ module Styles =
         [<CustomOperation("animationFillMode")>]
         member inline _.AnimationFillMode(props, value: AnimationFillMode) =
             ("animationFillMode", animationFillModeToString value :> obj) :: props
-
-        /// Sets animation duration using type-safe Duration
-        /// Example: animationDurationTyped (Duration.Ms 300)
-        /// Example: animationDurationTyped (Duration.Sec 0.3)
-        [<CustomOperation("animationDurationTyped")>]
-        member inline _.AnimationDurationTyped(props, value: Duration) =
-            ("animationDuration", durationToString value :> obj) :: props
 
         /// Sets grid template areas
         /// Example: gridTemplateAreas (GridTemplate.Areas [["header"; "header"]; ["nav"; "main"]; ["footer"; "footer"]])
@@ -1980,6 +2006,15 @@ module Styles =
             ("justifyContent", "space-between" :> obj) :: props
 
         // Position shorthands
+        /// <summary>Sets the position of an element relative to nearest positioned ancestor</summary>
+        /// <param name="value">Position coordinates in pixels, rem, etc</param>
+        /// <example>
+        /// style {
+        ///     absolute
+        ///     top (Length.Px 0)
+        ///     left (Length.Px 0)
+        /// }
+        /// </example>
         [<CustomOperation("absolute")>]
         member inline _.PositionAbsolute(props) =
             ("position", "absolute" :> obj) :: props
