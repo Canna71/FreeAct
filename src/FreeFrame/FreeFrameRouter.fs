@@ -255,7 +255,7 @@ let FreeFrameRoutes<'State> =
                                      DefaultContent: ReactElement
                                  |}) ->
         let routerState = useNewView props.AppDb props.GetRouterState
-        printfn "Matching route: %s" routerState.CurrentPath
+        console.log (" FreeFrameRoutes Matching route", routerState)
 
         let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
             match matched.Child with

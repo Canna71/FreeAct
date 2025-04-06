@@ -1,6 +1,7 @@
 module FreeAct.Router
 
 open Tokenizer
+// open Fable.Core.JS
 
 // Make RouteMatchResult type visible
 type RouteMatchResult = Tokenizer.RouteMatchResult
@@ -94,6 +95,10 @@ and Router<'T>() =
                     childPath
                     normalizedUrl
                     basePath
+
+                let childRoute = childRouter.Match(childPath)
+
+                Fable.Core.JS.console.log ("Child route match result: %A", childRoute)
 
                 Some
                     {

@@ -93,6 +93,7 @@ let about (context: RouteContext<ReactElement>) =
 
 // Route handlers now receive RouteContext with child content
 let users (context: RouteContext<ReactElement>) : ReactElement =
+    console.log("Users route context: ", context)
     div {
         h1 { "Users" }
         p { "List of users." }
