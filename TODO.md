@@ -1,13 +1,22 @@
 
+
+BUG: After a navigation, the app is not responding to events
+TODO: study a better way to architecture the project and avoid circular dependencies
+- TODO: add a way to define the initial model in the app
+- TODO: simplify the way a part of an application treat its own part of the app state
+- TODO: improve the way appDb is passed around
+TODO: implement nested routes
+TODO: add computation expressions for routes
 TODO: possibly allow synchronous effects
 TODO: Fix Named event handlers!!! => they should work similar to typed ones
 TODO: syntactic sugar or other for FunctionComponent.Of
 TODO: find an alternative to FunctionComponent.Of (Elmish?)
 TODO: split project into multiple projects
-TODO: add computation expressions for routes
 TODO: complete the builders for elements
 TODO: fix naming to distinguish between definitions of effects and actually executing them
 TODO: improve demo, avoid errors for duplicate Keys
+TODO: restore composition demo
+TODO: add a demo for typed(Union) events
 
 Differences between subscribers and effects:
 
