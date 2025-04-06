@@ -167,7 +167,6 @@ let internal dispatchInternal<'Payload, 'State>
     =
     match eventHandlers.TryGetValue(eventId) with
     | true, handler ->
-        console.log ($"Dispatching event {eventId} with payload {payload} to handler {handler}")
         let action = handler (payload :> obj)
         appDb.Dispatch(action)
     | false, _ -> console.error ($"No handler registered for event")
@@ -402,7 +401,6 @@ let useView<'V> (view: IView<'V>) =
             // Return the dispose function for cleanup
             { new IDisposable with
                 member _.Dispose() =
-                    console.log ("Disposing of subscriptionRef for ", view)
 
                     match subscriptionRef.current with
                     | Some dispose ->

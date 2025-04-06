@@ -101,7 +101,7 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
         div {
             FreeFrameLink {| 
                 appDb = appDb
-                destination = "/users/42"
+                destination = "/users/id/42"
                 className = Some "nav-link"
                 children = [str "View User 42"] 
             |}
@@ -111,6 +111,7 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
         match context.ChildContent with
         | Some childContent -> 
             div {
+                h2 { "Child Content" }
                 className "child-content"
                 childContent
             }
@@ -246,7 +247,7 @@ let App () =
           .Route("/about", about)
           .RouteWithChildren("/users", users, userRouter)
           .Route(
-            "/users/:userId",
+            "/users/id/:userId",
             fun (result) ->
                 let userId = result.Result.PathParams.["userId"]
                 div {
@@ -263,7 +264,7 @@ let App () =
                 }
           )
           .Route(
-            "/users/:userId/posts/:postId",
+            "/users/id/:userId/posts/:postId",
             fun (result) ->
                 let userId = result.Result.PathParams.["userId"]
                 let postId = result.Result.PathParams.["postId"]
