@@ -36,15 +36,15 @@ module EffectId =
         EffectId(Guid.NewGuid().ToString())
 
 [<RequireQualifiedAccess>]
-module EffectHandlers =
+module Effects =
     open FreeFrame
 
     // Private storage for effect handlers
-    let private effectHandlers =
+    let internal effectHandlers =
         Collections.Generic.Dictionary<string, obj -> Async<obj>>()
 
     // Register an effect handler
-    let registerEffectHandler<'Payload, 'Result>
+    let registerHandler<'Payload, 'Result>
         (effectId: EffectId<'Payload, 'Result>)
         (handler: EffectHandler<'Payload, 'Result>)
         =
@@ -57,16 +57,23 @@ module EffectHandlers =
 
         effectHandlers.[EffectId.key effectId] <- wrappedHandler
 
-    let registerNamedEffectHandler<'Payload, 'Result>
+    let registerNamed<'Payload, 'Result>
         (effectName: string)
         (handler: EffectHandler<'Payload, 'Result>)
         =
         let effectId = EffectId.named<'Payload, 'Result> effectName
-        registerEffectHandler effectId handler
+        registerHandler effectId handler
         effectId
 
-    // Execute an effect - returns Result<'Success, exn> to be more F# idiomatic
-    let runEffect<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =
+    /// Creates an async computation that will execute the registered effect handler.
+    /// Returns a Result containing either the handler's result or an error if:
+    /// - No handler is registered for the given effectId
+    /// - The handler throws an exception during execution
+    /// - Type conversion of the payload or result fails
+    let createEffectTask<'Payload, 'Result>
+        (effectId: EffectId<'Payload, 'Result>)
+        (payload: 'Payload)
+        =
         async {
             match effectHandlers.TryGetValue(EffectId.key effectId) with
             | true, handler ->
@@ -81,6 +88,84 @@ module EffectHandlers =
                 console.error (error.Message)
                 return Error error
         }
+
+    // =====================================================
+    //             Effect Composition
+    // =====================================================
+
+    // Chain two effects where the second effect depends on the result of the first
+    let chain<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
+        (effect1: EffectId<'PayloadA, 'ResultA>)
+        (payload1: 'PayloadA)
+        (mapResult: 'ResultA -> 'PayloadB)
+        (effect2: EffectId<'PayloadB, 'ResultB>)
+        : Async<Result<'ResultB, exn>>
+        =
+
+        async {
+            // Run the first effect
+            let! result1 = createEffectTask effect1 payload1
+
+            // If the first effect succeeds, run the second
+            match result1 with
+            | Ok resultA ->
+                let payload2 = mapResult resultA
+                return! createEffectTask effect2 payload2
+            | Error e -> return Error e
+        }
+
+    // Run two effects in parallel and combine their results
+    let combine<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
+        (effect1: EffectId<'PayloadA, 'ResultA>)
+        (payload1: 'PayloadA)
+        (effect2: EffectId<'PayloadB, 'ResultB>)
+        (payload2: 'PayloadB)
+        (combiner: 'ResultA -> 'ResultB -> 'Combined)
+        : Async<Result<'Combined, exn>>
+        =
+
+        async {
+            // Create the async tasks but don't await them yet
+            let task1 = createEffectTask effect1 payload1
+            let task2 = createEffectTask effect2 payload2
+
+            let! childA = Async.StartChild task1
+            let! childB = Async.StartChild task2
+
+            let! resultA = childA
+            let! resultB = childB
+
+            match resultA, resultB with
+            | Ok r1, Ok r2 -> return Ok(combiner r1 r2)
+            | Error e, _ -> return Error e
+            | _, Error e -> return Error e
+
+        }
+
+    let runEffectWithCallback<'Payload, 'Result>
+        (effectId: EffectId<'Payload, 'Result>)
+        (payload: 'Payload)
+        (callback: Result<'Result, exn> -> unit)
+        =
+        try
+            match effectHandlers.TryGetValue(EffectId.key effectId) with
+            | true, handler ->
+                printfn "Running effect %s with payload %A" (EffectId.key effectId) payload
+
+                async {
+                    let! result = handler (payload :> obj)
+                    callback (result :?> 'Result |> Ok)
+                }
+                |> Async.StartImmediate
+
+                Ok(())
+            | false, _ ->
+                printfn "No handler registered for effect %s" (EffectId.key effectId)
+                let error = Exception($"No handler registered for effect {EffectId.key effectId}")
+                console.error (error.Message)
+                Error error
+        with ex ->
+            Error ex
 
     // Async version - ignores the result
     let runEffectAsync<'Payload> (effectId: EffectId<'Payload, unit>) (payload: 'Payload) =
@@ -116,7 +201,7 @@ module EffectHandlers =
         (mapToEvent: Result<'Result, exn> -> EventId<'EventPayload> option * 'EventPayload option)
         =
         async {
-            let! result = runEffect effectId payload
+            let! result = createEffectTask effectId payload
 
             match result with
             | Ok _ ->
@@ -133,59 +218,6 @@ module EffectHandlers =
 
         }
         |> Async.StartImmediate
-
-    // =====================================================
-    //             Effect Composition
-    // =====================================================
-
-    // Chain two effects where the second effect depends on the result of the first
-    let chainEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB>
-        (effect1: EffectId<'PayloadA, 'ResultA>)
-        (payload1: 'PayloadA)
-        (mapResult: 'ResultA -> 'PayloadB)
-        (effect2: EffectId<'PayloadB, 'ResultB>)
-        : Async<Result<'ResultB, exn>>
-        =
-
-        async {
-            // Run the first effect
-            let! result1 = runEffect effect1 payload1
-
-            // If the first effect succeeds, run the second
-            match result1 with
-            | Ok resultA ->
-                let payload2 = mapResult resultA
-                return! runEffect effect2 payload2
-            | Error e -> return Error e
-        }
-
-    // Run two effects in parallel and combine their results
-    let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
-        (effect1: EffectId<'PayloadA, 'ResultA>)
-        (payload1: 'PayloadA)
-        (effect2: EffectId<'PayloadB, 'ResultB>)
-        (payload2: 'PayloadB)
-        (combiner: 'ResultA -> 'ResultB -> 'Combined)
-        : Async<Result<'Combined, exn>>
-        =
-
-        async {
-            // Create the async tasks but don't await them yet
-            let task1 = runEffect effect1 payload1
-            let task2 = runEffect effect2 payload2
-
-            let! childA = Async.StartChild task1
-            let! childB = Async.StartChild task2
-
-            let! resultA = childA
-            let! resultB = childB
-
-            match resultA, resultB with
-            | Ok r1, Ok r2 -> return Ok(combiner r1 r2)
-            | Error e, _ -> return Error e
-            | _, Error e -> return Error e
-
-        }
 
 // Simplified version that just passes through the result without managing loading state
 // let useEffectSimple<'Payload, 'Result> (effectId: EffectId<'Payload, 'Result>) (payload: 'Payload) =

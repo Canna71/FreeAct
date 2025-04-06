@@ -132,7 +132,7 @@ let LoadTodosButton () =
                 dispatch appDb setLoadingEvent true
                 console.log ("Loading todos...")
                 // Run the effect and handle the result with the specialized result type
-                EffectHandlers.dispatchAfterEffect
+                Effects.dispatchAfterEffect
                     appDb
                     fetchTodosEffect
                     ()

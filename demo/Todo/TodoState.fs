@@ -149,7 +149,7 @@ registerEventHandler
         ))
 
 // Register the effect handler - simulate an API call with a delay
-EffectHandlers.registerEffectHandler
+Effects.registerHandler
     fetchTodosEffect
     (fun _ ->
         async {
