@@ -40,7 +40,7 @@ let useCount () =
     useNewView appDb (fun state -> state.Count)
 
 // Route handlers - they now clearly take RouteMatchResult
-let _home (result: RouteMatchResult) : ReactElement =
+let _home (context: RouteContext<ReactElement>) : ReactElement =
     let count = useCount()
     div {
         h1 { "Home" }
@@ -70,7 +70,7 @@ let _home (result: RouteMatchResult) : ReactElement =
 
 let home = FunctionComponent.Of(_home, "Home")
 
-let about (result: RouteMatchResult) =
+let about (context: RouteContext<ReactElement>) =
     let ret = div {
         h1 { "About" }
         p { "This is the about page." }
@@ -84,18 +84,20 @@ let about (result: RouteMatchResult) =
                 children = [str "View Users"] 
             |}
         }
+        
+        context.ChildContent 
+
     }
     console.log("About page rendered with result: ", ret)
     ret
 
-// Route handlers - now they don't need to handle child components directly
-let users (result: RouteMatchResult) : ReactElement =
+// Route handlers now receive RouteContext with child content
+let users (context: RouteContext<ReactElement>) : ReactElement =
     div {
         h1 { "Users" }
         p { "List of users." }
         
-        // Child routes will be rendered automatically after this component
-        
+        // Links for navigation
         div {
             FreeFrameLink {| 
                 appDb = appDb
@@ -104,6 +106,15 @@ let users (result: RouteMatchResult) : ReactElement =
                 children = [str "View User 42"] 
             |}
         }
+        
+        // Render child content where we want it to appear
+        match context.ChildContent with
+        | Some childContent -> 
+            div {
+                className "child-content"
+                childContent
+            }
+        | None -> None
     }
 
 let notFound  =
@@ -194,7 +205,7 @@ let Navigation () =
 let userRouter = Router<ReactElement>()
 userRouter.Route(
     "/profile",
-    fun (result: RouteMatchResult) ->
+    fun (result) ->
         div {
             h2 { "User Profile" }
             p { "User profile details" }
@@ -202,7 +213,7 @@ userRouter.Route(
     )
     .Route(
         "/settings",
-        fun (result: RouteMatchResult) ->
+        fun (result) ->
             div {
                 h2 { "User Settings" }
                 p { "User settings panel" }
@@ -218,7 +229,7 @@ userRouter.Route(
     )
     .Route(
         "/settings/privacy",
-        fun (result: RouteMatchResult) ->
+        fun (result) ->
             div {
                 h2 { "Privacy Settings" }
                 p { "User privacy settings" }
@@ -236,8 +247,8 @@ let App () =
           .RouteWithChildren("/users", users, userRouter)
           .Route(
             "/users/:userId",
-            fun (result: RouteMatchResult) ->
-                let userId = result.PathParams.["userId"]
+            fun (result) ->
+                let userId = result.Result.PathParams.["userId"]
                 div {
                     h1 { sprintf "User: %s" userId }
                     p { "User details go here." }
@@ -253,9 +264,9 @@ let App () =
           )
           .Route(
             "/users/:userId/posts/:postId",
-            fun (result: RouteMatchResult) ->
-                let userId = result.PathParams.["userId"]
-                let postId = result.PathParams.["postId"]
+            fun (result) ->
+                let userId = result.Result.PathParams.["userId"]
+                let postId = result.Result.PathParams.["postId"]
                 div {
                     h1 { sprintf "Post %s by User %s" postId userId }
                     p { "Post details go here." }
@@ -269,12 +280,12 @@ let App () =
                     }
                 }
           )
-          .Route("/users/admin", fun (result: RouteMatchResult) -> div { h1 { "Admin Panel" } })
+          .Route("/users/admin", fun (result) -> div { h1 { "Admin Panel" } })
           .Route(
             "/search",
             fun result ->
                 let query =
-                    match result.QueryParams.TryFind "q" with
+                    match result.Result.QueryParams.TryFind "q" with
                     | Some [ q ] -> q
                     | _ -> ""
                 div {

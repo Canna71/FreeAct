@@ -257,17 +257,28 @@ let FreeFrameRoutes<'State> =
         let routerState = useNewView props.AppDb props.GetRouterState
 
         // Recursively render matched routes
-        let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
-            match matched.Child with
-            | Some childMatch ->
-                fragment {
-                    matched.Handler matched.Result
-                    renderMatch childMatch
-                }
-            | None -> matched.Handler matched.Result
+        let rec renderMatchWithChild
+            (matched: MatchedRoute<ReactElement>)
+            : ReactElement * option<ReactElement>
+            =
+            // Get child content if it exists
+            let childContent =
+                match matched.Child with
+                | Some childMatch ->
+                    let (childEl, _) = renderMatchWithChild childMatch
+                    Some childEl
+                | None -> None
+
+            // Now provide both the RouteMatchResult and the child content to the handler
+            let result =
+                matched.Handler { Result = matched.Result; ChildContent = childContent }
+
+            (result, childContent)
 
         match props.Router.Match(routerState.CurrentPath) with
-        | Some matched -> renderMatch matched
+        | Some matched ->
+            let (result, _) = renderMatchWithChild matched
+            result
         | None -> props.DefaultContent
     )
 

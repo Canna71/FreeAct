@@ -5,10 +5,13 @@ open Tokenizer
 // Make RouteMatchResult type visible
 type RouteMatchResult = Tokenizer.RouteMatchResult
 
-/// Handler for a route - receives only the match result
-type RouteHandler<'T> = RouteMatchResult -> 'T
+/// Extended route context that includes child content
+type RouteContext<'T> = { Result: RouteMatchResult; ChildContent: option<'T> }
 
-/// Result of a route match, containing the match info and any nested matches
+/// Handler for a route - receives RouteContext with both match result and optional child content
+type RouteHandler<'T> = RouteContext<'T> -> 'T
+
+/// Result of a route match, containing the match info and handler
 type MatchedRoute<'T> =
     {
         Result: RouteMatchResult
