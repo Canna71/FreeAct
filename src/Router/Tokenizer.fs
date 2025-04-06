@@ -237,7 +237,7 @@ let createMatcher (pathPattern: string) =
                 "/" + normalizedUrl
 
         let m = regexObj.Match(normalizedPath)
-        printfn "Matching %s against %s: %b" normalizedPath regex m.Success // Debug output
+        // printfn "Matching %s against %s: %b" normalizedPath regex m.Success // Debug output
 
         if m.Success then
             // Extract path parameters

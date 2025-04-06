@@ -139,14 +139,12 @@ let Routes =
                 str "Router context not found. Make sure to wrap your app with RouterProvider."
             }
         | Some context ->
-            let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
-                match matched.Child with
+            let rec renderMatch (m: MatchedRoute<ReactElement>) : ReactElement =
+                match m.Child with
                 | Some child ->
-                    fragment {
-                        matched.Handler matched.Result
-                        renderMatch child
-                    }
-                | None -> matched.Handler matched.Result
+                    let childContent = renderMatch child
+                    m.Handler { Result = m.Result; ChildContent = Some childContent }
+                | None -> m.Handler { Result = m.Result; ChildContent = None }
 
             match context.Router.Match(context.CurrentUrl) with
             | Some matched -> renderMatch matched

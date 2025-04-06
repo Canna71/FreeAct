@@ -351,4 +351,4 @@ else
     console.log("Rendering App...")
     root.render(App())
 
-FreeAct.Router.Tests.testNestedRoutes()
+// FreeAct.Router.Tests.testNestedRoutes()
