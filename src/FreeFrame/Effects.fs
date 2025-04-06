@@ -1,7 +1,7 @@
 // =====================================================
 //             Effects (side effects)
 // =====================================================
-namespace FreeFrame.Effects
+namespace FreeFrame
 
 open System
 open Fable.Core.JS
@@ -35,8 +35,8 @@ module EffectId =
     let inline auto<'Payload, 'Result> () : EffectId<'Payload, 'Result> =
         EffectId(Guid.NewGuid().ToString())
 
-[<AutoOpen>]
-module Handlers =
+[<RequireQualifiedAccess>]
+module EffectHandlers =
     open FreeFrame
 
     // Private storage for effect handlers

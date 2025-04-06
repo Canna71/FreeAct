@@ -4,9 +4,7 @@ open Fable.React
 open Browser
 open Fable.Core.JS
 open FreeFrame
-open FreeFrame.Effects
-open Fable.React.ReactBindings
-open FreeAct
+open FreeAct // needed for React DSL
 open Demo.Todo.Types
 open Demo.Todo.State
 open Demo.AppState
@@ -134,7 +132,7 @@ let LoadTodosButton () =
                 dispatch appDb setLoadingEvent true
                 console.log ("Loading todos...")
                 // Run the effect and handle the result with the specialized result type
-                dispatchAfterEffect
+                EffectHandlers.dispatchAfterEffect
                     appDb
                     fetchTodosEffect
                     ()

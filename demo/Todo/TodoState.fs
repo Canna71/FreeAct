@@ -4,7 +4,7 @@ open FreeFrame
 open Fable.Core.JS
 open Demo.Todo.Types
 open Demo.AppState
-open FreeFrame.Effects
+open FreeFrame
 
 
 // === Method 1b: Using string-based event identifiers ===
@@ -149,7 +149,7 @@ registerEventHandler
         ))
 
 // Register the effect handler - simulate an API call with a delay
-registerEffectHandler
+EffectHandlers.registerEffectHandler
     fetchTodosEffect
     (fun _ ->
         async {
