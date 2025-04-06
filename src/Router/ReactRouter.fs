@@ -40,7 +40,6 @@ type RouterProviderProps =
 /// Create a router provider component
 let RouterProvider =
     FunctionComponent.Of(fun (props: RouterProviderProps) ->
-        console.log "RouterProvider initialized"
 
         let initialUrl =
             match props.Mode with

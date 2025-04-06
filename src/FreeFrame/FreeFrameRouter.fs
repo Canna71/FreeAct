@@ -239,7 +239,6 @@ let FreeFrameRouterProvider<'State> =
             [| box props.Mode |]
         )
 
-        printfn "FreeFrameRouterProvider initialized with mode: %A" props.Mode
         // Render children
         fragment { children props.Children }
     )
@@ -255,10 +254,8 @@ let FreeFrameRoutes<'State> =
                                      DefaultContent: ReactElement
                                  |}) ->
         let routerState = useNewView props.AppDb props.GetRouterState
-        console.log ("FreeFrameRoutes Current Path:", routerState.CurrentPath)
 
         let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
-            console.log ("Rendering match:", matched.Result.Pattern, matched.Child)
 
             match matched.Child with
             | Some child ->

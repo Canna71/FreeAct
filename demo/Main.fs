@@ -116,7 +116,6 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
             div {
                 h2 { "Child Content" }
                 className "child-content"
-                // TODO: BUG: This is out of order!!!
                 childContent
             }
         | None -> None

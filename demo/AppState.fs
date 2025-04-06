@@ -19,7 +19,6 @@ let appDb = AppDb<AppState>({
     Count = 0
     TodoState = initialTodoState
 })
-console.log("AppDb initialized:", appDb)
 
 // Helper functions to get and set router state
 let getRouterState (state: AppState) = state.Router

@@ -219,7 +219,7 @@ let createMatcher (pathPattern: string) =
     let regex = tokensToRegex tokens
     let paramNames = extractParamNames tokens
 
-    printfn "Created matcher for %s with regex: %s" pathPattern regex // Debug output
+    // printfn "Created matcher for %s with regex: %s" pathPattern regex // Debug output
     let regexObj = Regex(regex)
 
     fun (url: string) ->

@@ -90,11 +90,11 @@ and Router<'T>() =
                     else
                         "/"
 
-                printfn
-                    "Child router matching %s (from %s, base: %s)"
-                    childPath
-                    normalizedUrl
-                    basePath
+                // printfn
+                //     "Child router matching %s (from %s, base: %s)"
+                //     childPath
+                //     normalizedUrl
+                //     basePath
 
                 let childRoute = childRouter.Match(childPath)
 
