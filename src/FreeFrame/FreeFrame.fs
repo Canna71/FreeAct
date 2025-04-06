@@ -110,23 +110,25 @@ type EventHandlerRegistration<'Payload, 'State> =
     { eventId: EventId<'Payload>; handler: EventHandler<'Payload, 'State> }
 
 // Register an event handler
-let registerNamedEventHandler<'Payload, 'State>
+let registerEventHandler<'Payload, 'State>
     (eventId: EventId<'Payload>)
     (handler: EventHandler<'Payload, 'State>)
     =
+    // Wrap the handler to match the expected signature
+    // This allows us to use the same handler for different payload types
+    // and to avoid boxing issues
     let wrappedHandler (payload: obj) : obj =
         let typedPayload = payload :?> 'Payload
         let reducer = (fun (state: 'State) -> handler typedPayload state) :> obj
         reducer
 
-    console.log ($"Registering event handler for {EventId.key eventId}")
     eventHandlers.[EventId.key eventId] <- wrappedHandler
 
 let inline registerTypedEventHandler<'EventType, 'State>
     (handler: EventHandler<'EventType, 'State>)
     =
     let eventId = EventId.ofType<'EventType> ()
-    registerNamedEventHandler eventId handler
+    registerEventHandler eventId handler
 
 /// Helper to create an event handler that operates on a subset of the state
 let focusHandler<'Payload, 'State, 'SubState>
@@ -139,6 +141,18 @@ let focusHandler<'Payload, 'State, 'SubState>
         let subState = lens state
         let newSubState = handler payload subState
         setLens newSubState state
+
+let registerFocusedEventHandler<'Payload, 'State, 'SubState>
+    (lens: 'State -> 'SubState)
+    (setLens: 'SubState -> 'State -> 'State)
+    (eventId: EventId<'Payload>)
+    (handler: EventHandler<'Payload, 'SubState>)
+    =
+    let wrappedHandler = focusHandler lens setLens handler
+
+    registerEventHandler eventId wrappedHandler
+
+// TODO: registerFocusedTypedEventHandler<'EventType, 'State, 'SubState> (handler: EventHandler<'EventType, 'SubState>) =
 
 let internal dispatchInternal<'Payload, 'State>
     (appDb: IAppDb<'State>)

@@ -17,89 +17,79 @@ let setTodosEvent = EventId.named<TodoItem list> ("set-todos")
 let todoStateLens (state: AppState) = state.TodoState
 let setTodoState todoState state = { state with TodoState = todoState }
 
+// Register the event handlers for the Todo events, using the lens functions
+let registerTodosEventHandler eventId handler =
+    registerFocusedEventHandler
+        todoStateLens
+        setTodoState
+        eventId
+        (fun arg todoState -> handler arg todoState)
+
 // Register handlers for the string-based events
-registerNamedEventHandler
+registerTodosEventHandler
     addTodoEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun text todoState ->
-            let newTodo =
-                {
-                    id = todoState.nextId
-                    text = text
-                    completed = false
-                }
-
-            { todoState with
-                todos =
-                    todoState.todos
-                    @ [
-                        newTodo
-                    ]
-                nextId = todoState.nextId + 1
+    (fun text todoState ->
+        let newTodo =
+            {
+                id = todoState.nextId
+                text = text
+                completed = false
             }
-        ))
 
-registerNamedEventHandler
+        { todoState with
+            todos =
+                todoState.todos
+                @ [
+                    newTodo
+                ]
+            nextId = todoState.nextId + 1
+        }
+    )
+
+registerTodosEventHandler
     toggleTodoEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun id todoState ->
-            { todoState with
-                todos =
-                    todoState.todos
-                    |> List.map (fun todo ->
-                        if todo.id = id then
-                            { todo with completed = not todo.completed }
-                        else
-                            todo
-                    )
-            }
-        ))
+    (fun id todoState ->
+        { todoState with
+            todos =
+                todoState.todos
+                |> List.map (fun todo ->
+                    if todo.id = id then
+                        { todo with completed = not todo.completed }
+                    else
+                        todo
+                )
+        }
+    )
 
-registerNamedEventHandler
+registerTodosEventHandler
     deleteTodoEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun id todoState ->
-            { todoState with todos = todoState.todos |> List.filter (fun todo -> todo.id <> id) }
-        ))
 
-registerNamedEventHandler
+    (fun id todoState ->
+        { todoState with todos = todoState.todos |> List.filter (fun todo -> todo.id <> id) }
+    )
+
+registerTodosEventHandler
     setFilterEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun filter todoState -> { todoState with filter = filter }))
+    (fun filter todoState -> { todoState with filter = filter })
 
-registerNamedEventHandler
+registerTodosEventHandler
     setLoadingEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun isLoading todoState -> { todoState with isLoading = isLoading }))
+    (fun isLoading todoState -> { todoState with isLoading = isLoading })
 
-registerNamedEventHandler
+registerTodosEventHandler
     setTodosEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-        (fun todos todoState ->
-            { todoState with
+    (fun todos todoState ->
+        { todoState with
 
-                todos = todos
-                nextId =
-                    match todos with
-                    | [] -> 1
-                    | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
-                isLoading = false
+            todos = todos
+            nextId =
+                match todos with
+                | [] -> 1
+                | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+            isLoading = false
 
-            }
-        ))
-
+        }
+    )
 
 let todoStateSubscription = createSubscription appDb todoStateLens
 
@@ -134,27 +124,27 @@ let fetchTodosEffect = EffectId.named<unit, TodoItem list> ("fetch-todos")
 let fetchTodosResultEvent = EventId.auto<FetchTodosResult> ()
 
 // Register a handler for this dedicated result event
-registerNamedEventHandler
+registerEventHandler
     fetchTodosResultEvent
     (focusHandler
         todoStateLens
         setTodoState
-    (fun result state ->
-        match result with
-        | TodosLoaded todos ->
-            { state with
-                todos = todos
-                nextId =
-                    match todos with
-                    | [] -> 1
-                    | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
-                isLoading = false
-            }
-        | FetchFailed err ->
-            // Just turn off loading, keep existing todos
-            console.error ("Error loading todos:", err)
-            { state with isLoading = false }
-    ))
+        (fun result state ->
+            match result with
+            | TodosLoaded todos ->
+                { state with
+                    todos = todos
+                    nextId =
+                        match todos with
+                        | [] -> 1
+                        | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+                    isLoading = false
+                }
+            | FetchFailed err ->
+                // Just turn off loading, keep existing todos
+                console.error ("Error loading todos:", err)
+                { state with isLoading = false }
+        ))
 
 // Register the effect handler - simulate an API call with a delay
 registerEffectHandler
@@ -190,7 +180,6 @@ registerEffectHandler
                 ]
         }
     )
-
 
 // Initialize the application with some test data
 let initializeApp () =
