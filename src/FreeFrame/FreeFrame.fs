@@ -148,11 +148,17 @@ let registerFocusedEventHandler<'Payload, 'State, 'SubState>
     (eventId: EventId<'Payload>)
     (handler: EventHandler<'Payload, 'SubState>)
     =
-    let wrappedHandler = focusHandler lens setLens handler
+    let focusedHandler = focusHandler lens setLens handler
 
-    registerEventHandler eventId wrappedHandler
+    registerEventHandler eventId focusedHandler
 
-// TODO: registerFocusedTypedEventHandler<'EventType, 'State, 'SubState> (handler: EventHandler<'EventType, 'SubState>) =
+let registerFocusedTypedEventHandler<'EventType, 'State, 'SubState>
+    (lens: 'State -> 'SubState)
+    (setLens: 'SubState -> 'State -> 'State)
+    (handler: EventHandler<'EventType, 'SubState>)
+    =
+    let eventId = EventId.ofType<'EventType> ()
+    registerFocusedEventHandler lens setLens eventId handler
 
 let internal dispatchInternal<'Payload, 'State>
     (appDb: IAppDb<'State>)
@@ -186,20 +192,20 @@ let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: '
     dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
 
 // =======================================================
-//             Subscriptions (views on app-db)
+//             Views on app-db
 // =======================================================
 
-type ISubscription<'V> =
+type IView<'V> =
     abstract member Value: 'V
     abstract member Subscribe: ('V -> unit) -> IDisposable
 
 // Create a derived view of app-db
-let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
+let createView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
     let mutable currentValue = selector (appDb.GetState())
     let subscribers = ResizeArray<'V -> unit>()
 
     let subscription =
-        { new ISubscription<'V> with
+        { new IView<'V> with
             member _.Value = currentValue
 
             member _.Subscribe(callback) =
@@ -225,15 +231,15 @@ let createSubscription<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) =
     subscription
 
 // =====================================================
-//             Subscription Composition
+//             Views Composition
 // =====================================================
 
 // Combine two subscriptions into a new one
-let combineSubscriptions<'A, 'B, 'C>
-    (subA: ISubscription<'A>)
-    (subB: ISubscription<'B>)
+let combineViews<'A, 'B, 'C>
+    (subA: IView<'A>)
+    (subB: IView<'B>)
     (combiner: 'A -> 'B -> 'C)
-    : ISubscription<'C>
+    : IView<'C>
     =
 
     let mutable currentValueA = subA.Value
@@ -242,7 +248,7 @@ let combineSubscriptions<'A, 'B, 'C>
     let subscribers = ResizeArray<'C -> unit>()
 
     let subscription =
-        { new ISubscription<'C> with
+        { new IView<'C> with
             member _.Value = currentValueC
 
             member _.Subscribe(callback) =
@@ -280,7 +286,7 @@ let combineSubscriptions<'A, 'B, 'C>
         )
 
     // Add a special handler to dispose both subscriptions
-    { new ISubscription<'C> with
+    { new IView<'C> with
         member _.Value = currentValueC
 
         member _.Subscribe(callback) =
@@ -298,26 +304,22 @@ let combineSubscriptions<'A, 'B, 'C>
     }
 
 // Combine three subscriptions
-let combine3Subscriptions<'A, 'B, 'C, 'D>
-    (subA: ISubscription<'A>)
-    (subB: ISubscription<'B>)
-    (subC: ISubscription<'C>)
+let combine3Views<'A, 'B, 'C, 'D>
+    (subA: IView<'A>)
+    (subB: IView<'B>)
+    (subC: IView<'C>)
     (combiner: 'A -> 'B -> 'C -> 'D)
-    : ISubscription<'D>
+    : IView<'D>
     =
 
     // First combine A and B
-    let subAB = combineSubscriptions subA subB (fun a b -> (a, b))
+    let subAB = combineViews subA subB (fun a b -> (a, b))
 
     // Then combine the result with C
-    combineSubscriptions subAB subC (fun (a, b) c -> combiner a b c)
+    combineViews subAB subC (fun (a, b) c -> combiner a b c)
 
 // Map a subscription to a new type
-let mapSubscription<'A, 'B>
-    (subscription: ISubscription<'A>)
-    (mapper: 'A -> 'B)
-    : ISubscription<'B>
-    =
+let mapView<'A, 'B> (subscription: IView<'A>) (mapper: 'A -> 'B) : IView<'B> =
     let mutable currentValueA = subscription.Value
     let mutable currentValueB = mapper currentValueA
     let subscribers = ResizeArray<'B -> unit>()
@@ -339,7 +341,7 @@ let mapSubscription<'A, 'B>
                     )
                 )
 
-    { new ISubscription<'B> with
+    { new IView<'B> with
         member _.Value = currentValueB
 
         member _.Subscribe(callback) =
@@ -360,13 +362,9 @@ let mapSubscription<'A, 'B>
     }
 
 // Filter a subscription
-let filterSubscription<'A>
-    (subscription: ISubscription<'A>)
-    (predicate: 'A -> bool)
-    : ISubscription<'A option>
-    =
+let filterView<'A> (subscription: IView<'A>) (predicate: 'A -> bool) : IView<'A option> =
 
-    mapSubscription
+    mapView
         subscription
         (fun value ->
             if predicate value then
@@ -558,7 +556,7 @@ let combineEffects<'PayloadA, 'ResultA, 'PayloadB, 'ResultB, 'Combined>
 // ===== React Integration =====
 
 // React hook to use a subscription in a React component with immediate subscription
-let useSubscription<'V> (subscription: ISubscription<'V>) =
+let useSubscription<'V> (subscription: IView<'V>) =
     let initialValue = subscription.Value
 
     // Create the state hook with the initial value
@@ -608,7 +606,7 @@ let useView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
     if subscriptionRef.current.IsNone then
         // Function to update the React state when subscription value changes
         // Create the subscription right away
-        let subscription = createSubscription appDb selector
+        let subscription = createView appDb selector
         // Store the subscription in the ref
         subscriptionRef.current <- Some subscription
 
@@ -618,12 +616,12 @@ let useView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
 
 // React hook for combined subscription
 let useCombinedSubscription<'A, 'B, 'C>
-    (subA: ISubscription<'A>)
-    (subB: ISubscription<'B>)
+    (subA: IView<'A>)
+    (subB: IView<'B>)
     (combiner: 'A -> 'B -> 'C)
     =
 
-    let combinedSub = combineSubscriptions subA subB combiner
+    let combinedSub = combineViews subA subB combiner
     useSubscription combinedSub
 
 // Simplified version that just passes through the result without managing loading state

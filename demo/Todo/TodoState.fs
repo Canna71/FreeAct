@@ -91,14 +91,14 @@ registerTodosEventHandler
         }
     )
 
-let todoStateSubscription = createSubscription appDb todoStateLens
+let todoStateSubscription = createView appDb todoStateLens
 
 // Create subscriptions
 let todosSubscription =
-    mapSubscription todoStateSubscription (fun state -> state.todos)
+    mapView todoStateSubscription (fun state -> state.todos)
 
 let filteredTodosSubscription =
-    mapSubscription
+    mapView
         todoStateSubscription
         (fun state ->
             match state.filter with
@@ -108,10 +108,10 @@ let filteredTodosSubscription =
         )
 
 let filterSubscription =
-    mapSubscription todoStateSubscription (fun state -> state.filter)
+    mapView todoStateSubscription (fun state -> state.filter)
 
 let isLoadingSubscription =
-    mapSubscription todoStateSubscription (fun state -> state.isLoading)
+    mapView todoStateSubscription (fun state -> state.isLoading)
 
 // === Define an effect for loading todos from a simulated API ===
 // Define a specialized result type for the fetchTodos effect
