@@ -52,10 +52,10 @@ type ElementBuilder(tag: obj) =
         x.Combine(prop, f ())
 
     member inline x.For(prop: ElementProperty list, f: unit -> ElementProperty) =
-        x.Combine(f (), prop)
+        x.Combine(prop, f ())
 
     member inline x.For(props: ElementProperty list, f: unit -> ElementProperty list) =
-        x.Combine(f (), props)
+        x.Combine(props, f ())
 
     member inline _.Delay(f: unit -> ElementProperty) = [ f () ]
 

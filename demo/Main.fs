@@ -122,6 +122,16 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
         | None -> None
     }
 
+let testOrdered (context: RouteContext<ReactElement>) : ReactElement =
+    div {
+        p { "One" }
+        p { "Two" }
+
+        id "test-ordered"
+        p { "Three" }
+      
+    }
+
 let notFound  =
     div {
         h1 { "404 Not Found" }
@@ -144,6 +154,14 @@ let Navigation () =
                         destination = "/"
                         className = None
                         children = [str "Home"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/test"
+                        className = None
+                        children = [str "Test"] 
                     |} 
                 }
                 li { 
@@ -251,6 +269,7 @@ let App () =
     // Create the router
     let router = Router<ReactElement>()
     router.Route("/", home)
+          .Route("/test", testOrdered)
           .Route("/about", about)
           .RouteWithChildren("/users", users, userRouter)
           .Route(
