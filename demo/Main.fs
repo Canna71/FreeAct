@@ -40,7 +40,7 @@ let useCount () =
     useNewView appDb (fun state -> state.Count)
 
 // Route handlers - they now clearly take RouteMatchResult
-let home (result: RouteMatchResult) : ReactElement =
+let _home (result: RouteMatchResult) : ReactElement =
     let count = useCount()
     div {
         h1 { "Home" }
@@ -67,6 +67,8 @@ let home (result: RouteMatchResult) : ReactElement =
             |}
         }
     }
+
+let home = FunctionComponent.Of(_home, "Home")
 
 let about (result: RouteMatchResult) =
     let ret = div {
