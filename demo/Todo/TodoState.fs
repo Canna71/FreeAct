@@ -19,28 +19,40 @@ let setTodoAnalysisEvent = EventId.named<LoadingState<TodoAnalysis>>("set-todo-a
 
 // Register handlers for the string-based events
 registerNamedEventHandler addTodoEvent (fun text state ->
-    let newTodo = { id = state.nextId; text = text; completed = false }
+    let newTodo = { id = state.TodoState.nextId; text = text; completed = false }
     { state with 
-        todos = state.todos @ [newTodo]
-        nextId = state.nextId + 1 }
+        TodoState = 
+            { state.TodoState with
+                todos = state.TodoState.todos @ [newTodo]
+                nextId = state.TodoState.nextId + 1 }
+    }
 )
 
 registerNamedEventHandler toggleTodoEvent (fun id state ->
     { state with
-        todos = state.todos |> List.map (fun todo ->
-            if todo.id = id then { todo with completed = not todo.completed } else todo
-        )
+        TodoState = 
+            { state.TodoState with
+                todos = state.TodoState.todos |> List.map (fun todo ->
+                    if todo.id = id then { todo with completed = not todo.completed } else todo
+                )
+            }
     }
 )
 
 registerNamedEventHandler deleteTodoEvent (fun id state ->
     { state with
-        todos = state.todos |> List.filter (fun todo -> todo.id <> id)
+        TodoState = 
+            { state.TodoState with
+                todos = state.TodoState.todos |> List.filter (fun todo -> todo.id <> id)
+            }
     }
 )
 
 registerNamedEventHandler setFilterEvent (fun filter state ->
-    { state with filter = filter }
+    { state with
+        TodoState = 
+            { state.TodoState with filter = filter }
+    }
 )
 
 registerNamedEventHandler setLoadingEvent (fun isLoading state ->
@@ -48,13 +60,16 @@ registerNamedEventHandler setLoadingEvent (fun isLoading state ->
 )
 
 registerNamedEventHandler setTodosEvent (fun todos state ->
-    { state with 
-        todos = todos
-        nextId = 
-            match todos with
-            | [] -> 1
-            | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
-        isLoading = false
+    { state with
+        TodoState = 
+            { state.TodoState with 
+                todos = todos
+                nextId = 
+                    match todos with
+                    | [] -> 1
+                    | _ -> (todos |> List.map (fun t -> t.id) |> List.max) + 1
+                isLoading = false
+            }
     }
 )
 
@@ -164,11 +179,7 @@ registerEffectHandler prioritizeTodosEffect (fun todos -> async {
 
 // Initialize the application with some test data
 let initializeApp() =
-    // batchDispatch appDb [
-    //     fun () -> dispatch appDb addTodoEvent "Learn F#"
-    //     fun () -> dispatch appDb addTodoEvent "Build a FreeFrame app"
-    //     fun () -> dispatch appDb addTodoEvent "Share with the community"
-    // ]
+    console.log("Initializing app with test data...")
     batchDispatch appDb [
         box addTodoEvent, "Learn F#"
         box addTodoEvent, "Build a FreeFrame app"
