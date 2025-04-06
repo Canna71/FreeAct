@@ -151,7 +151,7 @@ let testRouter () =
 
     for url in testUrls do
         match router.Match(url) with
-        | Some(result, handler) -> handler result |> printfn "URL: %s => %s" url
+        | Some(result) -> result.Handler result.Result |> printfn "URL: %s => %s" url
         | None -> printfn "URL: %s => No match" url
 
 testRouter ()

@@ -10,7 +10,6 @@ open Fable.React.ReactBindings
 open Fable.Core.JS
 
 open FreeAct.Router
-open FreeAct.ReactRouter
 open FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
@@ -40,10 +39,9 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
 let useCount () =
     useNewView appDb (fun state -> state.Count)
 
-// Route handlers
-let home  = FunctionComponent.Of(fun (route) ->
+// Route handlers - they now clearly take RouteMatchResult
+let home (result: RouteMatchResult) : ReactElement =
     let count = useCount()
-    
     div {
         h1 { "Home" }
         p { "Welcome to the home page!" }
@@ -69,9 +67,8 @@ let home  = FunctionComponent.Of(fun (route) ->
             |}
         }
     }
-)
 
-let about route =
+let about (result: RouteMatchResult) =
     let ret = div {
         h1 { "About" }
         p { "This is the about page." }
@@ -89,12 +86,14 @@ let about route =
     console.log("About page rendered with result: ", ret)
     ret
 
-let users route =
+// Route handlers - now they don't need to handle child components directly
+let users (result: RouteMatchResult) : ReactElement =
     div {
         h1 { "Users" }
         p { "List of users." }
         
-        // Example of using Link component
+        // Child routes will be rendered automatically after this component
+        
         div {
             FreeFrameLink {| 
                 appDb = appDb
@@ -189,11 +188,11 @@ let Navigation () =
         }
     }
 
-// Create nested router for user section
+// Fix userRouter route handlers
 let userRouter = Router<ReactElement>()
 userRouter.Route(
     "/profile",
-    fun result ->
+    fun (result: RouteMatchResult) ->
         div {
             h2 { "User Profile" }
             p { "User profile details" }
@@ -201,11 +200,10 @@ userRouter.Route(
     )
     .Route(
         "/settings",
-        fun result ->
+        fun (result: RouteMatchResult) ->
             div {
                 h2 { "User Settings" }
                 p { "User settings panel" }
-                
                 div {
                     FreeFrameLink {| 
                         appDb = appDb
@@ -218,7 +216,7 @@ userRouter.Route(
     )
     .Route(
         "/settings/privacy",
-        fun result ->
+        fun (result: RouteMatchResult) ->
             div {
                 h2 { "Privacy Settings" }
                 p { "User privacy settings" }
@@ -236,13 +234,14 @@ let App () =
           .RouteWithChildren("/users", users, userRouter)
           .Route(
             "/users/:userId",
-            fun result ->
+            fun (result: RouteMatchResult) ->
                 let userId = result.PathParams.["userId"]
                 div {
                     h1 { sprintf "User: %s" userId }
                     p { "User details go here." }
                     div {
-                        Link {| 
+                        FreeFrameLink {| 
+                            appDb = appDb
                             destination = sprintf "/users/%s/posts/123" userId
                             className = Some "nav-link"
                             children = [str "View User's Post"] 
@@ -252,18 +251,23 @@ let App () =
           )
           .Route(
             "/users/:userId/posts/:postId",
-            fun result ->
+            fun (result: RouteMatchResult) ->
                 let userId = result.PathParams.["userId"]
                 let postId = result.PathParams.["postId"]
                 div {
                     h1 { sprintf "Post %s by User %s" postId userId }
                     p { "Post details go here." }
                     div {
-                        Link {| destination = "/users"; className = Some "nav-link"; children = [str "Back to Users"] |}
+                        FreeFrameLink {| 
+                            appDb = appDb
+                            destination = "/users"
+                            className = Some "nav-link"
+                            children = [str "Back to Users"] 
+                        |}
                     }
                 }
           )
-          .Route("/users/admin", fun _ -> div { h1 { "Admin Panel" } })
+          .Route("/users/admin", fun (result: RouteMatchResult) -> div { h1 { "Admin Panel" } })
           .Route(
             "/search",
             fun result ->

@@ -22,6 +22,13 @@ type ElementBuilder(tag: obj) =
 
     // member inline _.Yield(prop) = HtmlProp prop
 
+    member inline _.Yield(el: option<ReactElement>) =
+        match el with
+        | Some e -> [ Child(Element e) ]
+        | None -> []
+
+    member inline _.Yield(el: ReactElement) = [ Child(Element el) ]
+
     member inline _.Yield(prop: HtmlProp) = Prop prop
     // member inline _.Yield(prop: ElementProperty) =
     //     [prop]

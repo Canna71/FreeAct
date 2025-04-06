@@ -25,7 +25,7 @@ type RouterState =
 
 /// Events for router actions
 type RouterEvent =
-    | RouteChanged of path: string * result: RouteMatchResult option
+    | RouteChanged of path: string * result: MatchedRoute<ReactElement> option
     | NavigateTo of string
     | NavigateBack
     | NavigateForward
@@ -44,6 +44,35 @@ let createDefaultRouterState () : RouterState =
         QueryParams = Map.empty
         Fragment = None
     }
+
+let rec extractRouteState (matched: MatchedRoute<'T>) =
+    let routeState =
+        {
+            CurrentRoute = matched.Result.Pattern
+            CurrentPath = matched.Result.Pattern
+            PathParams = matched.Result.PathParams
+            QueryParams = matched.Result.QueryParams
+            Fragment = matched.Result.Fragment
+        }
+
+    match matched.Child with
+    | Some child ->
+        // If there's a child, merge its params with the parent's
+        let childState = extractRouteState child
+
+        { routeState with
+            PathParams =
+                Map.fold
+                    (fun acc key value -> Map.add key value acc)
+                    routeState.PathParams
+                    childState.PathParams
+            QueryParams =
+                Map.fold
+                    (fun acc key value -> Map.add key value acc)
+                    routeState.QueryParams
+                    childState.QueryParams
+        }
+    | None -> routeState
 
 /// Create a link component that uses the FreeFrame router
 let FreeFrameLink<'State> =
@@ -94,79 +123,33 @@ let FreeFrameRouterProvider<'State> =
                 // Register handler for router events
                 registerTypedEventHandler<RouterEvent, 'State> (fun event state ->
                     match event with
-                    | RouteChanged(path, routeMatchOpt) ->
-                        let currentRouter = props.GetRouterState state
-
-                        match routeMatchOpt with
-                        | Some routeMatch ->
-                            let newRouterState =
-                                { currentRouter with
-                                    CurrentRoute = routeMatch.Pattern
-                                    CurrentPath = path
-                                    PathParams = routeMatch.PathParams
-                                    QueryParams = routeMatch.QueryParams
-                                    Fragment = routeMatch.Fragment
-                                }
-
+                    | RouteChanged(path, _) ->
+                        match props.Router.Match(path) with
+                        | Some matched ->
+                            // Update router state from complete matched route (including nested)
+                            let newRouterState = extractRouteState matched
                             props.SetRouterState newRouterState state
                         | None ->
-                            // If no match, just update the path
-                            let newRouterState =
-                                { currentRouter with
-                                    CurrentRoute = ""
-                                    CurrentPath = path
-                                    PathParams = Map.empty
-                                    QueryParams = Map.empty
-                                    Fragment = None
-                                }
-
-                            props.SetRouterState newRouterState state
+                            props.SetRouterState
+                                { createDefaultRouterState () with CurrentPath = path }
+                                state
 
                     | NavigateTo path ->
-                        // Update browser URL
                         window.history.pushState (null, "", path)
 
-                        // Match the route
-                        let matchResult = props.Router.Match(path)
+                        match props.Router.Match(path) with
+                        | Some matched ->
+                            let newState = props.SetRouterState (extractRouteState matched) state
+                            props.AppDb.ForceRefresh()
+                            newState
+                        | None ->
+                            let newState =
+                                props.SetRouterState
+                                    { createDefaultRouterState () with CurrentPath = path }
+                                    state
 
-                        let routeResult =
-                            match matchResult with
-                            | Some(result, _) -> Some result
-                            | None -> None
-
-                        // Create a new router state
-                        let currentRouter = props.GetRouterState state
-
-                        // Update state based on match result
-                        let newState =
-                            match routeResult with
-                            | Some routeMatch ->
-                                let newRouterState =
-                                    { currentRouter with
-                                        CurrentRoute = routeMatch.Pattern
-                                        CurrentPath = path
-                                        PathParams = routeMatch.PathParams
-                                        QueryParams = routeMatch.QueryParams
-                                        Fragment = routeMatch.Fragment
-                                    }
-
-                                props.SetRouterState newRouterState state
-                            | None ->
-                                let newRouterState =
-                                    { currentRouter with
-                                        CurrentRoute = ""
-                                        CurrentPath = path
-                                        PathParams = Map.empty
-                                        QueryParams = Map.empty
-                                        Fragment = None
-                                    }
-
-                                props.SetRouterState newRouterState state
-
-                        // Ensure subscribers are notified
-                        props.AppDb.ForceRefresh()
-
-                        newState
+                            props.AppDb.ForceRefresh()
+                            newState
 
                     | NavigateBack ->
                         window.history.back ()
@@ -196,18 +179,14 @@ let FreeFrameRouterProvider<'State> =
                             else
                                 "/"
 
-                    // Match the route
-                    let matchResult = props.Router.Match(path)
-
-                    let routeMatch =
-                        match matchResult with
-                        | Some(result, _) -> Some result
-                        | None -> None
-
-                    // Dispatch route changed event
-                    dispatchTyped<RouterEvent, 'State>
-                        props.AppDb
-                        (RouteChanged(path, routeMatch))
+                    // Match the route and extract route result from complete match
+                    match props.Router.Match(path) with
+                    | Some matched ->
+                        dispatchTyped<RouterEvent, 'State>
+                            props.AppDb
+                            (RouteChanged(path, Some matched))
+                    | None ->
+                        dispatchTyped<RouterEvent, 'State> props.AppDb (RouteChanged(path, None))
 
                 // Function to handle hashchange events
                 let handleHashChange _ =
@@ -223,15 +202,10 @@ let FreeFrameRouterProvider<'State> =
                         // Match the route
                         let matchResult = props.Router.Match(path)
 
-                        let routeMatch =
-                            match matchResult with
-                            | Some(result, _) -> Some result
-                            | None -> None
-
                         // Dispatch route changed event
                         dispatchTyped<RouterEvent, 'State>
                             props.AppDb
-                            (RouteChanged(path, routeMatch))
+                            (RouteChanged(path, matchResult))
 
                 // Add event listeners
                 window.addEventListener ("popstate", handlePopState)
@@ -251,14 +225,9 @@ let FreeFrameRouterProvider<'State> =
 
                 let matchResult = props.Router.Match(initialPath)
 
-                let routeMatch =
-                    match matchResult with
-                    | Some(result, _) -> Some result
-                    | None -> None
-
                 dispatchTyped<RouterEvent, 'State>
                     props.AppDb
-                    (RouteChanged(initialPath, routeMatch))
+                    (RouteChanged(initialPath, matchResult))
 
                 // Cleanup function
                 { new IDisposable with
@@ -285,33 +254,25 @@ let FreeFrameRoutes<'State> =
                                      AppDb: IAppDb<'State>
                                      DefaultContent: ReactElement
                                  |}) ->
-        console.log ("FreeFrameRoutes initialized with appDB: %A", props.AppDb)
-        // Create a subscription to watch router state changes
         let routerState = useNewView props.AppDb props.GetRouterState
 
-        // For debugging - log when route changes are detected
-        Hooks.useEffect (
-            (fun () ->
-                console.log ("FreeFrameRoutes detected route change:", routerState.CurrentPath)
-            ),
-            [| box routerState.CurrentPath |]
-        )
+        // Recursively render matched routes
+        let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
+            match matched.Child with
+            | Some childMatch ->
+                fragment {
+                    matched.Handler matched.Result
+                    renderMatch childMatch
+                }
+            | None -> matched.Handler matched.Result
 
-        // let h t = h1 { sprintf "FreeFrameRoutes %s" t }
-
-        // Match the current path to a route handler
         match props.Router.Match(routerState.CurrentPath) with
-        | Some(result, handler) ->
-            // Create a route match result to pass to the handler
-            // Render the matched route
-            // let res = handler result
-            let res = handler result
-            console.log ("FreeFrameRoutes matched route result: ", res)
-            fragment { res }
-
+        | Some matched -> renderMatch matched
         | None -> props.DefaultContent
-    // For debugging - show current date and time
     )
+
+// Update event handler
+let handleRouteChange (router: Router<ReactElement>) (path: string) = router.Match(path)
 
 /// Utility function to navigate programmatically
 let navigateTo<'State> (appDb: IAppDb<'State>) (path: string) =

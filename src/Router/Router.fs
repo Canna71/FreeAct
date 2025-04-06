@@ -1,10 +1,20 @@
 module FreeAct.Router
 
 open Tokenizer
+
+// Make RouteMatchResult type visible
 type RouteMatchResult = Tokenizer.RouteMatchResult
 
-/// Represents a route handler
+/// Handler for a route - receives only the match result
 type RouteHandler<'T> = RouteMatchResult -> 'T
+
+/// Result of a route match, containing the match info and any nested matches
+type MatchedRoute<'T> =
+    {
+        Result: RouteMatchResult
+        Handler: RouteHandler<'T>
+        Child: option<MatchedRoute<'T>>
+    }
 
 /// Represents a registered route with its pattern, handler and children
 type RegisteredRoute<'T> =
@@ -51,31 +61,13 @@ and Router<'T>() =
 
         this
 
-    member this.Match(url: string) =
-        let rec matchNested
-            (remainingPath: string)
-            (parentResult: RouteMatchResult)
-            (childRouter: Router<'T>)
-            =
-            match childRouter.Match(remainingPath) with
-            | Some(childResult, childHandler) ->
-                let mergedResult =
-                    { childResult with
-                        PathParams = mergeMaps parentResult.PathParams childResult.PathParams
-                        Pattern = parentResult.Pattern + childResult.Pattern
-                        QueryParams = mergeMaps parentResult.QueryParams childResult.QueryParams
-                    }
-
-                Some(mergedResult, childHandler)
-            | None -> None
-
+    member this.Match(url: string) : option<MatchedRoute<'T>> =
         match matchRoute (routes |> List.map (fun r -> r.Route)) url with
         | Some(route, result) ->
             let registeredRoute = routes |> List.find (fun r -> r.Route.Pattern = route.Pattern)
 
             match registeredRoute.Children with
             | Some childRouter ->
-                // Extract the remaining path after the parent route
                 let parentPath =
                     if result.Pattern.EndsWith("/") then
                         result.Pattern
@@ -84,15 +76,22 @@ and Router<'T>() =
 
                 let remainingPath =
                     if url.StartsWith(parentPath) then
-                        url.Substring(parentPath.Length - 1) // Keep the leading slash
+                        url.Substring(parentPath.Length - 1)
                     else
                         "/"
 
-                // Try to match child routes first
-                match matchNested remainingPath result childRouter with
-                | Some _ as childMatch -> childMatch // Use child match if found
-                | None -> Some(result, registeredRoute.Handler) // Fall back to parent handler
+                // Return both the parent match and child match
+                Some
+                    {
+                        Result = result
+                        Handler = registeredRoute.Handler
+                        Child = childRouter.Match(remainingPath)
+                    }
             | None ->
-                // No children, return current match
-                Some(result, registeredRoute.Handler)
+                Some
+                    {
+                        Result = result
+                        Handler = registeredRoute.Handler
+                        Child = None
+                    }
         | None -> None

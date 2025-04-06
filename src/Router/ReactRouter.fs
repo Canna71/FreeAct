@@ -19,6 +19,7 @@ type RouterContextInfo =
         Router: Router<ReactElement>
         CurrentUrl: string
         Navigate: string -> unit
+        ChildRenderer: (unit -> ReactElement) option
     }
 
 /// Create a React context for the router
@@ -114,6 +115,7 @@ let RouterProvider =
                 Router = props.Router
                 CurrentUrl = state.current
                 Navigate = navigate
+                ChildRenderer = None
             }
 
         // console.log props.Children
@@ -136,10 +138,18 @@ let Routes =
                 className "router-error"
                 str "Router context not found. Make sure to wrap your app with RouterProvider."
             }
-
         | Some context ->
+            let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
+                match matched.Child with
+                | Some child ->
+                    fragment {
+                        matched.Handler matched.Result
+                        renderMatch child
+                    }
+                | None -> matched.Handler matched.Result
+
             match context.Router.Match(context.CurrentUrl) with
-            | Some(result, handler) -> (handler result)
+            | Some matched -> renderMatch matched
             | None -> props.DefaultContent
     )
 
@@ -205,3 +215,16 @@ let useLocation<'T> () =
     | None ->
         printfn "Router context not found. Make sure to wrap your app with RouterProvider."
         ""
+
+/// Outlet component for rendering nested routes
+let Outlet =
+    FunctionComponent.Of(fun () ->
+        let routerContext = Hooks.useContext RouterContext
+
+        match routerContext with
+        | Some context ->
+            match context.ChildRenderer with
+            | Some render -> render ()
+            | None -> fragment { }
+        | None -> fragment { }
+    )
