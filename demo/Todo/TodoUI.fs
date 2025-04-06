@@ -126,7 +126,7 @@ let LoadTodosButton () =
         button {
             disabled isLoading
             className "load-button"
-            onClick (fun _ -> Effects.runEffectAsync loadTodosEffect () |> ignore)
+            onClick (fun _ -> Effects.runEffect loadTodosEffect () |> ignore)
 
             if isLoading then
                 str "Loading..."

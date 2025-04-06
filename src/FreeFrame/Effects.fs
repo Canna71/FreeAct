@@ -168,7 +168,7 @@ module Effects =
             Error ex
 
     // Async version - ignores the result
-    let runEffectAsync<'Payload> (effectId: EffectId<'Payload, unit>) (payload: 'Payload) =
+    let runEffect<'Payload> (effectId: EffectId<'Payload, unit>) (payload: 'Payload) =
         try
             match effectHandlers.TryGetValue(EffectId.key effectId) with
             | true, handler ->
