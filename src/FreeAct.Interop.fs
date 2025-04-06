@@ -25,5 +25,5 @@ let inline createElement
     =
     let props: obj = createObj !!properties
     // let nested = emitJsExpr (props) "$0.nested || []"
-    emitJsStatement (props) "delete $0.nested"
+    // emitJsStatement (props) "delete $0.nested"
     reactElementApply name props children

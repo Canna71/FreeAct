@@ -121,15 +121,10 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
         | None -> None
     }
 
-let testOrdered (context: RouteContext<ReactElement>) : ReactElement =
+let test (context: RouteContext<ReactElement>) : ReactElement =
     div {
-        p { "One" }
-        p { "Two" }
-
-        id "test-ordered"
-        p { "Three" }
-      
     }
+
 
 let notFound  =
     div {
@@ -268,7 +263,7 @@ let App () =
     // Create the router
     let router = Router<ReactElement>()
     router.Route("/", home)
-          .Route("/test", testOrdered)
+          .Route("/test", test)
           .Route("/about", about)
           .RouteWithChildren("/users", users, userRouter)
           .Route(
