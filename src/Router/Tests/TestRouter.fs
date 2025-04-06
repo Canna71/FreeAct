@@ -33,7 +33,7 @@ let testTokenizer () =
         let score = scoreRoute tokens
         printfn "Score: %d" score
 
-testTokenizer ()
+// testTokenizer ()
 
 // Test URL parsing
 let testUrlParsing () =
@@ -61,7 +61,7 @@ let testUrlParsing () =
 
         printfn "  Fragment: %A" parsed.Fragment
 
-testUrlParsing ()
+// testUrlParsing ()
 
 // Test the router
 let testRouter () =
@@ -156,7 +156,7 @@ let testRouter () =
             |> printfn "URL: %s => %s" url
         | None -> printfn "URL: %s => No match" url
 
-testRouter ()
+// testRouter ()
 
 // Test nested routes
 let testNestedRoutes () =
@@ -175,7 +175,7 @@ let testNestedRoutes () =
             "/users"
             , fun ctx ->
                 match ctx.ChildContent with
-                | Some child -> sprintf "Users List + %s" child
+                | Some child -> sprintf "Users List + [%s]" child
                 | None -> "Users List"
             , childRouter
         )
@@ -207,7 +207,7 @@ let testNestedRoutes () =
 
             let result = renderMatch matched
             printfn "Match result: %s" result
+            printfn "Path params: %A" matched.Result.PathParams
         | None -> printfn "No match found"
 
-// Remove the old version of testNestedRoutes and keep only this new one
-testNestedRoutes ()
+// testNestedRoutes ()

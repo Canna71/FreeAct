@@ -71,27 +71,35 @@ and Router<'T>() =
 
             match registeredRoute.Children with
             | Some childRouter ->
-                // Fix path handling for child routes
-                let parentPath = result.Pattern.TrimEnd('/') + "/"
+                // Get the base path from the match result
+                let basePath =
+                    if result.Pattern.EndsWith("/") then
+                        result.Pattern
+                    else
+                        result.Pattern + "/"
 
-                let remainingPath =
-                    if url.StartsWith(parentPath) then
-                        let rest = url.Substring(parentPath.Length)
-
-                        if rest.StartsWith("/") then
-                            rest
-                        else
-                            "/" + rest
+                // Calculate child path by removing the base path
+                let childPath =
+                    if url.Length > basePath.Length then
+                        let rest = url.Substring(basePath.Length - 1) // Keep the leading slash
+                        printfn "Child path for %s: %s (from %s)" url rest basePath
+                        rest
                     else
                         "/"
 
-                printfn "Parent path: %s, Remaining: %s" parentPath remainingPath
+                // Try to match the child route
+                let childMatch = childRouter.Match(childPath)
+
+                printfn
+                    "Child match for %s: %A"
+                    childPath
+                    (childMatch |> Option.map (fun m -> m.Result.Pattern))
 
                 Some
                     {
                         Result = result
                         Handler = registeredRoute.Handler
-                        Child = childRouter.Match(remainingPath)
+                        Child = childMatch
                     }
             | None ->
                 Some
