@@ -15,28 +15,12 @@ open FreeAct.FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
+open Demo.Todo.State
+open Demo.Todo.UI
+open AppState
 
-// Define the application state that includes router state
-type AppState = {
-    Router: RouterState
-    // Add other application state here as needed
-    Count: int
-}
 
-// Initialize the app database with initial state
-let appDb = AppDb<AppState>({
-    Router = createDefaultRouterState()
-    Count = 0
-})
 
-// Helper functions to get and set router state
-let getRouterState (state: AppState) = state.Router
-let setRouterState (routerState: RouterState) (state: AppState) =
-    // Only update if something actually changed
-    if routerState <> state.Router then
-        { state with Router = routerState }
-    else
-        state
 
 // Example of an additional event for counter
 type CounterEvent = 
@@ -247,7 +231,7 @@ let App () =
                     h1 { "FreeFrame Composition Demo" }
                     // Render the component directly
                     // FreeFrameDemo()
-                    CompositionDemo.CompositionDemo()
+                    // CompositionDemo.CompositionDemo()
                 }
           )
           .Route(
@@ -257,7 +241,7 @@ let App () =
                     h1 { "FreeFrame ToDo Demo" }
                     // Render the component directly
                     // FreeFrameDemo
-                    TodoDemo.TodoDemo()
+                    TodoDemo()
                 }
             )
           |> ignore

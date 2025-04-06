@@ -5,9 +5,12 @@
     <DefineConstants>FABLE_COMPILER</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Todo/TodoTypes.fs" />
+    <Compile Include="AppState.fs" />
+    <Compile Include="Todo/TodoState.fs" />
     <Compile Include="FreeFrameDemo.fs" />
-    <Compile Include="TodoDemo.fs" />
-    <Compile Include="CompositionDemo.fs" />
+    <!-- <Compile Include="CompositionDemo.fs" /> -->
+    <Compile Include="Todo/TodoUI.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>

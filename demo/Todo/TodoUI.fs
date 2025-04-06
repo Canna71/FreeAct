@@ -1,4 +1,4 @@
-module Demo.TodoDemo
+module Demo.Todo.UI
 
 open Fable.React
 open Browser
@@ -6,7 +6,10 @@ open Fable.Core.JS
 open FreeAct.FreeFrame
 open Fable.React.ReactBindings
 open FreeAct
-open Demo.FreeFrameDemo
+open Demo.Todo.Types
+open Demo.Todo.State
+open Demo.AppState
+// open Demo.FreeFrameDemo
 
 // React components
 let TodoItemComponent (props: {| todo: TodoItem |}) =
@@ -190,37 +193,6 @@ let TodoListForm () =
         TodoList(todos, isLoading)
     }
 
-
-// Example component showing both dispatch methods with improved union handling
-let ExampleComponent () =
-    div {
-        className "dispatch-examples"
-        h3 { "Two Ways to Dispatch Events" }
-
-        div {
-            // Method 1: Traditional event dispatch
-            button {
-                className "traditional"
-                onClick (fun _ -> dispatch appDb addTodoEvent "Task via traditional dispatch")
-                str "Add via Traditional Event"
-            }
-
-            // Method 2: Direct union case dispatch (now with explicit case name)
-            button {
-                className "direct-union"
-                onClick (fun _ -> dispatchTyped appDb (AddTodo "Task via union dispatch"))
-                str "Add via Union"
-            }
-
-            // Show that there's no conflict with AdminEvent
-            button {
-                className "admin-event"
-                onClick (fun _ -> dispatchTyped appDb (AddUser "Admin action"))
-                str "Add User (Admin)"
-            }
-        }
-    }
-
 // Main Todo demo component
 let _TodoDemo () =
     // Initialize data when component mounts
@@ -231,7 +203,7 @@ let _TodoDemo () =
         h1 { "Todo App Demo" }
         p { "This demo shows the basic usage of FreeFrame with a Todo application." }
         TodoListForm()
-        ExampleComponent()
+        // ExampleComponent()
     }
 
 let TodoDemo = FunctionComponent.Of(_TodoDemo)
