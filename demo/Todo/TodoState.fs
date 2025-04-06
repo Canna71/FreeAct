@@ -183,6 +183,26 @@ Effects.registerHandler
         }
     )
 
+// Add new effect for the complete loading flow
+let loadTodosEffect = EffectId.named<unit, unit> "load-todos-flow"
+
+Effects.registerHandler loadTodosEffect (fun _ ->
+    async {
+        // Set loading state
+        dispatch appDb setLoadingEvent true
+        console.log("Loading todos...")
+
+        // Run the fetch todos effect
+        let! result = Effects.createEffectTask fetchTodosEffect ()
+        
+        // Transform and dispatch result
+        match result with
+        | Ok todos -> dispatch appDb fetchTodosResultEvent (TodosLoaded todos)
+        | Error err -> dispatch appDb fetchTodosResultEvent (FetchFailed err.Message)
+
+        return ()
+    })
+
 // Initialize the application with some test data
 let initializeApp () =
     console.log ("Initializing app with test data...")
