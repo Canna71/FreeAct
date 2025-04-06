@@ -169,9 +169,61 @@ let Navigation () =
                         children = [str "FreeFrame Todo"] 
                     |} 
                 }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/users/profile"
+                        className = None
+                        children = [str "User Profile"] 
+                    |} 
+                }
+                li { 
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/users/settings"
+                        className = None
+                        children = [str "User Settings"] 
+                    |} 
+                }
             }
         }
     }
+
+// Create nested router for user section
+let userRouter = Router<ReactElement>()
+userRouter.Route(
+    "/profile",
+    fun result ->
+        div {
+            h2 { "User Profile" }
+            p { "User profile details" }
+        }
+    )
+    .Route(
+        "/settings",
+        fun result ->
+            div {
+                h2 { "User Settings" }
+                p { "User settings panel" }
+                
+                div {
+                    FreeFrameLink {| 
+                        appDb = appDb
+                        destination = "/users/settings/privacy"
+                        className = Some "nav-link"
+                        children = [str "Privacy Settings"] 
+                    |}
+                }
+            }
+    )
+    .Route(
+        "/settings/privacy",
+        fun result ->
+            div {
+                h2 { "Privacy Settings" }
+                p { "User privacy settings" }
+            }
+    ) |> ignore
 
 // Main app component using FreeFrameRouter
 let App () =
@@ -181,7 +233,7 @@ let App () =
     let router = Router<ReactElement>()
     router.Route("/", home)
           .Route("/about", about)
-          .Route("/users", users)
+          .RouteWithChildren("/users", users, userRouter)
           .Route(
             "/users/:userId",
             fun result ->
