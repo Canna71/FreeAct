@@ -292,50 +292,44 @@ let mapSubscription<'A, 'B>
     (mapper: 'A -> 'B)
     : ISubscription<'B>
     =
-
     let mutable currentValueA = subscription.Value
     let mutable currentValueB = mapper currentValueA
     let subscribers = ResizeArray<'B -> unit>()
+    let mutable sourceSubscription: IDisposable option = None
 
-    let mappedSubscription =
-        { new ISubscription<'B> with
-            member _.Value = currentValueB
+    let ensureSourceSubscription () =
+        if sourceSubscription.IsNone then
+            sourceSubscription <-
+                Some(
+                    subscription.Subscribe(fun newValueA ->
+                        currentValueA <- newValueA
+                        let newValueB = mapper newValueA
 
-            member _.Subscribe(callback) =
-                subscribers.Add(callback)
+                        if not (Object.Equals(currentValueB, newValueB)) then
+                            currentValueB <- newValueB
 
-                { new IDisposable with
-                    member _.Dispose() = subscribers.Remove(callback) |> ignore
-                }
-        }
+                            for subscriber in subscribers do
+                                subscriber newValueB
+                    )
+                )
 
-    // Subscribe to the source subscription
-    let dispose =
-        subscription.Subscribe(fun newValueA ->
-            currentValueA <- newValueA
-            let newValueB = mapper newValueA
-
-            if not (Object.Equals(currentValueB, newValueB)) then
-                currentValueB <- newValueB
-
-                for subscriber in subscribers do
-                    subscriber newValueB
-        )
-
-    // Add a special handler to dispose the source subscription
     { new ISubscription<'B> with
         member _.Value = currentValueB
 
         member _.Subscribe(callback) =
-            let innerSub = mappedSubscription.Subscribe(callback)
+            ensureSourceSubscription ()
+            subscribers.Add(callback)
 
             { new IDisposable with
                 member _.Dispose() =
-                    innerSub.Dispose()
-
-                    // If we're the last subscriber, clean up the source subscription
+                    subscribers.Remove(callback) |> ignore
+                    // Only dispose source subscription if no subscribers left
                     if subscribers.Count = 0 then
-                        dispose.Dispose()
+                        sourceSubscription
+                        |> Option.iter (fun sub ->
+                            sub.Dispose()
+                            sourceSubscription <- None
+                        )
             }
     }
 
