@@ -190,7 +190,7 @@ let tokensToRegex (tokens: Token list) : string =
            "/"
        else
            pattern)
-    + "$"
+    + "(?:/.*)?$" // Allow any content after the match
 
 /// Extracts parameter names from a token list
 let extractParamNames (tokens: Token list) : string list =
@@ -219,19 +219,25 @@ let createMatcher (pathPattern: string) =
     let regex = tokensToRegex tokens
     let paramNames = extractParamNames tokens
 
+    printfn "Created matcher for %s with regex: %s" pathPattern regex // Debug output
     let regexObj = Regex(regex)
 
     fun (url: string) ->
-        // Parse the URL into components
-        let parsedUrl = parseUrl url
-
-        let trimmedPath =
-            if parsedUrl.Path.StartsWith("/") then
-                parsedUrl.Path
+        // Normalize URL by removing trailing slash except for root
+        let normalizedUrl =
+            if url = "/" then
+                url
             else
-                "/" + parsedUrl.Path
+                url.TrimEnd('/')
 
-        let m = regexObj.Match(trimmedPath)
+        let normalizedPath =
+            if normalizedUrl.StartsWith("/") then
+                normalizedUrl
+            else
+                "/" + normalizedUrl
+
+        let m = regexObj.Match(normalizedPath)
+        printfn "Matching %s against %s: %b" normalizedPath regex m.Success // Debug output
 
         if m.Success then
             // Extract path parameters
@@ -253,8 +259,8 @@ let createMatcher (pathPattern: string) =
                 {
                     Pattern = pathPattern
                     PathParams = pathParams
-                    QueryParams = parsedUrl.QueryParams
-                    Fragment = parsedUrl.Fragment
+                    QueryParams = (parseUrl url).QueryParams
+                    Fragment = (parseUrl url).Fragment
                 }
         else
             None

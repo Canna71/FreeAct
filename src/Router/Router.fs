@@ -65,41 +65,41 @@ and Router<'T>() =
         this
 
     member this.Match(url: string) : option<MatchedRoute<'T>> =
-        match matchRoute (routes |> List.map (fun r -> r.Route)) url with
+        let normalizedUrl =
+            if url.EndsWith("/") then
+                url.TrimEnd('/')
+            else
+                url
+
+        match matchRoute (routes |> List.map (fun r -> r.Route)) normalizedUrl with
         | Some(route, result) ->
             let registeredRoute = routes |> List.find (fun r -> r.Route.Pattern = route.Pattern)
 
             match registeredRoute.Children with
             | Some childRouter ->
-                // Get the base path from the match result
-                let basePath =
-                    if result.Pattern.EndsWith("/") then
-                        result.Pattern
-                    else
-                        result.Pattern + "/"
+                // Get the base path without trailing slash
+                let basePath = result.Pattern.TrimEnd('/')
 
-                // Calculate child path by removing the base path
+                // Only proceed with child matching if we have more path to match
                 let childPath =
-                    if url.Length > basePath.Length then
-                        let rest = url.Substring(basePath.Length - 1) // Keep the leading slash
-                        printfn "Child path for %s: %s (from %s)" url rest basePath
-                        rest
+                    if normalizedUrl = basePath then
+                        "/"
+                    elif normalizedUrl.StartsWith(basePath + "/") then
+                        normalizedUrl.Substring(basePath.Length)
                     else
                         "/"
 
-                // Try to match the child route
-                let childMatch = childRouter.Match(childPath)
-
                 printfn
-                    "Child match for %s: %A"
+                    "Child router matching %s (from %s, base: %s)"
                     childPath
-                    (childMatch |> Option.map (fun m -> m.Result.Pattern))
+                    normalizedUrl
+                    basePath
 
                 Some
                     {
                         Result = result
                         Handler = registeredRoute.Handler
-                        Child = childMatch
+                        Child = childRouter.Match(childPath)
                     }
             | None ->
                 Some
