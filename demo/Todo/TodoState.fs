@@ -13,9 +13,6 @@ let setFilterEvent = EventId.named<string> ("set-filter")
 let setLoadingEvent = EventId.named<bool> ("set-loading")
 let setTodosEvent = EventId.named<TodoItem list> ("set-todos")
 
-let setTodoAnalysisEvent =
-    EventId.named<LoadingState<TodoAnalysis>> ("set-todo-analysis")
-
 // Define the lens functions once
 let todoStateLens (state: AppState) = state.TodoState
 let setTodoState todoState state = { state with TodoState = todoState }
@@ -102,15 +99,6 @@ registerNamedEventHandler
 
             }
         ))
-
-registerNamedEventHandler
-    setTodoAnalysisEvent
-    (focusHandler
-        todoStateLens
-        setTodoState
-      (fun (analysis) todoState ->
-          { todoState with todoAnalysis = analysis }
-      ))
 
 
 let todoStateSubscription = createSubscription appDb todoStateLens
@@ -203,58 +191,6 @@ registerEffectHandler
         }
     )
 
-let analyzeTodosEffect =
-    EffectId.named<TodoItem list, TodoAnalysis> ("analyze-todos")
-
-// Register the effect handler
-registerEffectHandler
-    analyzeTodosEffect
-    (fun todos ->
-        async {
-            // Simulate processing time
-            do! Async.Sleep 1500
-
-            let completed = todos |> List.filter (fun t -> t.completed)
-            let active = todos |> List.filter (fun t -> not t.completed)
-            let totalTextLength = todos |> List.sumBy (fun t -> t.text.Length)
-
-            let avgLength =
-                if todos.Length > 0 then
-                    float totalTextLength / float todos.Length
-                else
-                    0.0
-
-            return
-                {
-                    totalCount = todos.Length
-                    completedCount = completed.Length
-                    activeCount = active.Length
-                    averageTextLength = avgLength
-                }
-        }
-    )
-
-// create a view for the analysis result
-let todosAnalysisSubscription =
-    mapSubscription todoStateSubscription (fun state -> state.todoAnalysis)
-
-// Add a chained effects example
-// Define a second effect that depends on the result of the first
-let prioritizeTodosEffect =
-    EffectId.named<TodoItem list, TodoItem list> ("prioritize-todos")
-
-// Register the effect handler
-registerEffectHandler
-    prioritizeTodosEffect
-    (fun todos ->
-        async {
-            // Simulate processing time
-            do! Async.Sleep 1000
-
-            // Sort todos by completion status (active first) and then alphabetically
-            return todos |> List.sortBy (fun t -> (t.completed, t.text.ToLower()))
-        }
-    )
 
 // Initialize the application with some test data
 let initializeApp () =
