@@ -128,6 +128,18 @@ let inline registerTypedEventHandler<'EventType, 'State>
     let eventId = EventId.ofType<'EventType> ()
     registerNamedEventHandler eventId handler
 
+/// Helper to create an event handler that operates on a subset of the state
+let focusHandler<'Payload, 'State, 'SubState>
+    (lens: 'State -> 'SubState)
+    (setLens: 'SubState -> 'State -> 'State)
+    (handler: 'Payload -> 'SubState -> 'SubState)
+    : EventHandler<'Payload, 'State>
+    =
+    fun payload state ->
+        let subState = lens state
+        let newSubState = handler payload subState
+        setLens newSubState state
+
 let internal dispatchInternal<'Payload, 'State>
     (appDb: IAppDb<'State>)
     (eventId: string)
