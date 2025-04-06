@@ -211,7 +211,7 @@ userRouter.Route(
         div {
             h2 { "User Profile" }
             p { "User profile details" }
-            context.ChildContent |> Option.defaultValue (fragment { })
+            context.ChildContent 
         }
     )
     .Route(
@@ -229,7 +229,7 @@ userRouter.Route(
                     |}
                 }
                 // Render nested content if present
-                context.ChildContent |> Option.defaultValue (fragment { })
+                context.ChildContent 
             }
     )
     .Route(

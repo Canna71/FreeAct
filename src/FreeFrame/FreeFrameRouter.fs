@@ -46,7 +46,7 @@ let createDefaultRouterState () : RouterState =
     }
 
 let rec extractRouteState (matched: MatchedRoute<'T>) =
-    let routeState =
+    let baseState =
         {
             CurrentRoute = matched.Result.Pattern
             CurrentPath = matched.Result.Pattern
@@ -57,22 +57,22 @@ let rec extractRouteState (matched: MatchedRoute<'T>) =
 
     match matched.Child with
     | Some child ->
-        // If there's a child, merge its params with the parent's
         let childState = extractRouteState child
 
-        { routeState with
+        { baseState with
+            CurrentPath = matched.Result.Pattern + "/" + childState.CurrentPath.TrimStart('/') // Build full path
             PathParams =
                 Map.fold
                     (fun acc key value -> Map.add key value acc)
-                    routeState.PathParams
+                    baseState.PathParams
                     childState.PathParams
             QueryParams =
                 Map.fold
                     (fun acc key value -> Map.add key value acc)
-                    routeState.QueryParams
+                    baseState.QueryParams
                     childState.QueryParams
         }
-    | None -> routeState
+    | None -> baseState
 
 /// Create a link component that uses the FreeFrame router
 let FreeFrameLink<'State> =
@@ -255,9 +255,11 @@ let FreeFrameRoutes<'State> =
                                      DefaultContent: ReactElement
                                  |}) ->
         let routerState = useNewView props.AppDb props.GetRouterState
-        console.log (" FreeFrameRoutes Matching route", routerState)
+        console.log ("FreeFrameRoutes Current Path:", routerState.CurrentPath)
 
         let rec renderMatch (matched: MatchedRoute<ReactElement>) : ReactElement =
+            console.log ("Rendering match:", matched.Result.Pattern, matched.Child)
+
             match matched.Child with
             | Some child ->
                 let childContent = renderMatch child
@@ -266,7 +268,9 @@ let FreeFrameRoutes<'State> =
 
         match props.Router.Match(routerState.CurrentPath) with
         | Some matched -> renderMatch matched
-        | None -> props.DefaultContent
+        | None ->
+            console.log ("No match found for path:", routerState.CurrentPath)
+            props.DefaultContent
     )
 
 // Update event handler

@@ -1,11 +1,7 @@
 
 
-BUG: After a navigation, the app is not responding to events (subscriptions disposed?)
-TODO: study a better way to architecture the project and avoid circular dependencies
-- TODO: add a way to define the initial model in the app
-- TODO: simplify the way a part of an application treat its own part of the app state
-- TODO: improve the way appDb is passed around
-TODO: implement nested routes
+TODO: allow for emtpy tags es: fragment {} 
+
 TODO: add computation expressions for routes
 TODO: possibly allow synchronous effects
 TODO: Fix Named event handlers!!! => they should work similar to typed ones
