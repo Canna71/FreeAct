@@ -567,7 +567,9 @@ let useSubscription<'V> (subscription: ISubscription<'V>) =
                     console.log ("Disposing of subscriptionRef for ", subscription)
 
                     match subscriptionRef.current with
-                    | Some dispose -> dispose.Dispose()
+                    | Some dispose ->
+                        dispose.Dispose()
+                        subscriptionRef.current <- None
                     | None -> ()
             }
         ),

@@ -1,6 +1,6 @@
 
 
-BUG: After a navigation, the app is not responding to events
+BUG: After a navigation, the app is not responding to events (subscriptions disposed?)
 TODO: study a better way to architecture the project and avoid circular dependencies
 - TODO: add a way to define the initial model in the app
 - TODO: simplify the way a part of an application treat its own part of the app state

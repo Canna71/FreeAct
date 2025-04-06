@@ -3,6 +3,7 @@ module Demo.AppState
 open FreeAct.FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.Todo.Types
+open Fable.Core.JS
 
 // Define the application state that includes router state
 type AppState = {
@@ -18,6 +19,7 @@ let appDb = AppDb<AppState>({
     Count = 0
     TodoState = initialTodoState
 })
+console.log("AppDb initialized:", appDb)
 
 // Helper functions to get and set router state
 let getRouterState (state: AppState) = state.Router

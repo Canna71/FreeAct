@@ -164,7 +164,9 @@ let LoadTodosButton () =
             }
     }
 
-let TodoList (todos, isLoading) =
+let TodoList (todos: TodoItem list, isLoading) =
+    console.log ("Rendering TodoList with todos: ", todos)
+    
     fragment {
         if isLoading then
             div {

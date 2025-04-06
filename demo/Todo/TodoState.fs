@@ -29,6 +29,7 @@ registerNamedEventHandler addTodoEvent (fun text state ->
 )
 
 registerNamedEventHandler toggleTodoEvent (fun id state ->
+    console.log("Toggling todo with id:", id , state)
     { state with
         TodoState = 
             { state.TodoState with
