@@ -202,19 +202,20 @@ let Navigation () =
         }
     }
 
-// Fix userRouter route handlers
+// Fix userRouter route handlers to use RouteContext
 let userRouter = Router<ReactElement>()
 userRouter.Route(
     "/profile",
-    fun (result) ->
+    fun (context: RouteContext<ReactElement>) ->
         div {
             h2 { "User Profile" }
             p { "User profile details" }
+            context.ChildContent |> Option.defaultValue (fragment { })
         }
     )
     .Route(
         "/settings",
-        fun (result) ->
+        fun (context: RouteContext<ReactElement>) ->
             div {
                 h2 { "User Settings" }
                 p { "User settings panel" }
@@ -226,6 +227,8 @@ userRouter.Route(
                         children = [str "Privacy Settings"] 
                     |}
                 }
+                // Render nested content if present
+                context.ChildContent |> Option.defaultValue (fragment { })
             }
     )
     .Route(
@@ -347,3 +350,5 @@ else
     let root = ReactDomClient.createRoot(container)
     console.log("Rendering App...")
     root.render(App())
+
+FreeAct.Router.Tests.testNestedRoutes()

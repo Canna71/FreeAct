@@ -71,19 +71,22 @@ and Router<'T>() =
 
             match registeredRoute.Children with
             | Some childRouter ->
-                let parentPath =
-                    if result.Pattern.EndsWith("/") then
-                        result.Pattern
-                    else
-                        result.Pattern + "/"
+                // Fix path handling for child routes
+                let parentPath = result.Pattern.TrimEnd('/') + "/"
 
                 let remainingPath =
                     if url.StartsWith(parentPath) then
-                        url.Substring(parentPath.Length - 1)
+                        let rest = url.Substring(parentPath.Length)
+
+                        if rest.StartsWith("/") then
+                            rest
+                        else
+                            "/" + rest
                     else
                         "/"
 
-                // Return both the parent match and child match
+                printfn "Parent path: %s, Remaining: %s" parentPath remainingPath
+
                 Some
                     {
                         Result = result
