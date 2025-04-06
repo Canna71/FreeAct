@@ -6,7 +6,7 @@ open Browser.Types
 open Fable.React
 open FreeAct
 open FreeAct.Router
-open FreeAct.FreeFrame
+open FreeFrame
 open System
 
 // ==================================================
@@ -287,7 +287,7 @@ let FreeFrameRoutes<'State> =
                                  |}) ->
         console.log ("FreeFrameRoutes initialized with appDB: %A", props.AppDb)
         // Create a subscription to watch router state changes
-        let routerState = useView props.AppDb props.GetRouterState
+        let routerState = useNewView props.AppDb props.GetRouterState
 
         // For debugging - log when route changes are detected
         Hooks.useEffect (
@@ -327,4 +327,4 @@ let navigateForward<'State> (appDb: IAppDb<'State>) () =
 
 /// Hook to access the current route information
 let useRoute<'State> (appDb: IAppDb<'State>) (getRouterState: 'State -> RouterState) =
-    useView appDb getRouterState
+    useNewView appDb getRouterState

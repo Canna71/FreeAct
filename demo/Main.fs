@@ -11,7 +11,7 @@ open Fable.Core.JS
 
 open FreeAct.Router
 open FreeAct.ReactRouter
-open FreeAct.FreeFrame
+open FreeFrame
 open FreeAct.FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
@@ -38,7 +38,7 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
 
 // Create subscriptions for parts of the state
 let useCount () =
-    useView appDb (fun state -> state.Count)
+    useNewView appDb (fun state -> state.Count)
 
 // Route handlers
 let home  = FunctionComponent.Of(fun (route) ->

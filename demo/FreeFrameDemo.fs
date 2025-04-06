@@ -3,7 +3,7 @@ module Demo.FreeFrameDemo
 open Fable.React
 open Browser
 open Fable.Core.JS
-open FreeAct.FreeFrame
+open FreeFrame
 open Fable.React.ReactBindings
 open FreeAct
 

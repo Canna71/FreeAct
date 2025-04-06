@@ -3,12 +3,14 @@ module Demo.Todo.UI
 open Fable.React
 open Browser
 open Fable.Core.JS
-open FreeAct.FreeFrame
+open FreeFrame
+open FreeFrame.Effects
 open Fable.React.ReactBindings
 open FreeAct
 open Demo.Todo.Types
 open Demo.Todo.State
 open Demo.AppState
+
 // open Demo.FreeFrameDemo
 
 // React components
@@ -75,7 +77,7 @@ let TodoForm () =
     }
 
 let TodoFilters () =
-    let currentFilter = useSubscription filterSubscription
+    let currentFilter = useView filterSubscription
 
     div {
         className "filters"
@@ -118,7 +120,7 @@ let TodoFilters () =
     }
 
 let LoadTodosButton () =
-    let isLoading = useSubscription isLoadingSubscription
+    let isLoading = useView isLoadingSubscription
 
     div {
         className "load-todos-container"
@@ -183,8 +185,8 @@ let TodoList (todos: TodoItem list, isLoading) =
     }
 
 let TodoListForm () =
-    let todos = useSubscription filteredTodosSubscription
-    let isLoading = useSubscription isLoadingSubscription
+    let todos = useView filteredTodosSubscription
+    let isLoading = useView isLoadingSubscription
 
     div {
         h2 { "Todo List" }

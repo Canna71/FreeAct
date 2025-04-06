@@ -1,9 +1,11 @@
 module Demo.Todo.State
 
-open FreeAct.FreeFrame
+open FreeFrame
 open Fable.Core.JS
 open Demo.Todo.Types
 open Demo.AppState
+open FreeFrame.Effects
+
 
 // === Method 1b: Using string-based event identifiers ===
 let addTodoEvent = EventId.named<string> ("add-todo")
