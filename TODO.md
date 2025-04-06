@@ -1,5 +1,5 @@
 
-
+TODO: fix out of order children if props are in between
 TODO: allow for emtpy tags es: fragment {} 
 
 TODO: add computation expressions for routes

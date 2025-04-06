@@ -83,6 +83,8 @@ let about (context: RouteContext<ReactElement>) =
                 className = Some "nav-link"
                 children = [str "View Users"] 
             |}
+            p { "one" }
+            p { "two" }
         }
         
         context.ChildContent 
@@ -114,6 +116,7 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
             div {
                 h2 { "Child Content" }
                 className "child-content"
+                // TODO: BUG: This is out of order!!!
                 childContent
             }
         | None -> None
