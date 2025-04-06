@@ -215,16 +215,3 @@ let useLocation<'T> () =
     | None ->
         printfn "Router context not found. Make sure to wrap your app with RouterProvider."
         ""
-
-/// Outlet component for rendering nested routes
-let Outlet =
-    FunctionComponent.Of(fun () ->
-        let routerContext = Hooks.useContext RouterContext
-
-        match routerContext with
-        | Some context ->
-            match context.ChildRenderer with
-            | Some render -> render ()
-            | None -> fragment { }
-        | None -> fragment { }
-    )

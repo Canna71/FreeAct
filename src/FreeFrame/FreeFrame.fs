@@ -152,7 +152,7 @@ let registerFocusedEventHandler<'Payload, 'State, 'SubState>
 
     registerEventHandler eventId focusedHandler
 
-let registerFocusedTypedEventHandler<'EventType, 'State, 'SubState>
+let inline registerFocusedTypedEventHandler<'EventType, 'State, 'SubState>
     (lens: 'State -> 'SubState)
     (setLens: 'SubState -> 'State -> 'State)
     (handler: EventHandler<'EventType, 'SubState>)
