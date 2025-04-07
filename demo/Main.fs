@@ -120,11 +120,6 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
         | None -> None
     }
 
-let test (context: RouteContext<ReactElement>) : ReactElement =
-    div {
-      ()
-    }
-
 
 let notFound  =
     div {
@@ -148,14 +143,6 @@ let Navigation () =
                         destination = "/"
                         className = None
                         children = [str "Home"] 
-                    |} 
-                }
-                li { 
-                    FreeFrameLink {| 
-                        appDb = appDb
-                        destination = "/test"
-                        className = None
-                        children = [str "Test"] 
                     |} 
                 }
                 li { 
@@ -263,7 +250,6 @@ let App () =
     // Create the router
     let router = Router<ReactElement>()
     router.Route("/", home)
-          .Route("/test", test)
           .Route("/about", about)
           .RouteWithChildren("/users", users, userRouter)
           .Route(
