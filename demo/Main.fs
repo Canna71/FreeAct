@@ -122,7 +122,7 @@ let users (context: RouteContext<ReactElement>) : ReactElement =
 
 let test (context: RouteContext<ReactElement>) : ReactElement =
     div {
-      id "test"
+      ()
     }
 
 
@@ -369,8 +369,3 @@ else
     root.render(App())
 
 // FreeAct.Router.Tests.testNestedRoutes()
-
-let result = 
-    testbuilder.my {
-        // empty
-    }
