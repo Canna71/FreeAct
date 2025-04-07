@@ -1,6 +1,5 @@
 module Demo.Main
 
-printfn "Hello, from the demo!"
 
 // render a simple HTML page using the Fable.React library
 open Fable.React
@@ -370,3 +369,8 @@ else
     root.render(App())
 
 // FreeAct.Router.Tests.testNestedRoutes()
+
+let result = 
+    testbuilder.my {
+        
+    }

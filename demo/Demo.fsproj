@@ -11,6 +11,7 @@
     <Compile Include="FreeFrameDemo.fs" />
     <!-- <Compile Include="CompositionDemo.fs" /> -->
     <Compile Include="Todo/TodoUI.fs" />
+    <Compile Include="testbuilder.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
