@@ -1,5 +1,5 @@
 
-TODO: allow for emtpy tags es: fragment {} 
+
 
 TODO: add computation expressions for routes
 TODO: possibly allow synchronous effects
@@ -8,10 +8,10 @@ TODO: syntactic sugar or other for FunctionComponent.Of
 TODO: find an alternative to FunctionComponent.Of (Elmish?)
 TODO: split project into multiple projects
 TODO: complete the builders for elements
-TODO: fix naming to distinguish between definitions of effects and actually executing them
 TODO: improve demo, avoid errors for duplicate Keys
 TODO: restore composition demo
 TODO: add a demo for typed(Union) events
+TODO: CSS-in-F#
 
 Differences between subscribers and effects:
 
