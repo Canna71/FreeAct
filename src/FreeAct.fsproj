@@ -5,6 +5,7 @@
         <ChangelogFile>$(MSBuildThisFileDirectory)../CHANGELOG.md</ChangelogFile>
     </PropertyGroup>
     <ItemGroup>
+        
 
         <Compile Include="FreeAct.Interop.fs" />
         
@@ -23,6 +24,7 @@
         <Compile Include="FreeFrame/FreeFrame.fs" />
         <Compile Include="FreeFrame/Effects.fs" />
         <Compile Include="FreeFrame/FreeFrameRouter.fs" />
+        <Compile Include="FSS\fss.fs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="EasyBuild.PackageReleaseNotes.Tasks">

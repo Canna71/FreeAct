@@ -47,6 +47,10 @@ let _home (context: RouteContext<ReactElement>) : ReactElement =
         p { sprintf "Current count: %d" count }
         
         button {
+            style {
+                backgroundColor "#4CAF50"
+
+            }
             onClick (fun _ -> dispatchTyped appDb Increment)
             "Increment"
         }
@@ -355,3 +359,5 @@ else
     root.render(App())
 
 // FreeAct.Router.Tests.testNestedRoutes()
+
+Fss.testCssInFsharp()
