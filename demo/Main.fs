@@ -42,6 +42,7 @@ let useCount () =
 let _home (context: RouteContext<ReactElement>) : ReactElement =
     let count = useCount()
     div {
+        className "my"
         h1 { "Home" }
         p { "Welcome to the home page!" }
         p { sprintf "Current count: %d" count }
@@ -56,6 +57,7 @@ let _home (context: RouteContext<ReactElement>) : ReactElement =
         }
         
         button {
+
             onClick (fun _ -> dispatchTyped appDb Decrement)
             "Decrement"
         }
