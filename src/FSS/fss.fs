@@ -6,6 +6,19 @@ open System.Text.RegularExpressions
 
 let NESTED_MARKER = "$_$_"
 
+// Define a partial active pattern for prefix matching
+let (|Nested|_|) (s: string) =
+    if s.StartsWith NESTED_MARKER then
+        Some(s.Substring NESTED_MARKER.Length)
+    else
+        None
+
+type CssDeclaration =
+    | StyleDeclaration of string * obj
+    | NestedRule of CssRule
+
+and CssRule = { selector: string; rules: CssDeclaration list }
+
 type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
 
@@ -43,14 +56,6 @@ type CssClassBuilder(selector: string) =
 
 let css = CssClassBuilder
 
-let rules =
-    // css "root" {
-    css "root" {
-        flex
-        backgroundColor "#f0f0f0"
-    }
-// }
-
 let rules2 =
     [
 
@@ -84,9 +89,27 @@ let toCss (selector: string) (props: HtmlProp list) =
 
     cssText
 
+// processes the rules to turn then into CSSRules
+let processRules (rules: list<string * list<HtmlProp>>) : CssRule list =
+    let rec processRule (selector, props: list<HtmlProp>) : CssRule =
+        let rules =
+            props
+            |> List.map (fun (k, v) ->
+                match k with
+                | Nested s -> NestedRule(processRule (s, unbox v))
+                | _ -> StyleDeclaration(k, v)
+
+            )
+
+        { selector = selector; rules = rules }
+
+    rules |> List.map processRule
+
 let testCssInFsharp () =
-    console.log ("rules", rules)
     // let cssText = toCss "test" rules
     // console.log ("cssText\n", cssText)
 
     console.log ("rules2", rules2 |> List.toArray)
+    let cssRules = rules2 |> processRules
+    printf "%A" cssRules
+// console.log ("rules2", rules2 |> processRules )
