@@ -25,7 +25,7 @@ type CssClassBuilder(selector: string) =
 
     member inline _.Yield(nested: string * list<HtmlProp>) =
         let selector, props = nested
-        let ret = (selector, box props) :: []
+        let ret = ($"$_$.{selector}", box props) :: []
         console.log ("CssClassBuilder Yield", selector, nested, ret)
         ret
 
@@ -87,4 +87,4 @@ let testCssInFsharp () =
     // let cssText = toCss "test" rules
     // console.log ("cssText\n", cssText)
 
-    console.log ("rules2", rules2)
+    console.log ("rules2", rules2 |> List.toArray)
