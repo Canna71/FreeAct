@@ -979,6 +979,14 @@ module Styles =
         member inline _.Yield(_) = []
 
         member inline _.Zero() = []
+
+        member inline _.Run(props) =
+            // Convert to IReactProperty with "style" prop name
+            let styleObj = createObj props
+            let ret = unbox<HtmlProp> ("style", styleObj)
+            ret
+
+    type StyleBuilder with
         // Color
         /// <summary>Sets color for text content</summary>
         /// <param name="c">Color value (e.g. Color.red, Color.rgba(255,0,0,0.5))</param>
@@ -1840,13 +1848,6 @@ module Styles =
             ]
             @ props
 
-        // Convert to IReactProperty with "style" prop name
-        member inline _.Run(props) : HtmlProp =
-            let styleObj = createObj props
-            let ret = unbox<HtmlProp> ("style", styleObj)
-            ret
-
-    type StyleBuilder with
         // Replace duplicate margin/padding/border operations with new names
 
         /// Sets margin with four values
