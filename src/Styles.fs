@@ -1025,7 +1025,7 @@ module Styles =
         member inline _.Padding(props, n: int) =
             ("padding", sprintf "%dpx" n :> obj) :: props
 
-        // TODO: Add support for other syntaxes
+        // TODO: Add support for other shortcyts (e.g Px(10), Percent(50), etc)
         /// Sets margin on all sides
         /// Example: margin (Length.Units(10, Unit.Px))
         /// Example: margin Length.Auto
