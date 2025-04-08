@@ -7,9 +7,36 @@ open System.Text.RegularExpressions
 type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
 
+    member inline _.For(css: string * list<HtmlProp>, f: unit -> HtmlProp list) =
+        console.log ("CssClassBuilder For 1", selector, css, f ())
+        let selector, rules = css
+        let ret = (selector, box rules) :: f ()
+        ret
+
+    member inline _.For(props: list<HtmlProp>, f: unit -> string * list<HtmlProp>) =
+        console.log ("CssClassBuilder For 2", selector, props, f ())
+        let selector, rules = f ()
+        let ret = (selector, box rules) :: props
+        ret
+
+    member inline _.For(props: list<HtmlProp>, f: unit -> list<HtmlProp>) =
+        console.log ("CssClassBuilder For 3 ", selector, props, f ())
+        props @ f ()
+
+    member inline _.Yield(nested: string * list<HtmlProp>) =
+        let selector, props = nested
+        let ret = (selector, box props) :: []
+        console.log ("CssClassBuilder Yield", selector, nested, ret)
+        ret
+
+    member inline _.Delay(f: unit -> list<HtmlProp>) =
+        console.log ("CssClassBuilder Delay", selector, f ())
+        let props = f ()
+        props
+
     member inline _.Run(props: HtmlProp list) =
-        console.log ("CssClassBuilder", selector, props)
         let ret = selector, props
+        console.log ("CssClassBuilder Run", selector, ret)
         ret
 
 let css = CssClassBuilder
@@ -28,6 +55,8 @@ let rules2 =
         css "main" {
             flex
             backgroundColor "#f0f0f0"
+
+            css "nested" { color "#f0f0f0" }
         }
 
         css "header" {
