@@ -975,7 +975,7 @@ module Styles =
         | Border.None -> "none"
 
     // Style builder that combines property and value
-    type StyleBuilder(name: string) =
+    type StyleBuilder() =
         member inline _.Yield(_) = []
 
         member inline _.Zero() = []
@@ -1843,7 +1843,7 @@ module Styles =
         // Convert to IReactProperty with "style" prop name
         member inline _.Run(props) : HtmlProp =
             let styleObj = createObj props
-            let ret = unbox<HtmlProp> (name, styleObj)
+            let ret = unbox<HtmlProp> ("style", styleObj)
             ret
 
     type StyleBuilder with
@@ -2212,4 +2212,4 @@ module Styles =
         member inline _.ScrollY(props) =
             [ "overflowX", "hidden" :> obj; "overflowY", "auto" :> obj ] @ props
 
-    let style = StyleBuilder("style")
+    let style = StyleBuilder()

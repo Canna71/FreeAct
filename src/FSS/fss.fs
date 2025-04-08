@@ -4,23 +4,37 @@ open FreeAct
 open Fable.Core.JS
 open System.Text.RegularExpressions
 
-type CssClassBuilder(name: string) =
-    inherit StyleBuilder(name)
+type CssClassBuilder() =
+    inherit StyleBuilder()
 
-    member inline _.Run(props: HtmlProp list) : string * HtmlProp list =
+    member inline _.Run(props: HtmlProp list) : HtmlProp list =
 
-        let ret = (name, props)
+        let ret = props
         ret
 
-let css = CssClassBuilder
+let css = CssClassBuilder()
 
 let rules =
     // css "root" {
-    css "my" {
+    css {
         flex
         backgroundColor "#f0f0f0"
     }
 // }
+
+let rules2 =
+    {|
+        main =
+            css {
+                flex
+                backgroundColor "#f0f0f0"
+            }
+        header =
+            css {
+                flex
+                backgroundColor "#f0f0f0"
+            }
+    |}
 
 let uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
 
@@ -41,5 +55,7 @@ let toCss (selector: string) (props: HtmlProp list) =
 
 let testCssInFsharp () =
     console.log ("rules", rules)
-    let cssText = toCss (fst rules) (snd rules)
-    console.log ("cssText", cssText)
+    let cssText = toCss "test" rules
+    console.log ("cssText\n", cssText)
+
+    console.log ("rules2", rules2)
