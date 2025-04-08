@@ -4,6 +4,8 @@ open FreeAct
 open Fable.Core.JS
 open System.Text.RegularExpressions
 
+let NESTED_MARKER = "$_$_"
+
 type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
 
@@ -25,7 +27,7 @@ type CssClassBuilder(selector: string) =
 
     member inline _.Yield(nested: string * list<HtmlProp>) =
         let selector, props = nested
-        let ret = ($"$_$.{selector}", box props) :: []
+        let ret = ($"{NESTED_MARKER}{selector}", box props) :: []
         console.log ("CssClassBuilder Yield", selector, nested, ret)
         ret
 
