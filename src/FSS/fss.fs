@@ -4,6 +4,19 @@ open FreeAct
 open Fable.Core.JS
 open System.Text.RegularExpressions
 
+type CssRule =
+    | CssRule of HtmlProp
+    | NestedRule of string * CssRule list
+
+let NESTED_MARKER = "$$$."
+
+// Define a partial active pattern for prefix matching
+let (|Nested|_|) (s: string) =
+    if s.StartsWith(NESTED_MARKER) then
+        Some(s.Substring NESTED_MARKER.Length)
+    else
+        None
+
 type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
 
@@ -25,7 +38,7 @@ type CssClassBuilder(selector: string) =
 
     member inline _.Yield(nested: string * list<HtmlProp>) =
         let selector, props = nested
-        let ret = ($"$_$.{selector}", box props) :: []
+        let ret = ($"{NESTED_MARKER}{selector}", box props) :: []
         console.log ("CssClassBuilder Yield", selector, nested, ret)
         ret
 
@@ -35,19 +48,29 @@ type CssClassBuilder(selector: string) =
         props
 
     member inline _.Run(props: HtmlProp list) =
-        let ret = selector, props
+        let processed =
+            props
+            |> List.map (fun (k, v) ->
+                console.log ("CssClassBuilder Run match ", selector, k, v)
+
+                match k with
+                | Nested k -> NestedRule(k, unbox v)
+                | _ -> CssRule(k, v)
+            )
+
+        let ret = NestedRule(selector, processed)
         console.log ("CssClassBuilder Run", selector, ret)
         ret
 
 let css = CssClassBuilder
 
-let rules =
-    // css "root" {
-    css "root" {
-        flex
-        backgroundColor "#f0f0f0"
-    }
-// }
+// let rules =
+//     // css "root" {
+//     css "root" {
+//         flex
+//         backgroundColor "#f0f0f0"
+//     }
+// // }
 
 let rules2 =
     [
@@ -60,8 +83,8 @@ let rules2 =
         }
 
         css "header" {
-            flex
-            backgroundColor "#f0f0f0"
+            grid
+            margin (Length.Units(10, Unit.Px))
         }
     ]
 
@@ -82,9 +105,24 @@ let toCss (selector: string) (props: HtmlProp list) =
 
     cssText
 
+let rec CssRulesToString (rules: CssRule list) =
+    let cssText =
+        rules
+        |> List.map (fun rule ->
+            match rule with
+            | CssRule(k, v) -> $"{k}: {v};"
+            | NestedRule(selector, rules) ->
+                let nestedCssText = CssRulesToString rules
+                $"{selector} {{\n{nestedCssText}\n}}"
+        )
+        |> String.concat "\n"
+
+    cssText
+
 let testCssInFsharp () =
-    console.log ("rules", rules)
+    // console.log ("rules", rules)
     // let cssText = toCss "test" rules
     // console.log ("cssText\n", cssText)
 
     console.log ("rules2", rules2 |> List.toArray)
+    console.log (rules2 |> CssRulesToString)
