@@ -125,4 +125,14 @@ let testCssInFsharp () =
     console.log ("classMap", classMap)
 
     console.log ("Header", classMap["Header"])
-    console.log ("Main", classMap?Main)
+    console.log ("Main", classMap["Main"])
+
+    let otherClasses = createEmpty<obj>
+    otherClasses?Header <- string "Header_0_1"
+    otherClasses?Main <- "Main_0_2"
+
+    console.log ("otherClasses", otherClasses)
+    // Access with dynamic operator
+    let f = otherClasses?Header
+    console.log ("Header", string f)
+    console.log ("Main", otherClasses?Main)
