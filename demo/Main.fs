@@ -16,6 +16,7 @@ open Demo
 open Demo.Todo.State
 open Demo.Todo.UI
 open AppState
+open Fss
 
 
 
@@ -362,4 +363,4 @@ else
 
 // FreeAct.Router.Tests.testNestedRoutes()
 
-Fss.testCssInFsharp()
+testCssInFsharp()

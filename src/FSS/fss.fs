@@ -3,6 +3,9 @@ module Fss
 open FreeAct
 open Fable.Core.JS
 open System.Text.RegularExpressions
+open System.Dynamic
+open Fable.Core.JsInterop
+open Microsoft.FSharp.Collections
 
 let NESTED_MARKER = "$_$_"
 
@@ -112,4 +115,14 @@ let testCssInFsharp () =
     console.log ("rules2", rules2 |> List.toArray)
     let cssRules = rules2 |> processRules
     printf "%A" cssRules
-// console.log ("rules2", rules2 |> processRules )
+
+    let classMap =
+        Map.empty |> Map.add "Header" "Header_0_1" |> Map.add "Main" "Main_0_2"
+
+    // classMap["Header"]<-"Header_0_1";
+    // classMap["Main"]<-"Main_0_2";
+
+    console.log ("classMap", classMap)
+
+    console.log ("Header", classMap["Header"])
+    console.log ("Main", classMap?Main)
