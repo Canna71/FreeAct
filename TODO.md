@@ -24,6 +24,10 @@ TODO: add a demo for typed(Union) events
 TODO: CSS-in-F#
 
 - add extend() operation to include other rules
+- methods to act on values, like Color.darken()
+- type provider for classes 
+
+
 
 Differences between subscribers and effects:
 
