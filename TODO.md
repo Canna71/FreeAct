@@ -2,16 +2,27 @@
 
 
 TODO: add computation expressions for routes
+
 TODO: possibly allow synchronous effects
+
 TODO: Fix Named event handlers!!! => they should work similar to typed ones
+
 TODO: syntactic sugar or other for FunctionComponent.Of
+
 TODO: find an alternative to FunctionComponent.Of (Elmish?)
+
 TODO: split project into multiple projects
+
 TODO: complete the builders for elements
+
 TODO: improve demo, avoid errors for duplicate Keys
+
 TODO: restore composition demo
+
 TODO: add a demo for typed(Union) events
+
 TODO: CSS-in-F#
+
 - add extend() operation to include other rules
 
 Differences between subscribers and effects:
