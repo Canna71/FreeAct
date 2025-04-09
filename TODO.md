@@ -12,6 +12,7 @@ TODO: improve demo, avoid errors for duplicate Keys
 TODO: restore composition demo
 TODO: add a demo for typed(Union) events
 TODO: CSS-in-F#
+- add extend() operation to include other rules
 
 Differences between subscribers and effects:
 
