@@ -363,4 +363,8 @@ else
 
 // FreeAct.Router.Tests.testNestedRoutes()
 
+// open Demo.Style
+
 testCssInFsharp()
+
+console.log Demo.Style.classes

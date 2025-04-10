@@ -9,7 +9,7 @@
     <Compile Include="AppState.fs" />
     <Compile Include="Todo/TodoState.fs" />
     <Compile Include="FreeFrameDemo.fs" />
-    <!-- <Compile Include="CompositionDemo.fs" /> -->
+    <Compile Include="style.fs" />
     <Compile Include="Todo/TodoUI.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
