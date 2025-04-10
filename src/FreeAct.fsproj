@@ -24,7 +24,7 @@
         <Compile Include="FreeFrame/FreeFrame.fs" />
         <Compile Include="FreeFrame/Effects.fs" />
         <Compile Include="FreeFrame/FreeFrameRouter.fs" />
-        <Compile Include="FSS\fss.fs" />
+        <Compile Include="FreeSS\FreeSS.fs" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="EasyBuild.PackageReleaseNotes.Tasks">

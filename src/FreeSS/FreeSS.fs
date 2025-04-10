@@ -1,4 +1,4 @@
-module Fss
+module FreeSS
 
 open FreeAct
 open Fable.Core.JS
@@ -16,11 +16,11 @@ let (|Nested|_|) (s: string) =
     else
         None
 
-type CssDeclaration =
-    | StyleDeclaration of string * obj
-    | NestedRule of CssRule
+// type CssDeclaration =
+//     | StyleDeclaration of string * obj
+//     | NestedRule of CssRule
 
-and CssRule = { selector: string; rules: CssDeclaration list }
+// and CssRule = { selector: string; rules: CssDeclaration list }
 
 type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
@@ -88,25 +88,44 @@ let toCss (selector: string) (props: HtmlProp list) =
         props
         |> List.map (fun (k, v) -> $"{toCssProp k}: {v};")
         |> String.concat "\n"
-        |> fun x -> cssText + x + "\n}"
+        |> fun x -> cssText + x + "\n}\n"
 
     cssText
 
-// processes the rules to turn then into CSSRules
-let processRules (rules: list<string * list<HtmlProp>>) : CssRule list =
-    let rec processRule (selector, props: list<HtmlProp>) : CssRule =
-        let rules =
-            props
-            |> List.map (fun (k, v) ->
-                match k with
-                | Nested s -> NestedRule(processRule (s, unbox v))
-                | _ -> StyleDeclaration(k, v)
+// process a rule, flattening nested rules and concatenating with the parent selector
+let rec flattenRule (selector: string) (props: list<HtmlProp>)  =
+    let nestedRules =
+        props
+        |> List.choose (function
+            | Nested selector, prop-> Some((selector, unbox<list<HtmlProp>> prop))
+            | _ -> None)
+    let otherProps =
+        props
+        |> List.choose (function
+            | Nested _,_ -> None
+            | prop -> Some(prop))
+    let thisRule = selector,otherProps
+    
+    let nestedRules =
+        nestedRules
+        |> List.map (fun (nested, props) ->
+            let newSelector = $"{selector} {nested}"
+            flattenRule newSelector props)
+        |> List.concat
+    thisRule :: nestedRules
 
-            )
 
-        { selector = selector; rules = rules }
-
-    rules |> List.map processRule
+let processRules (rules) =
+    rules
+    |> List.map (fun (selector, props) ->
+        let flattenedRules = flattenRule selector props
+        flattenedRules)
+    |> List.concat
+    |> List.map (fun (selector, props) ->
+        let cssText = toCss selector props
+        cssText)
+    |> String.concat "\n"  // Add this line to concatenate all CSS rules
+    
 
 let testCssInFsharp () =
     // let cssText = toCss "test" rules
