@@ -75,9 +75,9 @@ let rules2 =
         }
     ]
 
-let uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
+let private uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
 
-let toCss (selector: string) (props: HtmlProp list) =
+let private toCss (selector: string) (props: HtmlProp list) =
 
     let toCssProp prop =
         uppercaseRegex.Replace(prop, "-$1").ToLower()
@@ -93,39 +93,46 @@ let toCss (selector: string) (props: HtmlProp list) =
     cssText
 
 // process a rule, flattening nested rules and concatenating with the parent selector
-let rec flattenRule (selector: string) (props: list<HtmlProp>)  =
+let rec private flattenRule (selector: string) (props: list<HtmlProp>) =
     let nestedRules =
         props
-        |> List.choose (function
-            | Nested selector, prop-> Some((selector, unbox<list<HtmlProp>> prop))
-            | _ -> None)
+        |> List.choose (
+            function
+            | Nested selector, prop -> Some((selector, unbox<list<HtmlProp>> prop))
+            | _ -> None
+        )
+
     let otherProps =
         props
-        |> List.choose (function
-            | Nested _,_ -> None
-            | prop -> Some(prop))
-    let thisRule = selector,otherProps
-    
+        |> List.choose (
+            function
+            | Nested _, _ -> None
+            | prop -> Some(prop)
+        )
+
+    let thisRule = selector, otherProps
+
     let nestedRules =
         nestedRules
         |> List.map (fun (nested, props) ->
             let newSelector = $"{selector} {nested}"
-            flattenRule newSelector props)
+            flattenRule newSelector props
+        )
         |> List.concat
+
     thisRule :: nestedRules
 
-
-let processRules (rules) =
+let private processRules (rules) =
     rules
-    |> List.map (fun (selector, props) ->
+    |> List.collect (fun (selector, props) ->
         let flattenedRules = flattenRule selector props
-        flattenedRules)
-    |> List.concat
+        flattenedRules
+    )
     |> List.map (fun (selector, props) ->
         let cssText = toCss selector props
-        cssText)
-    |> String.concat "\n"  // Add this line to concatenate all CSS rules
-    
+        cssText
+    )
+    |> String.concat "\n" // concatenate all CSS rules
 
 let testCssInFsharp () =
     // let cssText = toCss "test" rules
