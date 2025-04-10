@@ -59,6 +59,67 @@ type CssClassBuilder(selector: string) =
 
 let css = CssClassBuilder
 
+module private processor =
+
+    let uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
+
+    let toCss (selector: string) (props: HtmlProp list) =
+
+        let toCssProp prop =
+            uppercaseRegex.Replace(prop, "-$1").ToLower()
+
+        let cssText = $"{selector} {{\n"
+
+        let cssText =
+            props
+            |> List.map (fun (k, v) -> $"{toCssProp k}: {v};")
+            |> String.concat "\n"
+            |> fun x -> cssText + x + "\n}\n"
+
+        cssText
+
+    // process a rule, flattening nested rules and concatenating with the parent selector
+    let rec flattenRule (selector: string) (props: list<HtmlProp>) =
+        let nestedRules =
+            props
+            |> List.choose (
+                function
+                | Nested selector, prop -> Some((selector, unbox<list<HtmlProp>> prop))
+                | _ -> None
+            )
+
+        let otherProps =
+            props
+            |> List.choose (
+                function
+                | Nested _, _ -> None
+                | prop -> Some(prop)
+            )
+
+        let thisRule = selector, otherProps
+
+        let nestedRules =
+            nestedRules
+            |> List.map (fun (nested, props) ->
+                let newSelector = $"{selector} {nested}"
+                flattenRule newSelector props
+            )
+            |> List.concat
+
+        thisRule :: nestedRules
+
+    let processRules (rules) =
+        rules
+        |> List.collect (fun (selector, props) ->
+            let flattenedRules = flattenRule selector props
+            flattenedRules
+        )
+        |> List.map (fun (selector, props) ->
+            let cssText = toCss selector props
+            cssText
+        )
+        |> String.concat "\n" // concatenate all CSS rules
+
 let rules2 =
     [
 
@@ -75,71 +136,12 @@ let rules2 =
         }
     ]
 
-let private uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
-
-let private toCss (selector: string) (props: HtmlProp list) =
-
-    let toCssProp prop =
-        uppercaseRegex.Replace(prop, "-$1").ToLower()
-
-    let cssText = $"{selector} {{\n"
-
-    let cssText =
-        props
-        |> List.map (fun (k, v) -> $"{toCssProp k}: {v};")
-        |> String.concat "\n"
-        |> fun x -> cssText + x + "\n}\n"
-
-    cssText
-
-// process a rule, flattening nested rules and concatenating with the parent selector
-let rec private flattenRule (selector: string) (props: list<HtmlProp>) =
-    let nestedRules =
-        props
-        |> List.choose (
-            function
-            | Nested selector, prop -> Some((selector, unbox<list<HtmlProp>> prop))
-            | _ -> None
-        )
-
-    let otherProps =
-        props
-        |> List.choose (
-            function
-            | Nested _, _ -> None
-            | prop -> Some(prop)
-        )
-
-    let thisRule = selector, otherProps
-
-    let nestedRules =
-        nestedRules
-        |> List.map (fun (nested, props) ->
-            let newSelector = $"{selector} {nested}"
-            flattenRule newSelector props
-        )
-        |> List.concat
-
-    thisRule :: nestedRules
-
-let private processRules (rules) =
-    rules
-    |> List.collect (fun (selector, props) ->
-        let flattenedRules = flattenRule selector props
-        flattenedRules
-    )
-    |> List.map (fun (selector, props) ->
-        let cssText = toCss selector props
-        cssText
-    )
-    |> String.concat "\n" // concatenate all CSS rules
-
 let testCssInFsharp () =
     // let cssText = toCss "test" rules
     // console.log ("cssText\n", cssText)
 
     console.log ("rules2", rules2 |> List.toArray)
-    let cssRules = rules2 |> processRules
+    let cssRules = rules2 |> processor.processRules
     printf "%A" cssRules
 
     let classMap =
