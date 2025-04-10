@@ -108,7 +108,7 @@ module private processor =
             )
 
         let thisRule = selector, otherProps
-
+        // TODO: rename .classnames to something specific and add to a map
         let nestedRules =
             nestedRules
             |> List.map (fun (nested, props) ->
