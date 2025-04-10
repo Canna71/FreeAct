@@ -7,14 +7,7 @@ open System.Dynamic
 open Fable.Core.JsInterop
 open Microsoft.FSharp.Collections
 
-let NESTED_MARKER = "$_$_"
-
-// Define a partial active pattern for prefix matching
-let (|Nested|_|) (s: string) =
-    if s.StartsWith NESTED_MARKER then
-        Some(s.Substring NESTED_MARKER.Length)
-    else
-        None
+let private NESTED_MARKER = "$_$_"
 
 // type CssDeclaration =
 //     | StyleDeclaration of string * obj
@@ -61,18 +54,35 @@ let css = CssClassBuilder
 
 module private processor =
 
+    // Define a partial active pattern for prefix matching
+    let (|Nested|_|) (s: string) =
+        if s.StartsWith NESTED_MARKER then
+            Some(s.Substring NESTED_MARKER.Length)
+        else
+            None
+
+    // active pattern for selector containing an ampersand
+    let (|Ampersand|_|) (s: string) =
+        if s.Contains "&" then
+            Some(s)
+        else
+            None
+
     let uppercaseRegex = Regex("([A-Z])", RegexOptions.Compiled)
 
-    let toCss (selector: string) (props: HtmlProp list) =
+    let toCssProp prop =
+        uppercaseRegex.Replace(prop, "-$1").ToLower()
 
-        let toCssProp prop =
-            uppercaseRegex.Replace(prop, "-$1").ToLower()
+    // substitute an ampesand with the parent selector
+    let substituteAmpersand (selector: string) (s: string) = s.Replace("&", selector)
+
+    let toCss (selector: string) (props: HtmlProp list) =
 
         let cssText = $"{selector} {{\n"
 
         let cssText =
             props
-            |> List.map (fun (k, v) -> $"{toCssProp k}: {v};")
+            |> List.map (fun (k, v) -> $"  {toCssProp k}: {v};")
             |> String.concat "\n"
             |> fun x -> cssText + x + "\n}\n"
 
@@ -101,7 +111,11 @@ module private processor =
         let nestedRules =
             nestedRules
             |> List.map (fun (nested, props) ->
-                let newSelector = $"{selector} {nested}"
+                let newSelector =
+                    match nested with
+                    | Ampersand _ -> substituteAmpersand selector nested
+                    | _ -> $"{selector} {nested}"
+
                 flattenRule newSelector props
             )
             |> List.concat
@@ -133,6 +147,8 @@ let rules2 =
         css "header" {
             flex
             backgroundColor "#f0f0f0"
+
+            css "&:hover" { borderBottom "1px solid #000" }
         }
     ]
 
