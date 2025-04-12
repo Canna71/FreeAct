@@ -37,12 +37,14 @@ registerTypedEventHandler<CounterEvent, AppState>(fun ev state ->
 )
 
 // Create subscriptions for parts of the state
-let useCount () =
-    useNewView appDb (fun state -> state.Count)
+let getCountLens (state: AppState) = state.Count
+let setCountLens count state = { state with Count = count }
+
+let countView = createView appDb getCountLens 
 
 // Route handlers - they now clearly take RouteMatchResult
 let _home (context: RouteContext<ReactElement>) : ReactElement =
-    let count = useCount()
+    let count = useView countView
     div {
         className "my"
         h1 { "Home" }
