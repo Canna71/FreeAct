@@ -6,7 +6,6 @@ open Browser.Types
 open Fable.React
 open FreeAct
 open FreeAct.Router
-open FreeFrame
 open System
 
 // ==================================================
