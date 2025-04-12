@@ -437,3 +437,10 @@ let useCombinedViews<'A, 'B, 'C> (subA: IView<'A>) (subB: IView<'B>) (combiner: 
 
     let combinedSub = combineViews subA subB combiner
     useView combinedSub
+
+/// Creates a React component that automatically subscribes to a view and renders using the provided function
+let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
+    FunctionComponent.Of(fun () ->
+        let value = useView view
+        render value
+    )
