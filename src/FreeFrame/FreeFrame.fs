@@ -84,7 +84,7 @@ type AppDb<'T>(initialState: 'T) =
 // =================================================
 
 //  EventId implementation
-type EventId<'Payload> = private EventId of string
+type EventId<'Payload> = EventId of string
 
 // Module to encapsulate EventId operations
 module EventId =
@@ -160,11 +160,7 @@ let inline registerFocusedTypedEventHandler<'EventType, 'State, 'SubState>
     let eventId = EventId.ofType<'EventType> ()
     registerFocusedEventHandler lens setLens eventId handler
 
-let internal dispatchInternal<'Payload, 'State>
-    (appDb: IAppDb<'State>)
-    (eventId: string)
-    (payload: 'Payload)
-    =
+let dispatchById<'Payload, 'State> (appDb: IAppDb<'State>) (eventId: string) (payload: 'Payload) =
     match eventHandlers.TryGetValue(eventId) with
     | true, handler ->
         let action = handler (payload :> obj)
@@ -177,7 +173,7 @@ let dispatch<'Payload, 'State>
     (eventId: EventId<'Payload>)
     (payload: 'Payload)
     =
-    dispatchInternal appDb (EventId.key eventId) payload
+    dispatchById appDb (EventId.key eventId) payload
 
 // Improved batch dispatch function
 let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches) =
@@ -188,7 +184,7 @@ let batchDispatch<'State> (appDb: IAppDb<'State>) (dispatches) =
     )
 
 let inline dispatchTyped<'EventType, 'State> (appDb: IAppDb<'State>) (payload: 'EventType) =
-    dispatchInternal appDb (EventId.typeKey<'EventType> ()) payload
+    dispatchById appDb (EventId.typeKey<'EventType> ()) payload
 
 // =======================================================
 //             Views on app-db

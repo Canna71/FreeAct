@@ -20,7 +20,7 @@ type EffectResult =
     | Failure of exn
 
 //  EffectId implementation
-type EffectId<'Payload, 'Result> = private EffectId of string
+type EffectId<'Payload, 'Result> = EffectId of string
 
 [<AutoOpen>]
 module EffectId =
