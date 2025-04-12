@@ -8,9 +8,9 @@ open Browser
 open Fable.React.ReactBindings
 open Fable.Core.JS
 
-open FreeAct.Router
+open FreeActRouter
 open FreeFrame
-open FreeAct.FreeFrameRouter
+open FreeFrameRouter
 open Demo.FreeFrameDemo
 open Demo
 open Demo.Todo.State

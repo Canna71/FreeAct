@@ -1,5 +1,6 @@
-module FreeAct.Router
+module FreeActRouter
 
+open FreeAct
 open Tokenizer
 // open Fable.Core.JS
 
