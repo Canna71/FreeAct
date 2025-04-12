@@ -106,8 +106,8 @@ let TodoFilters =
       }
     )
 
-let LoadTodosButton ()  =
-    let isLoading  = useView isLoadingSubscription
+let LoadTodosButton () =
+    useViewRender isLoadingSubscription (fun isLoading ->
 
     div {
         className "load-todos-container"
@@ -128,7 +128,7 @@ let LoadTodosButton ()  =
                 className "loading-indicator"
                 str "Please wait, loading data..."
             }
-    }
+    })
 
 let TodoList (todos: TodoItem list, isLoading) =
     console.log ("Rendering TodoList with todos: ", todos)

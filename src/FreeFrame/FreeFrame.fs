@@ -430,9 +430,7 @@ let useNewView<'T, 'V> (appDb: IAppDb<'T>) (selector: 'T -> 'V) : 'V =
 
     useView subscriptionRef.current.Value
 
-// Return the subscription object
-
-// React hook for combined subscription
+/// Hook that combines two view subscriptions with a combiner function
 let useCombinedViews<'A, 'B, 'C> (subA: IView<'A>) (subB: IView<'B>) (combiner: 'A -> 'B -> 'C) =
 
     let combinedSub = combineViews subA subB combiner
@@ -443,6 +441,7 @@ let useViewRender<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
     let value = useView view
     render value
 
+/// Hook that combines two view subscriptions with rendering
 let useViewRender2<'A, 'B>
     (viewA: IView<'A>)
     (viewB: IView<'B>)
@@ -452,6 +451,7 @@ let useViewRender2<'A, 'B>
     let valueB = useView viewB
     render valueA valueB
 
+/// Hook that combines three view subscriptions with rendering
 let useViewRender3<'A, 'B, 'C>
     (viewA: IView<'A>)
     (viewB: IView<'B>)
@@ -463,7 +463,7 @@ let useViewRender3<'A, 'B, 'C>
     let valueC = useView viewC
     render valueA valueB valueC
 
-/// Creates a React component that automatically subscribes to a view and renders using the provided function
+/// create a React component that uses a view subscription
 let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
     // Create a unique name for each component instance
     let f =
@@ -474,6 +474,38 @@ let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
     let elemType = ReactElementType.ofFunction f
     fun props -> ReactElementType.create elemType props []
 
-// withKey = fun _ -> componentName
+/// create a React component that uses two view subscriptions
+let createViewComponent2<'A, 'B>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (render: 'A -> 'B -> ReactElement)
+    =
+    // Create a unique name for each component instance
+    let f =
+        fun () ->
+            let valueA = useView viewA
+            let valueB = useView viewB
+            render valueA valueB
 
-// ReactElementType.ofFunction
+    let elemType = ReactElementType.ofFunction f
+    fun props -> ReactElementType.create elemType props []
+
+/// create a React component that uses three view subscriptions
+let createViewComponent3<'A, 'B, 'C>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (viewC: IView<'C>)
+    (render: 'A -> 'B -> 'C -> ReactElement)
+    =
+    // Create a unique name for each component instance
+    let f =
+        fun () ->
+            let valueA = useView viewA
+            let valueB = useView viewB
+            let valueC = useView viewC
+            render valueA valueB valueC
+
+    let elemType = ReactElementType.ofFunction f
+    fun props -> ReactElementType.create elemType props []
+
+// =======================================================
