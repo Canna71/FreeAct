@@ -10,7 +10,7 @@ type MyStyles = {
 }
 let classes = makeStyles<MyStyles>()
 
-let background = css "&"  {
+let background = mix  {
     backgroundColor "#f0f0f0"
     margin 4
 } 

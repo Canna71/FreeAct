@@ -72,6 +72,8 @@ let css (input: obj) =
     | :? string as s -> CssClassBuilder.Create(s)
     | _ -> failwithf "Invalid input type for css builder"
 
+let mix = CssClassBuilder "&"
+
 module private processor =
 
     // Define a partial active pattern for prefix matching
