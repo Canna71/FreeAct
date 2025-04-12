@@ -346,7 +346,9 @@ let App () =
         Children = [
             div {
                 className classes.appContainer
-                Navigation()
+                header {
+                  Navigation()
+                }
                 main {
                     className "content"
                     FreeFrameRoutes {| 

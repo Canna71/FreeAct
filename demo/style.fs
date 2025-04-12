@@ -5,7 +5,6 @@ open FreeAct
 
 type MyStyles = {
     root: ClassName
-    header: ClassName
     appContainer: ClassName
 }
 let classes = makeStyles<MyStyles>()
@@ -29,6 +28,18 @@ fss [
           flex
           background
 
-          css "&:hover" { borderBottom "1px solid #000" }
+          css "ul" {
+            listStyleType ListStyle.None
+          }
+
+          css "a" { 
+
+            textDecoration TextDecoration.None
+
+            css "&:hover" {
+                textDecoration TextDecoration.Underline
+            }
+            
+          }
       }
   ]

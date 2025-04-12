@@ -5,7 +5,7 @@ open FreeAct
 open Fable.Core.JS
 
 [<AutoOpen>]
-module StylesTypes =
+module Styles =
     [<RequireQualifiedAccess>]
     type Unit =
         | Px
@@ -976,14 +976,6 @@ module StylesTypes =
         | Border.Shorthand s -> s
         | Border.None -> "none"
 
-// [<AutoOpen>]
-// module StyleExtensions =
-//   type System.Int32 with
-//       static member op_Implicit(l: int) : Length =
-//           Length.Units(l, Unit.Px)
-
-[<AutoOpen>]
-module Styles =
     // Style builder that combines property and value
     type StyleBuilder() =
         member inline _.Yield(_) = []
@@ -997,6 +989,11 @@ module Styles =
             ret
 
     type StyleBuilder with
+
+        /// failback function for providing any property
+        [<CustomOperation("prop")>]
+        member inline _.Prop(props, name: string, value: obj) = (name, value) :: props
+
         // Color
         /// <summary>Sets color for text content</summary>
         /// <param name="c">Color value (e.g. Color.red, Color.rgba(255,0,0,0.5))</param>
@@ -1251,9 +1248,9 @@ module Styles =
 
         /// Sets text decoration
         /// Example: textDecoration "underline"
-        [<CustomOperation("textDecoration")>]
-        member inline _.TextDecoration(props, value: string) =
-            ("textDecoration", value :> obj) :: props
+        // [<CustomOperation("textDecoration")>]
+        // member inline _.TextDecoration(props, value: TextDecoration) =
+        //     ("textDecoration", textDecorationToString value :> obj) :: props
 
         // Support combinators
         [<CustomOperation("combine")>]
@@ -1628,6 +1625,12 @@ module Styles =
         [<CustomOperation("visibility")>]
         member inline _.Visibility(props, value: Visibility) =
             ("visibility", visibilityToString value :> obj) :: props
+
+        /// hidden visibility
+        /// Example: visibility Visibility.Hidden
+        [<CustomOperation("hidden")>]
+        member inline _.Hidden(props) =
+            ("visibility", "hidden" :> obj) :: props
 
         /// Sets isolation
         /// Example: isolation "isolate"
@@ -2024,13 +2027,15 @@ module Styles =
         [<CustomOperation("block")>]
         member inline _.DisplayBlock(props) = ("display", "block" :> obj) :: props
 
+        /// <summary>Sets display to flex</summary>
         [<CustomOperation("flex")>]
         member inline _.DisplayFlex(props) = ("display", "flex" :> obj) :: props
 
+        /// <summary>Sets display to grid</summary>
         [<CustomOperation("grid")>]
         member inline _.DisplayGrid(props) = ("display", "grid" :> obj) :: props
 
-        [<CustomOperation("hidden")>]
+        [<CustomOperation("none")>]
         member inline _.DisplayNone(props) = ("display", "none" :> obj) :: props
 
         // Flexbox shorthands
