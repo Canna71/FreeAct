@@ -17,6 +17,7 @@ open Demo.Todo.State
 open Demo.Todo.UI
 open AppState
 open FreeSS
+open Microsoft.FSharp.Reflection
 
 
 
@@ -367,4 +368,19 @@ else
 
 testCssInFsharp()
 
-console.log Demo.Style.classes
+
+console.log Style.classes
+
+type MyClasses = 
+    { Root: string
+      AppContainer: string
+      Header: string
+      Nested: string }
+
+// display the fields of MyClasses
+// console.log("MyClasses fields: ", FSharpType.GetRecordFields(typeof<MyClasses>) )
+let t = 42
+let classes = makeStyles<MyClasses>()
+
+console.log("Generated classes: ", classes.Original, classes.Unique)
+

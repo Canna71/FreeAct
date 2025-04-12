@@ -20,35 +20,28 @@ type CssClassBuilder(selector: string) =
     inherit StyleBuilder()
 
     member inline _.For(css: string * list<HtmlProp>, f: unit -> HtmlProp list) =
-        console.log ("CssClassBuilder For 1", selector, css, f ())
         let selector, rules = css
         let ret = (selector, box rules) :: f ()
         ret
 
     member inline _.For(props: list<HtmlProp>, f: unit -> string * list<HtmlProp>) =
-        console.log ("CssClassBuilder For 2", selector, props, f ())
         let selector, rules = f ()
         let ret = (selector, box rules) :: props
         ret
 
-    member inline _.For(props: list<HtmlProp>, f: unit -> list<HtmlProp>) =
-        console.log ("CssClassBuilder For 3 ", selector, props, f ())
-        props @ f ()
+    member inline _.For(props: list<HtmlProp>, f: unit -> list<HtmlProp>) = props @ f ()
 
     member inline _.Yield(nested: string * list<HtmlProp>) =
         let selector, props = nested
         let ret = ($"{NESTED_MARKER}{selector}", box props) :: []
-        console.log ("CssClassBuilder Yield", selector, nested, ret)
         ret
 
     member inline _.Delay(f: unit -> list<HtmlProp>) =
-        console.log ("CssClassBuilder Delay", selector, f ())
         let props = f ()
         props
 
     member inline _.Run(props: HtmlProp list) =
         let ret = selector, props
-        console.log ("CssClassBuilder Run", selector, ret)
         ret
 
 let css = CssClassBuilder
@@ -160,27 +153,52 @@ let fss rules =
     // TODO: return classes names map
     createEmpty<obj                 >
 
-let testCssInFsharp () =
-    // let cssText = toCss "test" rules
-    // console.log ("cssText\n", cssText)
+// tentative
 
-    let classMap =
-        Map.empty |> Map.add "Header" "Header_0_1" |> Map.add "Main" "Main_0_2"
+type ClassNames = obj
+type StyleMap<'T> = { Original: 'T; Unique: 'T }
 
-    // classMap["Header"]<-"Header_0_1";
-    // classMap["Main"]<-"Main_0_2";
+open Microsoft.FSharp.Reflection
+// Add helper functions
+let inline private generateUniqueName (name: string) =
+    $"""{name}_{System.Guid.NewGuid().ToString("N").Substring(0, 8)}"""
 
-    console.log ("classMap", classMap)
+let inline makeStyles<'T> () : StyleMap<'T> =
+    let original = createEmpty<'T>
+    let unique = createEmpty<'T>
 
-    console.log ("Header", classMap["Header"])
-    console.log ("Main", classMap["Main"])
+    // Use FSharp reflection to get record fields
+    let fields = FSharpType.GetRecordFields(typeof<'T>)
 
-    let otherClasses = createEmpty<obj>
-    otherClasses?Header <- string "Header_0_1"
-    otherClasses?Main <- "Main_0_2"
+    for field in fields do
+        // Set original name
+        original?(field.Name) <- field.Name
+        // Set unique name
+        unique?(field.Name) <- generateUniqueName field.Name
 
-    console.log ("otherClasses", otherClasses)
-    // Access with dynamic operator
-    let f = otherClasses?Header
-    console.log ("Header", string f)
-    console.log ("Main", otherClasses?Main)
+    { Original = original; Unique = unique }
+
+let testCssInFsharp () = "demo" |> ignore
+// let cssText = toCss "test" rules
+// console.log ("cssText\n", cssText)
+
+// let classMap =
+//     Map.empty |> Map.add "Header" "Header_0_1" |> Map.add "Main" "Main_0_2"
+
+// classMap["Header"]<-"Header_0_1";
+// classMap["Main"]<-"Main_0_2";
+
+// console.log ("classMap", classMap)
+
+// console.log ("Header", classMap["Header"])
+// console.log ("Main", classMap["Main"])
+
+// let otherClasses = createEmpty<obj>
+// otherClasses?Header <- string "Header_0_1"
+// otherClasses?Main <- "Main_0_2"
+
+// console.log ("otherClasses", otherClasses)
+// // Access with dynamic operator
+// let f = otherClasses?Header
+// console.log ("Header", string f)
+// console.log ("Main", otherClasses?Main)
