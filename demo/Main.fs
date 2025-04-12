@@ -229,7 +229,12 @@ userRouter.Route(
         fun (context: RouteContext<ReactElement>) ->
             div {
                 h2 { "User Settings" }
-                p { "User settings panel" }
+                p { 
+                  style {
+                    padding 10
+                  }
+                  "User settings panel" 
+                }
                 div {
                     FreeFrameLink {| 
                         appDb = appDb

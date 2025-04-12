@@ -5,7 +5,7 @@ open FreeAct
 open Fable.Core.JS
 
 [<AutoOpen>]
-module Styles =
+module StylesTypes =
     [<RequireQualifiedAccess>]
     type Unit =
         | Px
@@ -34,6 +34,8 @@ module Styles =
         | FitContent
         | FitContentPercent of int
         | Stretch
+
+        static member op_Implicit(l: int) : Length = Units(l, Unit.Px)
 
     let lengthToString =
         function
@@ -974,6 +976,14 @@ module Styles =
         | Border.Shorthand s -> s
         | Border.None -> "none"
 
+// [<AutoOpen>]
+// module StyleExtensions =
+//   type System.Int32 with
+//       static member op_Implicit(l: int) : Length =
+//           Length.Units(l, Unit.Px)
+
+[<AutoOpen>]
+module Styles =
     // Style builder that combines property and value
     type StyleBuilder() =
         member inline _.Yield(_) = []
@@ -1022,8 +1032,8 @@ module Styles =
         /// Sets padding using pixel units
         /// Example: padding 10  // -> padding: 10px
         [<CustomOperation("padding")>]
-        member inline _.Padding(props, n: int) =
-            ("padding", sprintf "%dpx" n :> obj) :: props
+        member inline _.Padding(props, n: Length) =
+            ("padding", lengthToString n :> obj) :: props
 
         // TODO: Add support for other syntaxes
         /// Sets margin on all sides
@@ -1036,10 +1046,10 @@ module Styles =
         [<CustomOperation("margin")>]
         member inline _.Margin(props, m: string) = ("margin", m :> obj) :: props
 
-        // shortcut for int
-        [<CustomOperation("margin")>]
-        member inline _.Margin(props, m: int) =
-            ("margin", sprintf "%dpx" m :> obj) :: props
+        // // shortcut for int
+        // [<CustomOperation("margin")>]
+        // member inline _.Margin(props, m: int) =
+        //     ("margin", sprintf "%dpx" m :> obj) :: props
 
         /// Sets text alignment
         /// Example: textAlign TextAlign.Center
