@@ -438,19 +438,42 @@ let useCombinedViews<'A, 'B, 'C> (subA: IView<'A>) (subB: IView<'B>) (combiner: 
     let combinedSub = combineViews subA subB combiner
     useView combinedSub
 
+/// Hook that combines view subscription with rendering
+let useViewRender<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
+    let value = useView view
+    render value
+
+let useViewRender2<'A, 'B>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (render: 'A -> 'B -> ReactElement)
+    =
+    let valueA = useView viewA
+    let valueB = useView viewB
+    render valueA valueB
+
+let useViewRender3<'A, 'B, 'C>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (viewC: IView<'C>)
+    (render: 'A -> 'B -> 'C -> ReactElement)
+    =
+    let valueA = useView viewA
+    let valueB = useView viewB
+    let valueC = useView viewC
+    render valueA valueB valueC
+
 /// Creates a React component that automatically subscribes to a view and renders using the provided function
-// let inline createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
-//     // Create a unique name for each component instance
-//     let viewTypeName = typeof<'V>.Name
-//     let componentName = $"ViewComponent_For_{viewTypeName}_{Guid.NewGuid().ToString()}"
+let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
+    // Create a unique name for each component instance
+    let f =
+        fun () ->
+            let value = useView view
+            render value
 
-//     let c = FunctionComponent.Of(
-//       (fun () ->
-//         let value = useView view
-//         render value
-//       ),
-//       displayName = componentName
+    let elemType = ReactElementType.ofFunction f
+    fun props -> ReactElementType.create elemType props []
 
-//       // withKey = fun _ -> componentName
-//     )
-//     c
+// withKey = fun _ -> componentName
+
+// ReactElementType.ofFunction

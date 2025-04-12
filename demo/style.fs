@@ -16,7 +16,7 @@ let background = mix  {
 } 
 
 fss [
-      css classes.active { backgroundColor "red" }
+      css classes.active { backgroundColor (Color.rgb(200,200,200)) }
       css "#root" { fontFamily "Arial, sans-serif" }
       css classes.appContainer {
           flex
