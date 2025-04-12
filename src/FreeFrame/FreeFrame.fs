@@ -439,34 +439,18 @@ let useCombinedViews<'A, 'B, 'C> (subA: IView<'A>) (subB: IView<'B>) (combiner: 
     useView combinedSub
 
 /// Creates a React component that automatically subscribes to a view and renders using the provided function
-let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
-    FunctionComponent.Of(fun () ->
-        let value = useView view
-        render value
-    )
+// let inline createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
+//     // Create a unique name for each component instance
+//     let viewTypeName = typeof<'V>.Name
+//     let componentName = $"ViewComponent_For_{viewTypeName}_{Guid.NewGuid().ToString()}"
 
-/// Creates a React component that subscribes to two views and renders using the provided function
-let createViewComponent2<'A, 'B>
-    (viewA: IView<'A>)
-    (viewB: IView<'B>)
-    (render: 'A -> 'B -> ReactElement)
-    =
-    FunctionComponent.Of(fun () ->
-        let valueA = useView viewA
-        let valueB = useView viewB
-        render valueA valueB
-    )
+//     let c = FunctionComponent.Of(
+//       (fun () ->
+//         let value = useView view
+//         render value
+//       ),
+//       displayName = componentName
 
-/// Creates a React component that subscribes to three views and renders using the provided function
-let createViewComponent3<'A, 'B, 'C>
-    (viewA: IView<'A>)
-    (viewB: IView<'B>)
-    (viewC: IView<'C>)
-    (render: 'A -> 'B -> 'C -> ReactElement)
-    =
-    FunctionComponent.Of(fun () ->
-        let valueA = useView viewA
-        let valueB = useView viewB
-        let valueC = useView viewC
-        render valueA valueB valueC
-    )
+//       // withKey = fun _ -> componentName
+//     )
+//     c

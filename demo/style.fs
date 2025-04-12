@@ -6,6 +6,7 @@ open FreeAct
 type MyStyles = {
     root: ClassName
     appContainer: ClassName
+    active: ClassName
 }
 let classes = makeStyles<MyStyles>()
 
@@ -15,7 +16,7 @@ let background = mix  {
 } 
 
 fss [
-
+      css classes.active { backgroundColor "red" }
       css "#root" { fontFamily "Arial, sans-serif" }
       css classes.appContainer {
           flex
