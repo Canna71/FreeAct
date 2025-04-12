@@ -4,7 +4,9 @@
 
 [<AutoOpen>]
 // Module to encapsulate EffectId operations
-module FreeFrame.Effects
+module Effects
+
+open FreeFrame
 
 open System
 open Fable.Core.JS

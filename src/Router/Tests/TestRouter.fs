@@ -1,5 +1,6 @@
-module FreeAct.Router.Tests
+module FreeActRouterTests
 
+open FreeActRouter
 open FreeAct.Tokenizer
 
 let testTokenizer () =

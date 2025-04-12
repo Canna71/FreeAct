@@ -1,11 +1,12 @@
-module FreeFrame.Router
+module FreeFrameRouter
 
+open FreeFrame
 open Fable.Core
 open Browser
 open Browser.Types
 open Fable.React
 open FreeAct
-open FreeAct.Router
+open FreeActRouter
 open System
 
 // ==================================================

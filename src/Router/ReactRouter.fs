@@ -7,7 +7,7 @@ open Browser.Types
 open Fable.Core
 open Fable.Core.JsInterop
 open FreeAct
-open FreeAct.Router
+open FreeActRouter
 
 type RouterMode =
     | HistoryAPI
