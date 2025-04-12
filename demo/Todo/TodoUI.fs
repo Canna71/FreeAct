@@ -74,65 +74,86 @@ let TodoForm () =
         }
     }
 
-let TodoFilters = 
-  createViewComponent filterSubscription 
-    (fun (currentFilter: string) ->
-      // let currentFilter = useView filterSubscription
-      
-      let onFilter (filter: string) =
-          fun _ ->
-            dispatch appDb setFilterEvent filter
-      
-      div {
-          className "filters"
+let TodoFilters =
+    createViewComponent
+        filterSubscription
+        (fun (currentFilter: string) ->
+            // let currentFilter = useView filterSubscription
 
-          button {
-              className (if currentFilter = "all" then Demo.Style.classes.active.AsClassName  else "")
-              onClick (onFilter "all")
-              str "All"
-          }
+            let onFilter (filter: string) =
+                fun _ -> dispatch appDb setFilterEvent filter
 
-          button {
-              className (if currentFilter = "active" then Demo.Style.classes.active.AsClassName else "")
-              onClick (onFilter "active")
-              str "Active"
-          }
+            div {
+                className "filters"
 
-          button {
-              className (if currentFilter = "completed" then Demo.Style.classes.active.AsClassName else "")
-              onClick (onFilter "completed")
-              str "Completed"
-          }
-      }
-    )
+                button {
+                    className (
+                        if currentFilter = "all" then
+                            Demo.Style.classes.active.AsClassName
+                        else
+                            ""
+                    )
+
+                    onClick (onFilter "all")
+                    str "All"
+                }
+
+                button {
+                    className (
+                        if currentFilter = "active" then
+                            Demo.Style.classes.active.AsClassName
+                        else
+                            ""
+                    )
+
+                    onClick (onFilter "active")
+                    str "Active"
+                }
+
+                button {
+                    className (
+                        if currentFilter = "completed" then
+                            Demo.Style.classes.active.AsClassName
+                        else
+                            ""
+                    )
+
+                    onClick (onFilter "completed")
+                    str "Completed"
+                }
+            }
+        )
 
 let LoadTodosButton () =
-    useViewRender isLoadingSubscription (fun isLoading ->
+    useViewRender
+        isLoadingSubscription
+        (fun isLoading ->
 
-    div {
-        className "load-todos-container"
-
-        button {
-            disabled isLoading
-            className "load-button"
-            onClick (fun _ -> Effects.runEffect loadTodosEffect () |> ignore)
-
-            if isLoading then
-                str "Loading..."
-            else
-                str "Load Todos from API"
-        }
-
-        if isLoading then
             div {
-                className "loading-indicator"
-                str "Please wait, loading data..."
+                className "load-todos-container"
+
+                button {
+                    disabled isLoading
+                    className "load-button"
+                    onClick (fun _ -> Effects.runEffect loadTodosEffect () |> ignore)
+
+                    if isLoading then
+                        str "Loading..."
+                    else
+                        str "Load Todos from API"
+                }
+
+                if isLoading then
+                    div {
+                        className "loading-indicator"
+                        str "Please wait, loading data..."
+                    }
             }
-    })
+        )
 
 let TodoList (todos: TodoItem list, isLoading) =
     console.log ("Rendering TodoList with todos: ", todos)
-    
+
     fragment {
         if isLoading then
             div {
@@ -148,18 +169,22 @@ let TodoList (todos: TodoItem list, isLoading) =
         p { str (sprintf "Total: %d items" todos.Length) }
     }
 
-let TodoListForm () =
-    let todos = useView filteredTodosSubscription
-    let isLoading = useView isLoadingSubscription
 
-    div {
-        h2 { "Todo List" }
-        TodoForm()
-        TodoFilters()
-        LoadTodosButton() // Add the load button
+let TodoListForm =
+    createViewComponent2
+        filteredTodosSubscription
+        isLoadingSubscription
+        (fun (todos: TodoItem list) (isLoading) ->
+            div {
+                h2 { "Todo List" }
+                TodoForm()
+                TodoFilters()
+                LoadTodosButton() // Add the load button
 
-        TodoList(todos, isLoading)
-    }
+                TodoList(todos, isLoading)
+            }
+        )
+// Example component to demonstrate FreeFrame
 
 // Main Todo demo component
 let _TodoDemo () =
@@ -171,7 +196,7 @@ let _TodoDemo () =
         h1 { "Todo App Demo" }
         p { "This demo shows the basic usage of FreeFrame with a Todo application." }
         TodoListForm()
-        // ExampleComponent()
+    // ExampleComponent()
     }
 
 let TodoDemo = FunctionComponent.Of(_TodoDemo)
