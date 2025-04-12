@@ -74,48 +74,35 @@ let TodoForm () =
         }
     }
 
-let TodoFilters () =
-    let currentFilter = useView filterSubscription
+let TodoFilters  =
+    createViewComponent filterSubscription (fun currentFilter ->
+        
+        let onFilter (filter: string) =
+            fun _ ->
+              dispatch appDb setFilterEvent filter
+        
+        div {
+            className "filters"
 
-    div {
-        className "filters"
+            button {
+                className (if currentFilter = "all" then "active" else "")
+                onClick (onFilter "all")
+                str "All"
+            }
 
-        button {
-            className (
-                if currentFilter = "all" then
-                    "active"
-                else
-                    ""
-            )
+            button {
+                className (if currentFilter = "active" then "active" else "")
+                onClick (onFilter "active")
+                str "Active"
+            }
 
-            onClick (fun _ -> dispatch appDb setFilterEvent "all")
-            str "All"
+            button {
+                className (if currentFilter = "completed" then "active" else "")
+                onClick (onFilter "completed")
+                str "Completed"
+            }
         }
-
-        button {
-            className (
-                if currentFilter = "active" then
-                    "active"
-                else
-                    ""
-            )
-
-            onClick (fun _ -> dispatch appDb setFilterEvent "active")
-            str "Active"
-        }
-
-        button {
-            className (
-                if currentFilter = "completed" then
-                    "active"
-                else
-                    ""
-            )
-
-            onClick (fun _ -> dispatch appDb setFilterEvent "completed")
-            str "Completed"
-        }
-    }
+    )
 
 let LoadTodosButton () =
     let isLoading = useView isLoadingSubscription

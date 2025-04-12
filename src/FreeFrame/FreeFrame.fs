@@ -444,3 +444,29 @@ let createViewComponent<'V> (view: IView<'V>) (render: 'V -> ReactElement) =
         let value = useView view
         render value
     )
+
+/// Creates a React component that subscribes to two views and renders using the provided function
+let createViewComponent2<'A, 'B>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (render: 'A -> 'B -> ReactElement)
+    =
+    FunctionComponent.Of(fun () ->
+        let valueA = useView viewA
+        let valueB = useView viewB
+        render valueA valueB
+    )
+
+/// Creates a React component that subscribes to three views and renders using the provided function
+let createViewComponent3<'A, 'B, 'C>
+    (viewA: IView<'A>)
+    (viewB: IView<'B>)
+    (viewC: IView<'C>)
+    (render: 'A -> 'B -> 'C -> ReactElement)
+    =
+    FunctionComponent.Of(fun () ->
+        let valueA = useView viewA
+        let valueB = useView viewB
+        let valueC = useView viewC
+        render valueA valueB valueC
+    )
