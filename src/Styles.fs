@@ -1036,6 +1036,11 @@ module Styles =
         [<CustomOperation("margin")>]
         member inline _.Margin(props, m: string) = ("margin", m :> obj) :: props
 
+        // shortcut for int
+        [<CustomOperation("margin")>]
+        member inline _.Margin(props, m: int) =
+            ("margin", sprintf "%dpx" m :> obj) :: props
+
         /// Sets text alignment
         /// Example: textAlign TextAlign.Center
         /// Example: textAlign TextAlign.Justify
