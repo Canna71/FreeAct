@@ -10,7 +10,7 @@ open Fable.Core.JS
 
 open FreeAct.Router
 open FreeFrame
-open FreeFrame.FreeFrameRouter
+open FreeFrame.Router
 open Demo.FreeFrameDemo
 open Demo
 open Demo.Todo.State

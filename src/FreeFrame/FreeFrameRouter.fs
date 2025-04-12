@@ -1,4 +1,4 @@
-module FreeFrame.FreeFrameRouter
+module FreeFrame.Router
 
 open Fable.Core
 open Browser

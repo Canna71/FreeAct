@@ -1,7 +1,7 @@
 module Demo.AppState
 
 open FreeFrame
-open FreeFrame.FreeFrameRouter
+open FreeFrame.Router
 open Demo.Todo.Types
 open Fable.Core.JS
 
