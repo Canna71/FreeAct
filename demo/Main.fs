@@ -251,6 +251,8 @@ userRouter.Route(
             }
     ) |> ignore
 
+let classes = Style.classes
+
 // Main app component using FreeFrameRouter
 let App () =
     console.log("App component rendering...")
@@ -338,7 +340,7 @@ let App () =
         Mode = RouterMode.HistoryAPI
         Children = [
             div {
-                className "app-container"
+                className classes.appContainer
                 Navigation()
                 main {
                     className "content"
@@ -366,21 +368,4 @@ else
 
 // open Demo.Style
 
-testCssInFsharp()
-
-
-console.log Style.classes
-
-type MyClasses = 
-    { Root: string
-      AppContainer: string
-      Header: string
-      Nested: string }
-
-// display the fields of MyClasses
-// console.log("MyClasses fields: ", FSharpType.GetRecordFields(typeof<MyClasses>) )
-let t = 42
-let classes = makeStyles<MyClasses>()
-
-console.log("Generated classes: ", classes.Original, classes.Unique)
 

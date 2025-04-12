@@ -16,8 +16,27 @@ let private NESTED_MARKER = "$_$_"
 
 // and CssRule = { selector: string; rules: CssDeclaration list }
 
-type CssClassBuilder(selector: string) =
-    inherit StyleBuilder()
+// Add the ClassName type
+type ClassName =
+    {
+        Value: string
+    }
+
+    member this.AsCssSelector = $".{this.Value}"
+    member this.AsClassName = this.Value
+    // Add implicit conversion to string
+    static member op_Implicit(cn: ClassName) : string = cn.AsClassName
+
+type CssClassBuilder =
+    inherit StyleBuilder
+
+    val selector: string
+    new(selector: string) = { selector = selector }
+    // new (className: ClassName) = { selector = className.AsCssSelector }
+    static member Create(selector: string) = CssClassBuilder(selector)
+
+    static member Create(className: ClassName) =
+        CssClassBuilder(className.AsCssSelector)
 
     member inline _.For(css: string * list<HtmlProp>, f: unit -> HtmlProp list) =
         let selector, rules = css
@@ -40,11 +59,18 @@ type CssClassBuilder(selector: string) =
         let props = f ()
         props
 
-    member inline _.Run(props: HtmlProp list) =
-        let ret = selector, props
+    member inline this.Run(props: HtmlProp list) =
+        let ret = this.selector, props
         ret
 
-let css = CssClassBuilder
+// let css = CssClassBuilder
+
+// Define the shortcut using a function instead
+let css (input: obj) =
+    match input with
+    | :? ClassName as cn -> CssClassBuilder.Create(cn)
+    | :? string as s -> CssClassBuilder.Create(s)
+    | _ -> failwithf "Invalid input type for css builder"
 
 module private processor =
 
@@ -150,8 +176,6 @@ let fss rules =
     let cssRules = rules |> processor.processRules
     printf "%A" cssRules
     processor.addCssToPage cssRules
-    // TODO: return classes names map
-    createEmpty<obj                 >
 
 // tentative
 
@@ -163,20 +187,16 @@ open Microsoft.FSharp.Reflection
 let inline private generateUniqueName (name: string) =
     $"""{name}_{System.Guid.NewGuid().ToString("N").Substring(0, 8)}"""
 
-let inline makeStyles<'T> () : StyleMap<'T> =
-    let original = createEmpty<'T>
+// Update makeStyles to return wrapped class names
+let inline makeStyles<'T> () : 'T =
     let unique = createEmpty<'T>
 
-    // Use FSharp reflection to get record fields
     let fields = FSharpType.GetRecordFields(typeof<'T>)
 
     for field in fields do
-        // Set original name
-        original?(field.Name) <- field.Name
-        // Set unique name
-        unique?(field.Name) <- generateUniqueName field.Name
+        unique?(field.Name) <- { Value = generateUniqueName field.Name }
 
-    { Original = original; Unique = unique }
+    unique
 
 let testCssInFsharp () = "demo" |> ignore
 // let cssText = toCss "test" rules

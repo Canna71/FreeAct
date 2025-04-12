@@ -2,11 +2,18 @@ module Demo.Style
 
 open FreeSS
 
+type MyStyles = {
+    root: ClassName
+    header: ClassName
+    appContainer: ClassName
+}
+let classes = makeStyles<MyStyles>()
 
-let classes =   fss [
+
+fss [
 
       css "#root" { fontFamily "Arial, sans-serif" }
-      css ".app-container" {
+      css classes.appContainer {
           flex
           backgroundColor "#f0f0f0"
 
