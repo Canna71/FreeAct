@@ -1,9 +1,7 @@
 module FreeSS
 
 open FreeAct
-open Fable.Core.JS
 open System.Text.RegularExpressions
-open System.Dynamic
 open Fable.Core.JsInterop
 open Microsoft.FSharp.Collections
 
