@@ -23,7 +23,7 @@ type ReleaseCommand() =
         //         Workspace.``CHANGELOG.md``,
         //         forwardArguments = (context.Remaining.Raw |> Seq.toList)
         //     )
-        let newVersion = "0.3.0"
+        let newVersion = "0.3.1"
         printfn "New version: %s" newVersion
         let nupkgPath = DotNet.pack Workspace.src.``.``
 

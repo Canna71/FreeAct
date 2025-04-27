@@ -9,6 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 <!-- EasyBuild: START -->
 <!-- last_commit_released: cbe6c33a6e7459b127c0cb6e059174468d42a24b -->
 <!-- EasyBuild: END -->
+## 0.3.1 - 2025-04-27
 ## 0.3.0 - 2025-04-12
 
 ## 0.2.0 - 2025-03-25
